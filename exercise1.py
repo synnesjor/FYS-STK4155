@@ -10,7 +10,6 @@ def runge(x):
     return 1.0 / (1.0 + 25.0 * x**2)
 
 def design_matrix(x, degree, intercept = False):
-    # polynomial features [1, x, x^2, ..., x^degree] (drop the 1 if intercept=False)
     start = 0 if intercept else 1
     return np.vstack([x**p for p in range(start, degree + 1)]).T
 
@@ -39,8 +38,6 @@ xx = np.linspace(-1, 1, 400)
 
 # part a)
 
-# print(rescale_design_matrix(x,2))
-
 x = np.ravel(x)
 y = np.ravel(y)
 
@@ -54,26 +51,6 @@ def ols(X, y):
 y_mean = y.mean()
 y = y - y.mean()
 
-# X = rescale_design_matrix(x, degree = 2) # shape (100,3)
-# theta = ols(X, y)
-# print(theta)
-
-
-# print(f"2.1) Optimal parameters from the SVD:" , theta)
-
-# Code for 2.2
-# Now using sklearn
-# reg = LinearRegression(fit_intercept=False)
-# reg_fit = reg.fit(X, y)
-# theta_sklearn = reg_fit.coef_
-
-# print("2.2) Optimal parameters from sklearn:", theta_sklearn)
-
-# Code for 2.3
-# Models predicted values
-# y_tilde = X @ theta_sklearn
-
-# Compute the mean square error using sklearn
 mse_values=np.array([])
 
 def calculate_mse(x, y, degree):
@@ -84,7 +61,7 @@ def calculate_mse(x, y, degree):
     y_tilde = model.predict(X)
     mean_squared_error_train = mean_squared_error(y_train, model.predict(X_train))
     mean_squared_error_test = mean_squared_error(y_test, model.predict(X_test))
-    theta = ols(X, y) # shape (3,1) #there is an issue here
+    theta = ols(X, y)
     return mean_squared_error_train, mean_squared_error_test, theta, y_tilde
 
 
@@ -111,8 +88,6 @@ print(theta_values)
 # plt.show()
 
 
-
-# Your code for part a) here
 theta_list=list(theta_values)
 for j in range(len(theta_list)):
     for i in range(len(theta_list[-1])-j-1):
@@ -128,28 +103,53 @@ for i in range(len(theta_values)):
     filtered_data = theta_values[i][mask]
     filtered_theta.append(filtered_data)
 
-for i in range(len(degrees)-1):
-    plt.plot(degrees[i:], filtered_theta[i], label=f"Degree {i+1}")
+# for i in range(len(degrees)-1):
+#     plt.plot(degrees[i:], filtered_theta[i], label=f"Degree {i+1}")
 
-plt.plot(degrees[14:], filtered_theta[14], "o", label="Degree 15")
+# plt.plot(degrees[14:], filtered_theta[14], "o", label="Degree 15")
 
-plt.legend()
-plt.grid()
-plt.show()
+# plt.legend()
+# plt.grid()
+# plt.show()
 
-# And the R2 score function
 
 # Varying the coefficient in front of the added stochastic noise
-print("Varying noise level:")
-for sigma in [0.0, 0.01, 0.1, 0.5, 1.0, 20, 5.0]:
+# print("Varying noise level:")
+# for sigma in [0.0, 0.01, 0.1, 0.5, 1.0, 20, 5.0]:
 
-    # rng = np.random.default_rng(2026)
-    x = rng.random((100, 1))
+#     x = rng.random((100, 1))
 
-    x = np.ravel(x)
-    y = np.ravel(y)
+#     x = np.ravel(x)
+#     y = np.ravel(y)
 
-    X = design_matrix(x, degree = 2)
-    y_tilde = X @ ols(X, y)
+#     X = design_matrix(x, degree = 2)
+#     y_tilde = X @ ols(X, y)
 
-    print(f"{sigma} {sigma**2} {mean_squared_error(y, y_tilde)} {r2_score(y, y_tilde)}")
+#     print(f"{sigma} {sigma**2} {mean_squared_error(y, y_tilde)} {r2_score(y, y_tilde)}")
+
+
+
+#=======================================================================================================
+# Part b)
+
+degree = 5
+
+def ridge(x,y,lam,degree):
+    X = rescale_design_matrix(x, degree)
+    return ols(X,y) * (1/(1+lam))
+
+ridge_values = []
+lambda_values = np.logspace(-4, 2, 100)
+for each in lambda_values:
+    ridge_values.append(ridge(x,y,each,degree))
+
+ridge_temp = np.array(ridge_values)
+
+ridge_values=ridge_temp.T
+
+plt.figure()
+for i in np.arange(degree):
+    plt.plot(lambda_values, ridge_values[i])
+plt.xscale("log")
+plt.axhline(y=0, color = "gray", alpha = 0.2)
+plt.show()
