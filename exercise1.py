@@ -89,7 +89,7 @@ def calculate_mse(x, y, degree):
 
 
 
-degrees = np.arange(1, 4)
+degrees = np.arange(1, 16)
 mse_train_values = []
 mse_test_values = []
 theta_values = []
@@ -112,21 +112,36 @@ print(theta_values)
 
 
 
-plt.figure()
-for idx, i in enumerate(theta_values):
-    if idx == 0: 
-        plt.plot(0,i, "o", label = "Degree 1")
-    else: plt.plot(np.arange(len(i)), i, label = f"Degree {idx+1}")
+# Your code for part a) here
+theta_list=list(theta_values)
+for j in range(len(theta_list)):
+    for i in range(len(theta_list[-1])-j-1):
+        theta_list[j]=np.append(theta_list[j], np.nan) # Using NaN to avoid removing parameter values...
 
+theta_values=np.array(theta_list)
+theta_values=theta_values.T
+
+filtered_theta = []
+
+for i in range(len(theta_values)):
+    mask = np.isnan(theta_values[i]) == False
+    filtered_data = theta_values[i][mask]
+    filtered_theta.append(filtered_data)
+
+for i in range(len(degrees)-1):
+    plt.plot(degrees[i:], filtered_theta[i], label=f"Degree {i+1}")
+
+plt.plot(degrees[14:], filtered_theta[14], "o", label="Degree 15")
 
 plt.legend()
+plt.grid()
 plt.show()
 
 # And the R2 score function
 
 # Varying the coefficient in front of the added stochastic noise
 print("Varying noise level:")
-for sigma in [0.0, 0.01, 0.1, 0.5, 1.0, 2.0, 5.0]:
+for sigma in [0.0, 0.01, 0.1, 0.5, 1.0, 20, 5.0]:
 
     # rng = np.random.default_rng(2026)
     x = rng.random((100, 1))
