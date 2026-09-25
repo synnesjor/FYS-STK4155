@@ -12,6 +12,7 @@ jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 from jax import grad
 
+
 # from exercises_f import optimiser_step, optimise, closed_form, ols, ridge
 
 #============================== MAIN =================================================
@@ -336,7 +337,7 @@ def grad_OLS(theta, gamma, X, y):
 for deg in [2,5,15]:
 
     X_norm = rescale_design_matrix(x_unravelled, deg)
-    y_centered = y_unravelled
+    y_centered = y_unravelled - y_unravelled.mean()    
 
     # Analytical forms: theta_Ridge = (X^T X + n*lambda*I)^{-1} X^T y and theta_OLS = (X^T X)^{-1} X^T y
     n_features = X_norm.shape[1]
@@ -406,7 +407,7 @@ for deg in [2,5,15]:
 #=======================================================================================================
 # Part f)
 
-def runge_data(n=100, degree=2, noise=0.1, seed=2026):
+def runge_data(n=100, degree = 5, noise=0.1, seed=2026):
     """Runge function 1/(1+25x^2) on [-1,1], standardised polynomial features, centred y."""
     rng = np.random.default_rng(seed)
     x = rng.uniform(-1.0, 1.0, n)
@@ -415,11 +416,32 @@ def runge_data(n=100, degree=2, noise=0.1, seed=2026):
     X_norm = (X - X.mean(axis=0)) / X.std(axis=0)
     return X_norm, y - y.mean()
 
-def ols_no_X(theta):
-    X, y = runge_data(degree = 5)
-    U, s, Vt = np.linalg.svd(X, full_matrices=False)
-    return Vt.T @ ((U.T @ y) / s)
 
+def gradient_ols(theta):
+    X, y = runge_data(degree = 5)
+    """Eqs. (4.13) and (4.17): the gradient of (1/n)||X theta - y||^2 + lambda theta^T theta."""
+    n = len(y)
+    return (2 / n) * X.T @ (X @ theta - y)
+
+def gradient_ridge(theta, lam = 0.1):
+    X, y = runge_data(degree = 5)
+    """Eqs. (4.13) and (4.17): the gradient of (1/n)||X theta - y||^2 + lambda theta^T theta."""
+    n = len(y)
+    return (2 / n) * X.T @ (X @ theta - y) + (2.0 * lam * theta)
+
+def cost_lasso(X, y, theta, lam):
+    X, y = runge_data(degree = 5)
+    """Eqs. (4.13) and (4.17): the gradient of (1/n)||X theta - y||^2 + lambda theta^T theta."""
+    n = len(y)
+    return jnp.mean((y-X@theta)**2) + lam * jnp.mean(np.abs(X@theta))
+
+def grad_lasso(theta):
+    return grad(jnp.mean((y_centered-X_norm@theta)**2) + lam * jnp.mean(np.abs(X_norm@theta)))
+
+# def ols_no_X(theta):
+#     X, y = (x)
+#     U, s, Vt = np.linalg.svd(X, full_matrices=False)
+#     return Vt.T @ ((U.T @ y) / s)
 
 def optimiser_step(method, theta, g, state, t, gamma, beta=0.9, rho=0.99,
                    beta1=0.9, beta2=0.999, eps=1e-6):
@@ -475,20 +497,70 @@ def ridge(X,y,lam):
     return ols(X,y) * (1/(1+lam))
 
 
+def hessian_eigs(X, lam):
+    """Eigenvalues of the Hessian (2/n) X^T X + 2 lambda I, Eqs. (4.14) and (4.17)."""
+    n = len(X)
+    return np.linalg.eigvalsh((2.0 / n) * X.T @ X + 2.0 * lam * np.eye(X.shape[1]))
+
+eigenvalues_hessian_OLS = hessian_eigs(X_norm,lam = 0)
+lambda_max_OLS = np.max(eigenvalues_hessian_OLS)
+optimal_gamma = 0.9*(2/lambda_max_OLS)
+print(optimal_gamma)
+
 lam = 0.0
 degree = 5
 
 methods = ("plain", "momentum", "adagrad", "rmsprop", "adam")
 
+max_iters = 100
+
+print("For OLS:")
 iters = {}
-gam = np.logspace(-3,0,15)
+gam = np.logspace(-3,0,10)
 for i in methods:
     iters[i] = []
     for j in gam:
-        opt = optimise(ols_no_X, np.zeros(degree), i, j, num_iters = 20000)
-        # print(len(opt))
+        opt = optimise(gradient_ols, np.zeros(degree), i, j, num_iters = max_iters)
         if len(opt) >= 20000:
+            iters[i].append(np.nan)
+        else:
             iters[i].append(len(opt))
+print(iters)
 
 
+print("For ridge:")
+iters = {}
+gam = np.logspace(-3,0,10)
+for i in methods:
+    iters[i] = []
+    for j in gam:
+        opt = optimise(gradient_ridge, np.zeros(degree), i, j, num_iters = max_iters)
+        if len(opt) >= max_iters:
+            iters[i].append(np.nan)
+        else:
+            iters[i].append(len(opt))
+print(iters)
+
+# vi har funnet ut: alle konvergerer for minst en gamma-verdi, utenom rmsprop. 
+# Vi burde se om optimal gamma analytisk stemmer overens med den beste gamma-verdien numerisk.
+
+
+#=======================================================================================================
+# Part g)
+
+print(y.shape)
+print(y_unravelled.shape)
+print(y_centered.shape)
+
+print("For lasso:")
+iters = {}
+gam = np.logspace(-3,0,10)
+for i in methods:
+    iters[i] = []
+    for j in gam:
+        opt = optimise(grad_lasso, np.ones(degree)*0.0001, i, j, num_iters = max_iters)
+        if len(opt) >= max_iters:
+            iters[i].append(np.nan)
+        else:
+            iters[i].append(len(opt))
 print(iters)
