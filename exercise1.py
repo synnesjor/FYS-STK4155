@@ -11,6 +11,9 @@ import jax
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 from jax import grad
+
+# from exercises_f import optimiser_step, optimise, closed_form, ols, ridge
+
 #============================== MAIN =================================================
 
 def runge(x):
@@ -299,7 +302,7 @@ def test_gamma(gamma = 0.1):
     theta_gdRidge = np.zeros(n_features)
 
     # Gradient descent loop
-    for t in range(10000000):
+    for t in range(1000):
         # Compute gradients for OLS and Ridge
         grad_OLS = (2.0 / n) * X_norm.T @ (X_norm @ theta_gdOLS - y_centered)
         # grad_Ridge = (2.0 / n) * X_norm.T @ (X_norm @ theta_gdRidge - y_centered) + 2 * lam * theta_gdRidge
@@ -398,3 +401,94 @@ for deg in [2,5,15]:
     # the largest safe learning rate for plain gradient descent: eta < 2 / lambda_max(Hessian)
     H = 2.0 / len(y) * X_norm.T @ X_norm
     # print("eta_max for OLS  =", 2.0 / np.linalg.eigvalsh(H).max())
+
+
+#=======================================================================================================
+# Part f)
+
+def runge_data(n=100, degree=2, noise=0.1, seed=2026):
+    """Runge function 1/(1+25x^2) on [-1,1], standardised polynomial features, centred y."""
+    rng = np.random.default_rng(seed)
+    x = rng.uniform(-1.0, 1.0, n)
+    y = 1.0 / (1.0 + 25.0 * x**2) + noise * rng.standard_normal(n)
+    X = np.column_stack([x**k for k in range(1, degree + 1)])
+    X_norm = (X - X.mean(axis=0)) / X.std(axis=0)
+    return X_norm, y - y.mean()
+
+def ols_no_X(theta):
+    X, y = runge_data(degree = 5)
+    U, s, Vt = np.linalg.svd(X, full_matrices=False)
+    return Vt.T @ ((U.T @ y) / s)
+
+
+def optimiser_step(method, theta, g, state, t, gamma, beta=0.9, rho=0.99,
+                   beta1=0.9, beta2=0.999, eps=1e-6):
+    """One update of theta from the gradient g at step t (t = 1, 2, ...), Eqs. (4.10), (4.28),
+    (4.42)-(4.45), (4.47)-(4.48) and (4.51)-(4.55).  state carries the running quantities."""
+    if method == "plain":
+        return theta - gamma * g, state
+    if method == "momentum":
+        v = beta * state.get("v", 0.0) + gamma * g               # Eq. (4.28)
+        state["v"] = v
+        return theta - v, state
+    if method == "adagrad":
+        r = state.get("r", 0.0) + g * g                           # Eq. (4.42)
+        state["r"] = r
+        return theta - gamma * g / (np.sqrt(r) + eps), state      # Eq. (4.45)
+    if method == "rmsprop":
+        r = rho * state.get("r", 0.0) + (1.0 - rho) * g * g       # Eq. (4.47)
+        state["r"] = r
+        return theta - gamma * g / (np.sqrt(r) + eps), state      # Eq. (4.48)
+    if method == "adam":
+        m = beta1 * state.get("m", 0.0) + (1.0 - beta1) * g       # Eq. (4.51)
+        r = beta2 * state.get("r", 0.0) + (1.0 - beta2) * g * g   # Eq. (4.52)
+        state["m"], state["r"] = m, r
+        m_hat = m / (1.0 - beta1**t)                              # Eq. (4.54)
+        r_hat = r / (1.0 - beta2**t)
+        return theta - gamma * m_hat / (np.sqrt(r_hat) + eps), state   # Eq. (4.55)
+    raise ValueError(f"unknown method {method}")
+
+
+def optimise(grad, theta0, method, gamma, num_iters = 100, tol = 1e-6, **kw):
+    """Run one optimiser from theta0 with the full gradient; returns all iterates."""
+    theta, state = np.array(theta0, dtype=float), {}
+    history = [theta.copy()]
+    for t in range(1, num_iters + 1):
+        g = grad(theta)
+        theta, state = optimiser_step(method, theta, g, state, t, gamma, **kw)
+        history.append(theta.copy())
+        if np.linalg.norm(g) < tol:
+            # print("Final iteration", t)
+            # print("Final theta", theta)
+            break
+    return history
+
+degree = 5
+
+def closed_form(X, y, lam):
+    """Eq. (3.44) with the 1/n convention of Eq. (3.95): (X^T X + n lambda I)^-1 X^T y."""
+    n, p = X.shape
+    return np.linalg.solve(X.T @ X + n * lam * np.eye(p), X.T @ y)
+
+
+def ridge(X,y,lam):
+    return ols(X,y) * (1/(1+lam))
+
+
+lam = 0.0
+degree = 5
+
+methods = ("plain", "momentum", "adagrad", "rmsprop", "adam")
+
+iters = {}
+gam = np.logspace(-3,0,15)
+for i in methods:
+    iters[i] = []
+    for j in gam:
+        opt = optimise(ols_no_X, np.zeros(degree), i, j, num_iters = 20000)
+        # print(len(opt))
+        if len(opt) >= 20000:
+            iters[i].append(len(opt))
+
+
+print(iters)
