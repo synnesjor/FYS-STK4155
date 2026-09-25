@@ -149,7 +149,8 @@ ridge_values=ridge_temp.T
 
 plt.figure()
 for i in np.arange(degree):
-    plt.plot(lambda_values, ridge_values[i])
+    plt.plot(lambda_values, ridge_values[i], label=f"Theta={i+1}")
 plt.xscale("log")
 plt.axhline(y=0, color = "gray", alpha = 0.2)
+plt.legend()
 plt.show()
