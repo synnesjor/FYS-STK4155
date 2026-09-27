@@ -25,28 +25,42 @@ def main(x, y):
         model = LinearRegression(fit_intercept=False)
         model.fit(X_train, y_train)
         y_tilde = model.predict(X)
+        y_tilde_test = model.predict(X_test)
+        y_tilde_train = model.predict(X_train)
         mean_squared_error_train = mean_squared_error(y_train, model.predict(X_train))
         mean_squared_error_test = mean_squared_error(y_test, model.predict(X_test))
         theta = ols(X, y)
-        return mean_squared_error_train, mean_squared_error_test, theta, y_tilde
+        return mean_squared_error_train, mean_squared_error_test, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test
 
     degrees = np.arange(1, 16)
     mse_train_values = []
     mse_test_values = []
     theta_values = []
-    R2_values = []
+    R2_values_test = []
+    R2_values_train = []
 
     for degree in degrees:
-        mse_train, mse_test, theta, y_tilde = calculate_mse(x, y, degree)
+        mse_train, mse_test, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test = calculate_mse(x, y, degree)
         mse_train_values.append(mse_train)
         mse_test_values.append(mse_test)
         theta_values.append(theta)
-        R2_values.append(r2_score(y, y_tilde))
+        R2_values_test.append(r2_score(y_test, y_tilde_test))
+        R2_values_train.append(r2_score(y_train, y_tilde_train))
+
+    print("Training data:")
+    print("The optimal polynomial degree, according to the R2 value for the training data, is", np.argmax(R2_values_train))
+    print("The optimal polynomial degree, according to the MSE value for the training data, is", np.argmin(mse_train_values))
+
+    print("Test data:")
+    print("The optimal polynomial degree, according to the R2 value for the test data, is", np.argmax(R2_values_test))
+    print("The optimal polynomial degree, according to the MSE value for the test data, is", np.argmin(mse_test_values))
 
     plt.figure(figsize = (9,6.5))
     plt.plot(degrees, mse_train_values, "-o", label = "Train MSE", color = "#bb0303", markersize = 3)
     plt.plot(degrees, mse_test_values, "-o", label = "Test MSE", color = "#01123d", markersize = 3)
-    plt.plot(degrees, R2_values, "-o", label = f"$R^2$ score", color = "#ed7e08", markersize = 3)
+    plt.plot(degrees, R2_values_train, "-o", label = f"$R^2$ train", color = "#195f3a", markersize = 3)
+    plt.plot(degrees, R2_values_test, "-o", label = f"$R^2$ test", color = "#ed7e08", markersize = 3)
+
     plt.xlabel(f"Polynomial degree ($\\theta$)", fontsize = 20)
     # plt.ylabel("Mean Square Error (MSE)")
     plt.xticks(size = 18)

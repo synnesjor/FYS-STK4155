@@ -1,10 +1,10 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.9.27)  27 SEP 2026 18:29
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.9.27)  27 SEP 2026 20:25
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**/Users/synnesjo/Desktop/project_1/main.tex
-(/Users/synnesjo/Desktop/project_1/main.tex
+**/Users/synnesjo/Desktop/FYS-STK4155/project_1_latex/main.tex
+(/Users/synnesjo/Desktop/FYS-STK4155/project_1_latex/main.tex
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
 (/usr/local/texlive/2026/texmf-dist/tex/latex/revtex/revtex4-2.cls
@@ -809,17 +809,17 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `math shift' on input line 2.
 
-<figures/results/mse_values.pdf, id=126, 650.43pt x 469.755pt>
-File: figures/results/mse_values.pdf Graphic file (type pdf)
-<use figures/results/mse_values.pdf>
-Package pdftex.def Info: figures/results/mse_values.pdf  used on input line 18.
+<../figures/mse_values.pdf, id=127, 650.43pt x 469.755pt>
+File: ../figures/mse_values.pdf Graphic file (type pdf)
+<use ../figures/mse_values.pdf>
+Package pdftex.def Info: ../figures/mse_values.pdf  used on input line 11.
 (pdftex.def)             Requested size: 246.0pt x 177.66295pt.
 ) (./sections/conclusions.tex
 Underfull \hbox (badness 10000) in paragraph at lines 1--2
 
  []
 
-[2 <./figures/results/mse_values.pdf>]) (./main.bbl) [3]
+[2 <../figures/mse_values.pdf>]) (./main.bbl) [3]
 
 Package caption Warning: Unused \captionsetup[subfigure] on input line 23.
 See the caption package documentation for explanation.
@@ -834,17 +834,17 @@ Package rerunfilecheck Info: File `main.out' has not changed.
  ) 
 Here is how much of TeX's memory you used:
  30722 strings out of 467525
- 577231 string characters out of 5418982
+ 577250 string characters out of 5418982
  1030336 words of memory out of 5000000
  59062 multiletter control sequences out of 15000+600000
  639214 words of font info for 83 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 84i,8n,94p,1963b,526s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 84i,8n,94p,1981b,526s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmib10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on main.pdf (4 pages, 245651 bytes).
+Output written on main.pdf (4 pages, 245797 bytes).
 PDF statistics:
- 295 PDF objects out of 1000 (max. 8388607)
- 209 compressed objects within 3 object streams
+ 289 PDF objects out of 1000 (max. 8388607)
+ 206 compressed objects within 3 object streams
  34 named destinations out of 1000 (max. 500000)
  178 words of extra memory for PDF output out of 10000 (max. 10000000)
 

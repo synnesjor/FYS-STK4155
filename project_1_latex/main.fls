@@ -1,8 +1,8 @@
-PWD /Users/synnesjo/Desktop/project_1
+PWD /Users/synnesjo/Desktop/FYS-STK4155/project_1_latex
 INPUT /usr/local/texlive/2026/texmf.cnf
 INPUT /usr/local/texlive/2026/texmf-dist/web2c/texmf.cnf
 INPUT /usr/local/texlive/2026/texmf-var/web2c/pdftex/pdflatex.fmt
-INPUT /Users/synnesjo/Desktop/project_1/main.tex
+INPUT /Users/synnesjo/Desktop/FYS-STK4155/project_1_latex/main.tex
 OUTPUT main.log
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/revtex/revtex4-2.cls
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/revtex/revtex4-2.cls
@@ -396,11 +396,11 @@ INPUT sections/methods.tex
 INPUT ./sections/results_and_discussion.tex
 INPUT ./sections/results_and_discussion.tex
 INPUT sections/results_and_discussion.tex
-INPUT ./figures/results/mse_values.pdf
-INPUT ./figures/results/mse_values.pdf
-INPUT ./figures/results/mse_values.pdf
-INPUT ./figures/results/mse_values.pdf
-INPUT ./figures/results/mse_values.pdf
+INPUT ../figures/mse_values.pdf
+INPUT ../figures/mse_values.pdf
+INPUT ../figures/mse_values.pdf
+INPUT ../figures/mse_values.pdf
+INPUT ../figures/mse_values.pdf
 INPUT ./sections/conclusions.tex
 INPUT ./sections/conclusions.tex
 INPUT sections/conclusions.tex
