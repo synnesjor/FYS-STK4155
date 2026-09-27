@@ -113,14 +113,14 @@ for i in range(len(theta_values)):
     filtered_data = theta_values[i][mask]
     filtered_theta.append(filtered_data)
 
-# for i in range(len(degrees)-1):
-#     plt.plot(degrees[i:], filtered_theta[i], label=f"Degree {i+1}")
+for i in range(len(degrees)-1):
+    plt.plot(degrees[i:], filtered_theta[i], label=f"Degree {i+1}")
 
-# plt.plot(degrees[14:], filtered_theta[14], "o", label="Degree 15")
+plt.plot(degrees[14:], filtered_theta[14], "o", label="Degree 15")
 
-# plt.legend()
-# plt.grid()
-# plt.show()
+plt.legend()
+plt.grid()
+plt.savefig("figures/test.pdf")
 
 
 # Varying the coefficient in front of the added stochastic noise
