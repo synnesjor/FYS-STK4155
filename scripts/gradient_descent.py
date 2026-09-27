@@ -1,12 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.linear_model import LinearRegression, Ridge
-from sklearn.preprocessing import PolynomialFeatures, StandardScaler
-from sklearn.pipeline import make_pipeline
-from sklearn.model_selection import train_test_split, KFold, cross_val_score
-from sklearn.metrics import mean_squared_error, r2_score, mean_squared_log_error, mean_absolute_error
-from sklearn.utils import resample
-from numpy import random
+from sklearn.linear_model import Ridge
 import jax
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
@@ -25,7 +18,6 @@ def main(x, y, n, rng):
     def grad_ridge(theta, gamma, X, y, lam, max_iter=10000, tol=1e-8): # works for OLS with lam=0.0
         for k in range(max_iter):
             gradient = (2.0 / n) * X.T @ (X @ theta- y) + 2 * lam * theta
-            theta_new = theta - gamma * gradient
             theta -= gamma * gradient
             if np.linalg.norm(gradient) < tol:
                 break
