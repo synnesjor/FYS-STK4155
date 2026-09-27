@@ -1,0 +1,36 @@
+
+ Machine learning $\left(\mathrm{ML}\right)$ is a fast growing field. Today, impacts of the advancements in machine learning are seen in numerous domains such as medicine, humanities, and technology. The principle of Machine Learning is to give us the possibility to find patterns in sets of data without explicitly writing out a specific code for each problem we would like to solve \cite{noauthor_machinelearninguiodocbookmllecturebookpdf_nodate}. The idea is that our generic algorithm can ``learn'' from the data we give it. 
+
+ \subsection{Runges function}
+ Runge's funcion, given in \autoref{eq:runges_function} as a classic test case when working with ML. The reason for choosing this function as our function to investigate is a concept we call \textit{Runge's phenomenon}. Discovered by Carl Runge in $1901$ \cite{runges_phenomenon}, the phenomenon describes how when the function is fitted to higher polynomial degrees, we see oscillation at the edges. Using Runge's function is therefore an excellent example to use when one wants to demonstrate that fitting to a higher polynomial degree is not necessarily synonym with improved results. The reason for this is not that polynomial interpolation is an unfit method, but rather a consequence arising from using a high-degree polynomial built from equally spaced points \cite{interpolationcal_runges_2026}. This is something we will go into much further detail in this paper.
+
+ In this paper, we take a deep dive into Runge's function, and its characteristics. We wish to investigate how our models behave when we fit the function with regression, especially focusing on how fitting to higher polynomial degrees affect our results.
+
+\subsection{Methods of Regression}
+ One of the desired outputs when working with ML is \textit{regression}: a process where we fit a model to a data set. There are many different approaches to performing regression, some of them we will look at in this paper.
+
+ \textit{Ordinary Least Squares} $\left(\mathrm{OLS}\right)$ is a practical and a fairly straight forward method of regression, where the principle is that you fit your data by minimising the sum of the squared errors \textcolor{red}{should have citation here}. We can solve for the coefficients of a model using \autoref{eq:ols_theta_values}.
+
+
+ \textit{Ridge} regression follows many of the same principles as the regression with OLS, but we add what we call a \textit{penalty parameter}, to the sqaured lenght of the parameter vector \textcolor{red}{should I have reference here?}. The coefficients can be solved for using \autoref{eq:ridge_theta_values}.
+
+
+ \textit{Lasso} regression is different from the Ridge Regression model; this one relies on a 1-norm penalty instead of a 2-norm penalty. The model coefficients do not have a closed form solution, but are defined and found by optimising their cost function, defined in \autoref{eq:lasso_cost_function}. Deriving the cost function for Lasso Regression and optimising it gives us \autoref{eq:lasso_optimise}.  
+
+
+ \subsection{Resampling methods}
+ If we have a function $\hat{\theta} = \hat{\theta}(\mathbf{X})$, where $\mathbf{X}$ is random, this means that $\hat{\theta}$ is itself a random variable with an assosiated PDF $p(x)$\cite{noauthor_machinelearninguiodocbookmllecturebookpdf_nodate}. This means that we can draw a certain number of data points from the function, learn our desired characteristics from it, and interpret the results. This can be especially useful if our sample size is small. There are various methods of resampling. The \textit{Bootstrap} method is a method where you draw random samples from your data, with replacement of the drawn observations, from which you can infer statistical quantities. The \textit{Jacknife} method is a method where you purposely leave out one observation at the time, and then drawn new samples. Both methods require independent, identically distributed variables \cite{noauthor_machinelearninguiodocbookmllecturebookpdf_nodate}.
+
+A third method for resampling is the \textit{k-fold cross valiation} method. Here, you organise the splitting between the training data and the test data, to make sure that no samples land in one of the two categories more than any other sample \cite{noauthor_machinelearninguiodocbookmllecturebookpdf_nodate}. You divide the data into so-called $k-folds$, and then the fold serves as the test data, while the remaining data points serve as the training data. 
+
+
+ \subsection{Optimisers}
+ Optimisers are algorithms that change the weights on our model. In this paper, we have used the optimisers \textit{momentum}, \textit{adagrad}, \textit{RMSprop}, and \textit{adam}. These methods are ways of optimising the cost function of our model using different parameters to retrieve better results for our model coefficients.\\ 
+
+ 
+ This paper is structured as follows: In \autoref{sec:theory} we will present the theoretical background used for our work, as well as relevant equations. In \autoref{sec:methods} we will display the methods we have applied to achieve our results, which will be presented and discussed in \autoref{sec:results_and_discussion}. Our conclusions can be found in \autoref{sec:conclusions}.  
+
+ 
+
+ 
+ The code developed for this paper can be found on our GitHub repository \footnote{link to github}.

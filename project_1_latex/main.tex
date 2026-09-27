@@ -1,0 +1,97 @@
+
+\documentclass[english,notitlepage,reprint,nofootinbib]{revtex4-2}  % defines the basic parameters of the document
+% If you want a single-column, remove "reprint"
+
+% Allows special characters (including æøå)
+\usepackage[utf8]{inputenc}
+% \usepackage[english]{babel}
+
+% Note that you may need to download some of these packages manually, it depends on your setup.
+% It may be usefult to download TeXMasker, because it includes a large library of the most common packages.
+
+\usepackage{physics,amssymb}  % mathematical symbols (physics imports amsmath)
+
+\usepackage{graphicx}         % include graphics such as plots
+\usepackage{xcolor}           % set colors
+\usepackage{hyperref}         % automagic cross-referencing
+
+\usepackage{listings}         % display code
+\usepackage{subfigure}        % imports a lot of cool and useful figure commands
+\usepackage{caption}
+\captionsetup{justification=raggedright,singlelinecheck=false}
+\usepackage{subcaption}
+\captionsetup[subfigure]{labelformat=empty}
+% \usepackage{siunitx}
+
+% \usepackage{float}
+%\usepackage[section]{placeins}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{subfigure}
+\usepackage{tikz}
+\usetikzlibrary{quantikz2}
+% defines the color of hyperref objects
+% Blending two colors:  blue!80!black  =  80% blue and 20% black
+\hypersetup{ % this is just my personal choice, feel free to change things
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}}
+
+
+% ===========================================
+
+
+\begin{document}
+\include{amsmath}
+\title{Week 39 exercises}  % self-explanatory
+\author{Marie Océane Pilskog, Muhammad Mohsin Mumtaz, and Synne Sigstad Jørgensen} % self-explanatory
+\date{\today}                             % self-explanatory
+\noaffiliation                            % ignore this, but keep it.
+
+%This is how we create an abstract section.
+\begin{abstract}
+\noindent The aim of Project 1 was to investigate a set of regression methods in great detail. Among these the regression of the following methods have been studied: Ordinary Least Squares (OLS), Ridge, and Lasso. Studies have been performed of bias-variance tradeoff including its derivation, as well as bootstrap and cross-validation. The starting point for the analysis has been the Runge function. The test error was found to minimize at the following degree $\left[\:\:\:\:
+\right]$. It was shown that $\left[\:\:\:\: \right]$ is the most effective method for reproducing the closed-form solution. When investigating the Ridge function, an optimal value for the penalty parameter was found at $\left[\lambda = \:\:\:\:
+\right]$.         
+\end{abstract}
+\maketitle
+
+
+% ===========================================
+\section{Introduction}\label{sec:introduction}
+\input{sections/introduction.tex}
+
+\section{Theory}\label{sec:theory}
+\input{sections/theory.tex}
+
+\section{Methods}\label{sec:methods}
+\input{sections/methods.tex}
+
+\section{Results and Discussion}\label{sec:results_and_discussion}
+\input{sections/results_and_discussion.tex}
+
+\section{Conclusions}\label{sec:conclusions}
+\input{sections/conclusions.tex}
+
+
+
+% ===========================================
+
+%\newpage
+\onecolumngrid
+\bibliographystyle{unsrt}
+\bibliography{references}
+
+\newpage
+\appendix
+\section{Use of AI/LLM Tools}
+In our work for project 1, we have written the code ourselves and have not used any AI or LLM Tools for generating code or text. 
+\subsection{Tools used}
+No use of AI/LLM tools.
+\subsection{Text writing and editing}
+The report has level 0 of AI/LLM tool use.
+\subsection{Code generation and assistance}
+The developed code has level 0 of AI/LLM tool use.
+
+\end{document}
