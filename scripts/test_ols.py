@@ -29,7 +29,7 @@ def main(x, y):
         y_tilde_train = model.predict(X_train)
         mean_squared_error_train = mean_squared_error(y_train, model.predict(X_train))
         mean_squared_error_test = mean_squared_error(y_test, model.predict(X_test))
-        theta = ols(X, y)
+        theta = ols(X_test, y_test)
         return mean_squared_error_train, mean_squared_error_test, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test
 
     degrees = np.arange(1, 16)
@@ -61,7 +61,7 @@ def main(x, y):
     plt.plot(degrees, R2_values_train, "-o", label = f"$R^2$ train", color = "#195f3a", markersize = 3)
     plt.plot(degrees, R2_values_test, "-o", label = f"$R^2$ test", color = "#ed7e08", markersize = 3)
 
-    plt.xlabel(f"Polynomial degree ($\\theta$)", fontsize = 20)
+    plt.xlabel(f"Polynomial degree", fontsize = 20)
     # plt.ylabel("Mean Square Error (MSE)")
     plt.xticks(size = 18)
     plt.yticks(size = 18)
@@ -84,6 +84,19 @@ def main(x, y):
         mask = np.isnan(theta_values[i]) == False
         filtered_data = theta_values[i][mask]
         filtered_theta.append(filtered_data)
+
+    plt.figure(figsize = (9.5,7))
+    for i in range(len(degrees)-1):
+        plt.plot(degrees[i:], filtered_theta[i], label=f"$\\theta_{{{(i+1)}}}$")
+
+    plt.plot(degrees[14:], filtered_theta[14], "o", label="$\\theta_{15}$")
+    plt.xlabel(f"Polynomial degree", fontsize = 22)
+    plt.ylabel(f"$\\theta$", fontsize = 22)
+    plt.xticks(size = 18)
+    plt.yticks(size = 18)
+    plt.grid(alpha = 0.3)
+    plt.legend(fontsize = 16)
+    plt.savefig('figures/theta_vs_degree.pdf', dpi=300)
 
     print("Theta values for OLS:")
     print(theta_values[:,4])

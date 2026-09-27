@@ -23,12 +23,17 @@ def main(x, y):
 
     ridge_values=ridge_temp.T
 
-    plt.figure()
+    plt.figure(figsize = (8,6))
     for i in np.arange(degree):
-        plt.plot(lambda_values, ridge_values[i], label=f"Theta={i+1}")
+        plt.plot(lambda_values, ridge_values[i], label=f"$\\theta_{{{i+1}}}$")
     plt.xscale("log")
     plt.axhline(y=0, color = "gray", alpha = 0.2)
-    plt.legend()
+    plt.xlabel(f"$\\lambda$", fontsize = 18)
+    plt.ylabel(f"$\\theta$", fontsize = 18)
+    plt.xticks(size = 18)
+    plt.yticks(size = 18)
+    plt.grid(alpha = 0.3)
+    plt.legend(fontsize = 16)
     plt.savefig('figures/lambda_values.pdf', dpi=300)
 
     print("Theta values for Ridge:")
@@ -37,3 +42,5 @@ def main(x, y):
 
     # vi sammenlikner start theta-verdier for OLS og Ridge for å sjekke at det gir mening, vi burde starte på ca samme sted siden vi begynner med en liter verdi for lambda. 
     # deretter skal vi se hvordan theta verdiene for ridge utvikler seg, spesielt med tanke på hvordan de avhenger av lambda. 
+
+    print(ridge_values)
