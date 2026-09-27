@@ -16,8 +16,8 @@ def main():
 
     # Scripts need certain initial values to run
 
-    test_ols.main(x, y) # runs part 1a
-    # ridge_regression.main(x, y) # runs part 1b
+    # test_ols.main(x, y) # runs part 1a
+    ridge_regression.main(x, y) # runs part 1b
     # bias_variance.main(x, y) # runs part 1c
     # cross_validation.main(x, y) # runs part 1d
     # gradient_descent.main(x, y, n, rng) # runs part 1e
