@@ -1,10 +1,10 @@
 
-\subsection{Mean Square Error, $R^2$ score, and optimal polynomial degree}
+\subsection{Ordinary least squares: mean square error, coefficient of determination, and polynomial degree}
 
-\autoref{fig:results_mse_values} shows us the MSE values and $R^2$ scores for our chosen range of  polynomial degrees. For the training data, we find from the MSE values that the optimal polynomial degree is $14$, while for the test data we find a polynomial degree $7$. This difference is expected, as for the training MSE values we train our model on a certain set of noise values, and the higher the polynomial the better the fit for that specific noise data set. However, when we then use the trained model to fit for the test data with new noise data points, the model is fitted so closely with the noise data points for the training data, that the model may no longer be a good fit for the test data. This is what we call \textit{overfitting}, and shows us that the highest polynomial degree is not necessarily the best one.
+\autoref{fig:results_mse_values} shows us the MSE values and $R^2$ (the dimentionless \textit{coefficient of determination}) for our chosen range of  polynomial degrees. For the training data, we find from the MSE values that the optimal polynomial degree is $14$, while for the test data we find a polynomial degree $7$. This difference is expected, as for the training MSE values we train our model on a certain set of noise values, and the higher the polynomial the better the fit for that specific noise data set. However, when we then use the trained model to fit for the test data with new noise data points, the model is fitted so closely with the noise data points for the training data, that the model may no longer be a good fit for the test data. This is what we call \textit{overfitting}, and shows us that the highest polynomial degree is not necessarily the best one.
 
-$R^2$ is the dimentionless \textit{coefficient of determination}, and it compares the model against the best constant 
-prediction \cite{noauthor_machinelearninguiodocbookmllecturebookpdf_nodate}. The closer to $1$ the better the fit, and the closer to $0$, the worse the model. 
+$R^2$ compares the model against the best constant 
+prediction \cite{noauthor_machinelearninguiodocbookmllecturebookpdf_nodate}. This value of this coefficient lies between $0$ and $1$. The closer to $1$ the better the fit, and vice versa. From \autoref{fig:results_mse_values} we deduce that the values for $R^2$ agree with the values for the MSE, and gives us the same optimal polynomial degree for both training and test data, with $14$ and $7$ respectively. The negaive value for the first polynomial degree on the test data, means that the model does even worse than the mean for this degree.
 
 \begin{figure}[h!]
     \centering
@@ -12,3 +12,29 @@ prediction \cite{noauthor_machinelearninguiodocbookmllecturebookpdf_nodate}. The
     \caption{Caption}
     \label{fig:results_mse_values}
 \end{figure}
+
+\autoref{fig:theta_vs_degree} displays how the value of $\theta$ varies with the plynomial degree, for our test data. For the lower degrees, we see that the values does not vary much as we increase the number of polynomial degrees in our model. However, around a degree of $7$ and onward, we see that the values start to vary to a greater extent. This agrees with our earlier findings, that the optimal polynomial degree for our model trained on our given data is $7$.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 1.0\linewidth]{../figures/theta_vs_degree.pdf}
+    \caption{Caption}
+    \label{fig:theta_vs_degree}
+\end{figure}
+
+
+\subsection{\textcolor{red}{Why have we scaled the data?? Need critical discussion here!}}
+
+\subsection{Ridge Regression}
+
+In \autoref{fig:lambda_values} we have displayed how the values for $\theta$ up to a polynomial degree of $5$ varies with the penalty parameter $\lambda$. As expected, the lowest value for $\lambda$ should reproduce values for $\theta$ close to the values found with the OLS regression (since we are moving closer to $\lambda = 0$).
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 1.0\linewidth]{../figures/lambda_values.pdf}
+    \caption{Caption}
+    \label{fig:lambda_values}
+\end{figure}
+
+
+

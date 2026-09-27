@@ -1,16 +1,18 @@
 # Fdb version 4
-["bibtex main"] 1790532539.48323 "main.aux" "main.bbl" "main" 1790533504.23701 0
-  "./mainNotes.bib" 1790533503.90096 0 d41d8cd98f00b204e9800998ecf8427e ""
+["bibtex main"] 1790540771.45725 "main.aux" "main.bbl" "main" 1790540772.31632 0
+  "./mainNotes.bib" 1790540771.90738 0 d41d8cd98f00b204e9800998ecf8427e ""
   "./references.bib" 1790519310 1480 ec30fe9739145b38e620035ebf7d22dd ""
   "/usr/local/texlive/2026/texmf-dist/bibtex/bst/base/unsrt.bst" 1292289607 18030 1376b4b231b50c66211e47e42eda2875 ""
-  "amsmath.aux" 1790533503.90341 1259 d13d0dac380d3fd4e4d8b1c8e891814d "pdflatex"
-  "main.aux" 1790533504.01584 4200 895ca1165f0f3eb96c208b50e81b7c95 "pdflatex"
+  "amsmath.aux" 1790540771.91007 1259 d13d0dac380d3fd4e4d8b1c8e891814d "pdflatex"
+  "main.aux" 1790540772.05008 4921 2adcc4861670f443103de1dc731d81d8 "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1790533503.53707 "/Users/synnesjo/Desktop/FYS-STK4155/project_1_latex/main.tex" "main.pdf" "main" 1790533504.23715 0
-  "../figures/mse_values.pdf" 1790533503.21427 17820 6dcd892d24c126675cbae609b89cd2da ""
+["pdflatex"] 1790540771.53432 "/Users/synnesjo/Desktop/FYS-STK4155/project_1_latex/main.tex" "main.pdf" "main" 1790540772.31652 0
+  "../figures/lambda_values.pdf" 1790540604.94912 14690 0713e1a83bac3062d06ed9a0d4cadb35 ""
+  "../figures/mse_values.pdf" 1790537430.93739 16718 325244098cb64ffdd4f9145e8b041baf ""
+  "../figures/theta_vs_degree.pdf" 1790537431.02779 15506 282627eba70b874b03e7624dce0dc217 ""
   "/Users/synnesjo/Desktop/FYS-STK4155/project_1_latex/main.tex" 1790519310 3685 0426b6eeaf07f3df8e8d3ce787e28c69 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy5.tfm" 1246382020 1120 1e8878807317373affa7f7bba4cf2f6a ""
@@ -238,16 +240,16 @@
   "/usr/local/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1790526189 5573038 b99aad5e4898a9034e953632f940512b ""
   "/usr/local/texlive/2026/texmf-var/web2c/pdftex/pdflatex.fmt" 1790526158 3636779 af9081e40193367041035453bf1bf580 ""
   "/usr/local/texlive/2026/texmf.cnf" 1774209515 577 648cd9f92f9c0eac486f4c71c85cfbbe ""
-  "amsmath.aux" 1790533503.90341 1259 d13d0dac380d3fd4e4d8b1c8e891814d "pdflatex"
+  "amsmath.aux" 1790540771.91007 1259 d13d0dac380d3fd4e4d8b1c8e891814d "pdflatex"
   "amsmath.tex" 0 -1 0 ""
-  "main.aux" 1790533504.01584 4200 895ca1165f0f3eb96c208b50e81b7c95 "pdflatex"
-  "main.bbl" 1790532539.56624 784 b4d468c03422096a58c74a68a53e7a49 "bibtex main"
-  "main.out" 1790533504.01664 3110 bd009289b40bcc041921217fc9229082 "pdflatex"
+  "main.aux" 1790540772.05008 4921 2adcc4861670f443103de1dc731d81d8 "pdflatex"
+  "main.bbl" 1790540771.53195 784 b4d468c03422096a58c74a68a53e7a49 "bibtex main"
+  "main.out" 1790540772.05092 3823 44370d31dee068c3ad90a8e135f468f4 "pdflatex"
   "main.tex" 1790519310 3685 0426b6eeaf07f3df8e8d3ce787e28c69 ""
   "sections/conclusions.tex" 1790519310 899 0c7c7ea66b84b5b3605690e49d7f439a ""
   "sections/introduction.tex" 1790519310 5320 b1a7c61afbfff4e4121795af322e4255 ""
   "sections/methods.tex" 1790519310 0 d41d8cd98f00b204e9800998ecf8427e ""
-  "sections/results_and_discussion.tex" 1790532538.60579 1363 9c878ab119fa2754c9a41a5edc7b6ddc ""
+  "sections/results_and_discussion.tex" 1790540770.54423 3050 bc1dd4015022ced42dcf5c9aaeb046da ""
   "sections/theory.tex" 1790519310 2470 e7c71af7f75196bf3cfb2abf6c1cc054 ""
   (generated)
   "amsmath.aux"
