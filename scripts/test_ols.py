@@ -43,11 +43,16 @@ def main(x, y):
         theta_values.append(theta)
         R2_values.append(r2_score(y, y_tilde))
 
-    plt.figure()
-    plt.plot(degrees, mse_train_values, label = "Train mse")
-    plt.plot(degrees, mse_test_values, label = "Test mse")
-    plt.plot(degrees, R2_values, label = "R2 values")
-    plt.legend()
+    plt.figure(figsize = (9,6.5))
+    plt.plot(degrees, mse_train_values, "-o", label = "Train MSE", color = "#bb0303", markersize = 3)
+    plt.plot(degrees, mse_test_values, "-o", label = "Test MSE", color = "#01123d", markersize = 3)
+    plt.plot(degrees, R2_values, "-o", label = f"$R^2$ score", color = "#ed7e08", markersize = 3)
+    plt.xlabel(f"Polynomial degree ($\\theta$)", fontsize = 20)
+    # plt.ylabel("Mean Square Error (MSE)")
+    plt.xticks(size = 18)
+    plt.yticks(size = 18)
+    plt.grid(alpha = 0.3)
+    plt.legend(loc = "center right", fontsize = 20)
     plt.savefig('figures/mse_values.pdf', dpi=300)
 
     
