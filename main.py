@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 from scripts import test_ols, ridge_regression, bias_variance, cross_validation, gradient_descent, optimisers
 
 def runge(x):
@@ -23,7 +22,6 @@ def main():
     # cross_validation.main(x, y) # runs part 1d
     gradient_descent.main(x, y, n, rng) # runs part 1e
     # optimisers.main(x, y) # runs part 1f
-    plt.show()
 
 if __name__ == "__main__":
     main()
