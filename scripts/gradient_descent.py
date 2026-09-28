@@ -10,19 +10,9 @@ from src.utils import *
 def main(x, y, n, rng):
     # Set regularization parameter, either a single value or a vector of values 
     # Note that lambda is a python keyword: the lambda keyword creates small anonymous functions. # 2/n * X.T @ X + 2 * lam * I
-    y = y - y.mean() # centre y
 
     lam = 0.1
     gamma = 0.1
-
-    def grad_ridge(theta, gamma, X, y, lam, max_iter=10000, tol=1e-8): # works for OLS with lam=0.0
-        for k in range(max_iter):
-            gradient = (2.0 / n) * X.T @ (X @ theta- y) + 2 * lam * theta
-            theta -= gamma * gradient
-            if np.linalg.norm(gradient) < tol:
-                break
-        return theta, k
-
 
     for deg in [2,5,15]:
 

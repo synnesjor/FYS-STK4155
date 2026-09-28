@@ -1,36 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import r2_score
 from src.utils import *
 
 # Script for part 1a
 
 def main(x, y):
-
-    # Defining the Singular Value Decomposition function
-    def ols(X, y):
-        U, s, Vt = np.linalg.svd(X, full_matrices=False)
-        return Vt.T @ ((U.T @ y) / s)
-
     # Center the target to zero mean
     y = y - y.mean()
-
-    mse_values=np.array([])
-
-    def calculate_mse(x, y, degree):
-        X = rescale_design_matrix(x, degree)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state = 2026)
-        model = LinearRegression(fit_intercept=False)
-        model.fit(X_train, y_train)
-        y_tilde = model.predict(X)
-        y_tilde_test = model.predict(X_test)
-        y_tilde_train = model.predict(X_train)
-        mean_squared_error_train = mean_squared_error(y_train, model.predict(X_train))
-        mean_squared_error_test = mean_squared_error(y_test, model.predict(X_test))
-        theta = ols(X_test, y_test)
-        return mean_squared_error_train, mean_squared_error_test, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test
 
     degrees = np.arange(1, 16)
     mse_train_values = []

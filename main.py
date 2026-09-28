@@ -14,6 +14,9 @@ def main():
     x = np.sort(rng.uniform(-1, 1, n))
     y = runge(x) + rng.normal(0, sigma, n)
 
+    # Center the target to zero mean
+    y = y - y.mean()
+
     # Scripts need certain initial values to run
 
     # test_ols.main(x, y) # runs part 1a
