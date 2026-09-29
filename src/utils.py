@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
+import jax
+import jax.numpy as jnp
 
 # Useful Functions
 
@@ -55,6 +57,15 @@ def gradient(theta, x, y, degree, lam=0.0):
     X = rescale_design_matrix(x, degree)
     n = len(y)
     return (2.0 / n) * X.T @ (X @ theta - y) + 2.0 * lam * theta
+
+def gradient_lasso(theta, x, y, degree, lam=0.0):
+    X = jnp.asarray(rescale_design_matrix(x, degree))
+    y = jnp.asarray(y)
+
+    def cost(params):
+        return jnp.mean((y - X @ params) ** 2) + lam * jnp.mean(jnp.abs(params))
+
+    return jax.grad(cost)(jnp.asarray(theta))
 
 def hessian_eigs(X, lam):
     """Eigenvalues of the Hessian (2/n) X^T X + 2 lambda I, Eqs. (4.14) and (4.17)."""
