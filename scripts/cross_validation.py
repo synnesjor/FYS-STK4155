@@ -9,8 +9,6 @@ from src.utils import *
 # Script for part 1d
 
 def main(x, y):
-    y = y-y.mean() # centre y
-
     x = x.reshape(-1,1)
     y = y.reshape(-1,1) 
 

@@ -2,24 +2,10 @@ import numpy as np
 from src.utils import *
 
 def main(x, y):
-
     degree = 5
     X_norm = rescale_design_matrix(x, degree=degree)
-    y = y - y.mean() # centre y
-
-    def gradient(theta, x, y, degree, lam=0.0):
-        """Eqs. (4.13) and (4.17): the gradient of (1/n)||X theta - y||^2 + lambda theta^T theta."""
-        X = rescale_design_matrix(x, degree)
-        n = len(y)
-        return (2.0 / n) * X.T @ (X @ theta - y) + 2.0 * lam * theta
 
     grads = {'ols': lambda th: gradient(th, x, y, lam=0.0, degree=degree), 'ridge': lambda th: gradient(th, x, y, lam=0.01, degree=degree)}
-
-    def hessian_eigs(X, lam):
-        """Eigenvalues of the Hessian (2/n) X^T X + 2 lambda I, Eqs. (4.14) and (4.17)."""
-        n = len(X)
-        return np.linalg.eigvalsh((2.0 / n) * X.T @ X + 2.0 * lam * np.eye(X.shape[1]))
-
 
 
     eigenvalues_hessian_OLS = hessian_eigs(X_norm,lam = 0)

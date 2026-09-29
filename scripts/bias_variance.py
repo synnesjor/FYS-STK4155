@@ -12,8 +12,7 @@ def main(x, y):
     BLUE, RED, YELLOW = "#004488", "#BB5566", "#DDAA33" 
 
     degrees = np.arange(1, 16)
-    y = y - y.mean() # centre y
-
+    
     x = x.reshape(-1,1)
     y = y.reshape(-1,1) 
 

@@ -5,14 +5,8 @@ from src.utils import *
 # Script for part 1b
 def main(x, y):
 
-    y = y - y.mean() # centre y
-
     # Choose degree
     degree = 5
-
-    def ridge(x,y,lam,degree):
-        X = rescale_design_matrix(x, degree)
-        return ols(X,y) * (1/(1+lam))
 
     ridge_values = []
     lambda_values = np.logspace(-4, 2, 100)
