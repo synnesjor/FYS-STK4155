@@ -23,11 +23,10 @@ prediction \cite{noauthor_machinelearninguiodocbookmllecturebookpdf_nodate}. Thi
 \end{figure}
 
 
-\subsection{\textcolor{red}{Why have we scaled the data?? Need critical discussion here!}}
 
 \subsection{Ridge Regression}
 
-In \autoref{fig:lambda_values} we have displayed how the values for $\theta$ up to a polynomial degree of $5$ varies with the penalty parameter $\lambda$. As expected, the lowest value for $\lambda$ should reproduce values for $\theta$ close to the values found with the OLS regression (since we are moving closer to $\lambda = 0$).
+In \autoref{fig:lambda_values} we have displayed how the values for $\theta$ up to a polynomial degree of $5$ varies with the penalty parameter $\lambda$. As expected, the lowest value for $\lambda$ should reproduce values for $\theta$ close to the values found with the OLS regression (since we are moving closer to $\lambda = 0$). From our results, it looks like $\theta_2$ and $\theta_4$ is first affected by $\lambda$, followed by $\theta_3$ and $\theta_5$. $\theta_1$ seems to be the coefficient least affected by th change in $\lambda$. 
 
 \begin{figure}[h!]
     \centering
@@ -37,4 +36,23 @@ In \autoref{fig:lambda_values} we have displayed how the values for $\theta$ up 
 \end{figure}
 
 
+\subsection{The bias-variance tradeoff and the bootstrap}
+ 
 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 1.0\linewidth]{../figures/MSE_decomposition.pdf}
+    \caption{Caption}
+    \label{fig:MSE_decomposition}
+\end{figure}
+
+
+
+\subsection{Cross validation}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 1.0\linewidth]{../figures/cross_validation.pdf}
+    \caption{Caption}
+    \label{fig:cross_validation}
+\end{figure}

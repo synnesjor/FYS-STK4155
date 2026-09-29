@@ -411,6 +411,16 @@ INPUT ../figures/lambda_values.pdf
 INPUT ../figures/lambda_values.pdf
 INPUT ../figures/lambda_values.pdf
 INPUT ../figures/lambda_values.pdf
+INPUT ../figures/MSE_decomposition.pdf
+INPUT ../figures/MSE_decomposition.pdf
+INPUT ../figures/MSE_decomposition.pdf
+INPUT ../figures/MSE_decomposition.pdf
+INPUT ../figures/MSE_decomposition.pdf
+INPUT ../figures/cross_validation.pdf
+INPUT ../figures/cross_validation.pdf
+INPUT ../figures/cross_validation.pdf
+INPUT ../figures/cross_validation.pdf
+INPUT ../figures/cross_validation.pdf
 INPUT ./sections/conclusions.tex
 INPUT ./sections/conclusions.tex
 INPUT sections/conclusions.tex

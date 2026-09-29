@@ -17,4 +17,8 @@ interpolationcal.
 \newblock \url{https://interpolationcalc.com/blog/runges-phenomenon/}, June 2026.
 \newblock Accessed 23 September 2026.
 
+\bibitem{bias_variance_geeksforgeeks}
+Bias and {Variance} in {Machine} {Learning}.
+\newblock Section: Technical Scripter.
+
 \end{thebibliography}

@@ -29,7 +29,43 @@ where $n$ is the amount of data points and $\lambda$ is yet another penalty para
 \end{equation}
 where sgn$(\boldsymbol{\theta})$ is defined as a vector with all the signs of the coefficient vector $\boldsymbol{\theta}$. 
 
-\subsection{The bias-variation trade-off derivation}
+
+\subsection{The bias-variance tradeoff}
+\subsubsection{Bias, variance, and irreducible error}
+\textit{Bias} is the difference between the expectation value for the predicted value by our model, and the true value, given by
+
+\begin{equation}\label{eq:bias}
+    \mathrm{Bias}{(\hat\theta)} = \mathbb{E}[\hat{\theta}]-\theta,
+\end{equation}
+where the hat denotes the predicted value, and the \textcolor{red}{plain} $\theta$ is the true value. In other words, the bias is a measure on how simplified our model is \cite{bias_variance_geeksforgeeks}. If the model is oversimplified, it will miss patterns, and ends up underfitting. This happens when we have high bias. When we have lower bias, the model is closer to the true values, and it captures patterns well. \textit{Variance} is an error arising from the model being to sensitive to the training data, which might lead to overfitting as discussed \textcolor{red}{somewhere in the text, make sure this is correct.} The variance is given by 
+
+\begin{equation}\label{eq:variance}
+    \mathrm{Var}(\hat{\theta}) = \mathbb{E}[(\hat{\theta}-\mathbb{E}[\hat{\theta}])^2].
+\end{equation}
+The bias and the variance combine to give us the mean squared error, given by
+
+\begin{equation}\label{eq:mean_square_error}
+    \mathrm{MSE} = \mathbb{E}[(\hat{\theta}-\theta)^2].
+\end{equation}
+ The irreducible error $\sigma^2$ is a variance of the noise. Because the noise is random, will $\sigma^2$ be a floor beneath the test error. This means that the total test error is a combination of the bias, the variance, and this irreducible error:
+ 
+\begin{equation}\label{eq:total_test_error}
+    \mathrm{test\:error} = \mathrm{bias} + \mathrm{variance} + \sigma^2.
+\end{equation}
+
+The \textit{bias-variance tradeoff} describes the balance between the bias and the variance. A simplified model leads to a bias increase, but a variance decrease, because the model is not too sensitive to the training data. On the other hand, if we make the model complex the bias is lowered, but the variance error is larger, because we have now fit very closely to the training data. The goal is to find a middleground between these errors.    
+
+\subsubsection{The bias-variation trade-off derivation}
 Assume you have a noisy model $\mathbf{y}=f(\mathbf{x})+\boldsymbol{\varepsilon}$, where $\varepsilon \sim N(0, \sigma^2)$. Further assume that you have a data set $\tilde{y}$ predicts $y$, we try to find the expected value of the mean square error $\displaystyle E[(\mathbf{y}-\mathbf{\tilde{y}})^2]$. \textcolor{red}{not done yet...}
 
-\subsection{Subsection 2}
+\subsection{Scaling and intercept}\label{eq:scaling_and_intercept}
+Sometimes, the data we use in our model have very different orders of magnitude, or different units. For example, if we have a data set of distances, where some measurements are in the units of meters and some are in the units of kilometers, the measurements will be penalised differently. Centerting and scaling of the data effectively make the input features comparable! \textcolor{red}{used chat gpt here for explanations}. When they are, the penalty can treat them more fairly. It is common to scale the desig matrix so that evry column has zero mean and unit standard deviation, using
+
+\begin{equation}\label{eq:scaling_X}
+    x_j^{(i)} \rightarrow \frac{x_j^{(i)}-\overline{x}_j}{\sigma(x_j)},
+\end{equation}
+where $x$ is a measurement, $i$ denotes the row, $j$ denotes the column, the overline denotes the mean, and $sigma$ is the standard deviation. In addition to scaling the design matrix, we should also center the $y$-values. When we do this, we essensially remove the intercept, so we no longer have a baseline level for our model. The scaling of the $y$-values can simply be done as
+
+\begin{equation}\label{eq:centering_y}
+    y_j = y_j - \overline{y}_j.
+\end{equation}

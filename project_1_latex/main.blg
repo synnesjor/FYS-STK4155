@@ -5,44 +5,44 @@ A level-1 auxiliary file: amsmath.aux
 The style file: unsrt.bst
 Database file #1: mainNotes.bib
 Database file #2: references.bib
-You've used 3 entries,
+You've used 4 entries,
             1791 wiz_defined-function locations,
-            465 strings with 4116 characters,
-and the built_in function-call counts, 511 in all, are:
-= -- 48
-> -- 12
+            469 strings with 4226 characters,
+and the built_in function-call counts, 609 in all, are:
+= -- 55
+> -- 13
 < -- 0
-+ -- 6
++ -- 7
 - -- 3
 * -- 19
-:= -- 86
-add.period$ -- 11
-call.type$ -- 3
-change.case$ -- 3
+:= -- 94
+add.period$ -- 13
+call.type$ -- 4
+change.case$ -- 4
 chr.to.int$ -- 0
-cite$ -- 3
-duplicate$ -- 19
-empty$ -- 60
+cite$ -- 4
+duplicate$ -- 24
+empty$ -- 78
 format.name$ -- 3
-if$ -- 113
+if$ -- 139
 int.to.chr$ -- 0
-int.to.str$ -- 3
+int.to.str$ -- 4
 missing$ -- 1
-newline$ -- 20
+newline$ -- 24
 num.names$ -- 3
-pop$ -- 14
+pop$ -- 23
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 7
+skip$ -- 11
 stack$ -- 0
 substring$ -- 25
-swap$ -- 3
+swap$ -- 4
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 0
 while$ -- 5
-width$ -- 4
-write$ -- 36
+width$ -- 5
+write$ -- 43
