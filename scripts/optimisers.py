@@ -17,12 +17,13 @@ def main(x, y):
 
     methods = ("plain", "momentum", "adagrad", "rmsprop", "adam")
 
-    max_iters = 10000
+    max_iters = 100000
 
     print("For OLS:")
     iters = {}
-    gam = np.logspace(-3,0,10)
+    gam = np.logspace(-4,0,10)
     for i in methods:
+        print(f"For {i}")
         iters[i] = []
         for j in gam:
             opt = optimise(grads["ols"], np.zeros(degree), i, j, num_iters = max_iters)
@@ -35,7 +36,7 @@ def main(x, y):
 
     print("For ridge:")
     iters = {}
-    gam = np.logspace(-3,0,10)
+    gam = np.logspace(-3,0,5)
     for i in methods:
         iters[i] = []
         for j in gam:

@@ -49,6 +49,7 @@ def grad_ridge(theta, gamma, X, y, lam, max_iter=10000, tol=1e-8): # works for O
         gradient = (2.0 / n) * X.T @ (X @ theta- y) + 2 * lam * theta
         theta -= gamma * gradient
         if np.linalg.norm(gradient) < tol:
+            print("converges at", k)
             break
     return theta, k
 
@@ -59,13 +60,20 @@ def gradient(theta, x, y, degree, lam=0.0):
     return (2.0 / n) * X.T @ (X @ theta - y) + 2.0 * lam * theta
 
 def gradient_lasso(theta, x, y, degree, lam=0.0):
-    X = jnp.asarray(rescale_design_matrix(x, degree))
-    y = jnp.asarray(y)
+    X = rescale_design_matrix(x, degree)
+    n = len(y)
 
-    def cost(params):
-        return jnp.mean((y - X @ params) ** 2) + lam * jnp.mean(jnp.abs(params))
+    residual = y - X @ theta
 
-    return jax.grad(cost)(jnp.asarray(theta))
+    mse_grad = -(2 / n) * X.T @ residual
+    l1_grad = 2.0 * lam * np.sign(theta)
+
+    return mse_grad + l1_grad
+
+
+
+
+
 
 def hessian_eigs(X, lam):
     """Eigenvalues of the Hessian (2/n) X^T X + 2 lambda I, Eqs. (4.14) and (4.17)."""
@@ -105,10 +113,13 @@ def optimise(grad, theta0, method, gamma, num_iters = 100, tol = 1e-6, **kw):
     history = [theta.copy()]
     for t in range(1, num_iters + 1):
         g = grad(theta)
+        theta_old = theta.copy()
         theta, state = optimiser_step(method, theta, g, state, t, gamma, **kw)
         history.append(theta.copy())
-        if np.linalg.norm(g) < tol:
-            # print("Final iteration", t)
-            # print("Final theta", theta)
+        # if np.linalg.norm(g) < tol:
+        #     # print("Final iteration", t)
+        #     # print("Final theta", theta)
+        #     break
+        if np.linalg.norm(theta - theta_old) < tol:
             break
     return history

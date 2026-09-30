@@ -14,7 +14,8 @@ def main(x, y, n, rng):
     lam = 0.1
     gamma = 0.1
 
-    for deg in [2,5,15]:
+    # for deg in [2,5,15]:
+    for deg in [15]:
 
         X_norm = rescale_design_matrix(x, deg)
         y_centered = y - y.mean()    
