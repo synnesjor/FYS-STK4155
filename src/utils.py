@@ -59,6 +59,11 @@ def gradient(theta, x, y, degree, lam=0.0):
     n = len(y)
     return (2.0 / n) * X.T @ (X @ theta - y) + 2.0 * lam * theta
 
+def gradient_batch(theta, X, y, lam=0.0):
+    """Eqs. (4.13) and (4.17): the gradient of (1/n)||X theta - y||^2 + lambda theta^T theta."""
+    n = len(y)
+    return (2.0 / n) * X.T @ (X @ theta - y) + 2.0 * lam * theta
+
 def gradient_lasso(theta, x, y, degree, lam=0.0):
     X = rescale_design_matrix(x, degree)
     n = len(y)
@@ -129,18 +134,22 @@ def step_length(t, t0, t1):
     """The schedule of Eq. (4.40)."""
     return t0 / (t + t1)
 
-def stochastic_gradient_descent(X, y, method="plain", n_epochs=50, batch_size=5, gamma=0.1, schedule=None, lam=0.0, seed=2026, **kw):
+def stochastic_gradient_descent(X, y, method="plain", n_epochs=50, batch_size=5, gamma=0.1, schedule=None, lam=0.0, seed=2026, tol=1e-6, **kw,):
     """Minibatch SGD, Eq. (4.34), with any optimiser. schedule=(t0, t1) replaces gamma by Eq. (4.40).
     Returns the iterate after every epoch."""
     rng = np.random.default_rng(seed)
     n, p = X.shape
     theta, state, t = np.zeros(p), {}, 0
     history = [theta.copy()]
+    
     for epoch in range(n_epochs):
+        theta_old = theta.copy()
         for batch in make_batches(n, batch_size, rng):
             t += 1
-            g = gradient(theta, X[batch], y[batch], lam)                                    # the gradient of the cost on this minibatch
+            g = gradient_batch(theta, X[batch], y[batch], lam)                                    # the gradient of the cost on this minibatch
             gamma_t = gamma if schedule is None else step_length(t, *schedule)                           # constant, or the schedule
             theta, state = optimiser_step(method, theta, g, state, t, gamma_t, **kw)
+        if np.linalg.norm(theta - theta_old) < tol:
+            break
         history.append(theta.copy())
-    return np.array(history)
+    return epoch, np.array(history)
