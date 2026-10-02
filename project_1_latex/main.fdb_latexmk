@@ -1,19 +1,20 @@
 # Fdb version 4
-["bibtex main"] 1790887508.9683 "main.aux" "main.bbl" "main" 1790889224.07893 0
-  "./mainNotes.bib" 1790889223.73173 0 d41d8cd98f00b204e9800998ecf8427e ""
+["bibtex main"] 1790964330.93353 "main.aux" "main.bbl" "main" 1790969457.24069 0
+  "./mainNotes.bib" 1790969456.85147 0 d41d8cd98f00b204e9800998ecf8427e ""
   "./references.bib" 1790670346.25622 2050 59694064543ece161b870cf10791e88f ""
   "/usr/local/texlive/2026/texmf-dist/bibtex/bst/base/unsrt.bst" 1292289607 18030 1376b4b231b50c66211e47e42eda2875 ""
-  "amsmath.aux" 1790889223.73425 1259 d13d0dac380d3fd4e4d8b1c8e891814d "pdflatex"
-  "main.aux" 1790889223.85911 6553 47494ca1f62af14eb32f3de4c6780f2f "pdflatex"
+  "amsmath.aux" 1790969456.85445 1259 d13d0dac380d3fd4e4d8b1c8e891814d "pdflatex"
+  "main.aux" 1790969456.98683 6755 e8258c117c146e85518871015d91c515 "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1790889223.33538 "/Users/synnesjo/Documents/FYS-STK4155/FYS-STK4155/project_1_latex/main.tex" "main.pdf" "main" 1790889224.07908 0
-  "../figures/MSE_decomposition_OLS.pdf" 1790889220.14725 17948 c77f7ce858b3d8521aecabcb58076200 ""
-  "../figures/MSE_decomposition_ridge.pdf" 1790889222.98148 20942 648947c89851bc0526226d240adeec0f ""
+["pdflatex"] 1790969456.47959 "/Users/synnesjo/Documents/FYS-STK4155/FYS-STK4155/project_1_latex/main.tex" "main.pdf" "main" 1790969457.24085 0
+  "../figures/MSE_decomposition_OLS.pdf" 1790939723.88331 18589 966cb88187773dfad5149c2d1e137519 ""
+  "../figures/MSE_decomposition_ridge.pdf" 1790939760.77657 20889 11b8271c54ce21d54ce8b4b0987f531d ""
   "../figures/cross_validation_ols.pdf" 1790887987.85124 16279 85bc1a98b0e5baff8ab720112f7fe1d5 ""
   "../figures/cross_validation_ridge.pdf" 1790887996.42572 18930 8a52ac35f65dfc339c9b71a70a2de197 ""
+  "../figures/optimiser_algorithms.pdf" 1790969455.96973 20415 0ea06127584ed87beabb9a1ef36bea46 ""
   "/Users/synnesjo/Documents/FYS-STK4155/FYS-STK4155/project_1_latex/main.tex" 1790670346.25601 3685 0426b6eeaf07f3df8e8d3ce787e28c69 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy5.tfm" 1246382020 1120 1e8878807317373affa7f7bba4cf2f6a ""
@@ -241,19 +242,19 @@
   "/usr/local/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1790526189 5573038 b99aad5e4898a9034e953632f940512b ""
   "/usr/local/texlive/2026/texmf-var/web2c/pdftex/pdflatex.fmt" 1790526158 3636779 af9081e40193367041035453bf1bf580 ""
   "/usr/local/texlive/2026/texmf.cnf" 1774209515 577 648cd9f92f9c0eac486f4c71c85cfbbe ""
-  "amsmath.aux" 1790889223.73425 1259 d13d0dac380d3fd4e4d8b1c8e891814d "pdflatex"
+  "amsmath.aux" 1790969456.85445 1259 d13d0dac380d3fd4e4d8b1c8e891814d "pdflatex"
   "amsmath.tex" 0 -1 0 ""
   "figures/lambda_values.pdf" 1790670346.25493 14690 0713e1a83bac3062d06ed9a0d4cadb35 ""
   "figures/mse_values.pdf" 1790670346.25519 16718 9e0cc76d4300a275a3774a5acb89fe11 ""
   "figures/theta_vs_degree.pdf" 1790670346.25565 15509 8b31aa80eb1426c2cb56dd206524a2d7 ""
-  "main.aux" 1790889223.85911 6553 47494ca1f62af14eb32f3de4c6780f2f "pdflatex"
-  "main.bbl" 1790887509.04084 907 cfd5f160b924017854ee3c398d0c17ae "bibtex main"
-  "main.out" 1790889223.85994 4366 b8b4a6cbdbc05fe3a8dd6975762e587b "pdflatex"
+  "main.aux" 1790969456.98683 6755 e8258c117c146e85518871015d91c515 "pdflatex"
+  "main.bbl" 1790964331.00819 907 cfd5f160b924017854ee3c398d0c17ae "bibtex main"
+  "main.out" 1790969456.98782 4366 5ed2c4f77557fb70b576ba60101a4b2e "pdflatex"
   "main.tex" 1790670346.25601 3685 0426b6eeaf07f3df8e8d3ce787e28c69 ""
   "sections/conclusions.tex" 1790670346.25665 899 0c7c7ea66b84b5b3605690e49d7f439a ""
   "sections/introduction.tex" 1790670346.25695 5320 b1a7c61afbfff4e4121795af322e4255 ""
   "sections/methods.tex" 1790663140 0 d41d8cd98f00b204e9800998ecf8427e ""
-  "sections/results_and_discussion.tex" 1790887612.36984 4013 6a882b5922bc3502ddb799fd9eafab35 ""
+  "sections/results_and_discussion.tex" 1790964633.30206 4202 2fc9367ebe814b5c3a4956b26a1b6da3 ""
   "sections/theory.tex" 1790670346.25767 5859 75230cda886857ce6ed74ec1b6ebe188 ""
   (generated)
   "amsmath.aux"

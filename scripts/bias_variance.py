@@ -16,7 +16,7 @@ def main(x, y):
     x = x.reshape(-1,1)
     y = y.reshape(-1,1) 
 
-    number_of_bootstraps = 100
+    number_of_bootstraps = 1380
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.2, random_state=2026)
 
     test_error = []

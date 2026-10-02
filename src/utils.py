@@ -43,7 +43,7 @@ def ridge(x,y,lam,degree):
     X = rescale_design_matrix(x, degree)
     return ols(X,y) * (1/(1+lam))
 
-def grad_ridge(theta, gamma, X, y, lam, max_iter=10000, tol=1e-8): # works for OLS with lam=0.0
+def grad_ridge(theta, gamma, X, y, lam, max_iter=100000, tol=1e-6): # works for OLS with lam=0.0
     n = len(y)
     for k in range(max_iter):
         gradient = (2.0 / n) * X.T @ (X @ theta- y) + 2 * lam * theta
