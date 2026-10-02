@@ -26,10 +26,15 @@ def main():
     # bias_variance.main(x, y) # runs part 1c
     # cross_validation.main(x, y) # runs part 1d
     # gradient_descent.main(x, y, n, rng) # runs part 1e
+<<<<<<< HEAD
     optimisers.main(x, y) # runs part 1f
+=======
+    # optimisers.main(x, y) # runs part 1f
+>>>>>>> f666d78792394e2a530657adf5680fb26b3116e8
     # lasso.main(x, y) # runs part 1g
-    # stochastic_gradient_descent.main(x, y)
+    stochastic_gradient_descent.main(x, y)
 
+    plt.show()
 
 if __name__ == "__main__":
     main()
