@@ -9,14 +9,14 @@ from src.utils import *
 
 # Script for part 1c
 def main(x, y):
-    BLUE, RED, YELLOW = "#004488", "#BB5566", "#DDAA33" 
+    # BLUE, RED, YELLOW = "#004488", "#BB5566", "#DDAA33" 
 
     degrees = np.arange(1, 16)
     
     x = x.reshape(-1,1)
     y = y.reshape(-1,1) 
 
-    number_of_bootstraps = 1380
+    number_of_bootstraps = 100
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.2, random_state=2026)
 
     test_error = []
@@ -49,6 +49,7 @@ def main(x, y):
     plt.legend(loc = "upper left", fontsize = "13")
     plt.xticks(size = 12)
     plt.yticks(size = 14)
+    plt.grid(alpha = 0.4)
     # plt.title(f"number of bootstraps = {number_of_bootstraps}")
     plt.savefig("figures/MSE_decomposition_OLS.pdf", dpi=300)
 
@@ -98,6 +99,7 @@ def main(x, y):
     # plt.ylim(3*10**-3, 3*10**1)
     plt.legend(loc = "lower left", fontsize = "14")
     # plt.title(f"n = 100")
+    plt.grid(alpha = 0.4)
     plt.savefig("figures/MSE_decomposition_ridge.pdf")
 
     print("The minimum test error is found at a lambda value", our_logspace[np.argmin(test_error)])

@@ -5,6 +5,8 @@ from src.utils import *
 # Script for part 1b
 def main(x, y):
 
+    colours = ["#aa333c", "#9aab64", "#21534c", "#ef9d2c", "#B0a6df"]
+
     # Choose degree
     degree = 5
 
@@ -18,15 +20,15 @@ def main(x, y):
     ridge_values=ridge_temp.T
 
     plt.figure(figsize = (8,6))
-    for i in np.arange(degree):
-        plt.plot(lambda_values, ridge_values[i], label=f"$\\theta_{{{i+1}}}$")
+    for idx, i in enumerate(np.arange(degree)):
+        plt.plot(lambda_values, ridge_values[i], label=f"$\\theta_{{{i+1}}}$", color = colours[idx])
     plt.xscale("log")
     plt.axhline(y=0, color = "gray", alpha = 0.2)
-    plt.xlabel(f"$\\lambda$", fontsize = 18)
-    plt.ylabel(f"$\\theta$", fontsize = 18)
-    plt.xticks(size = 18)
-    plt.yticks(size = 18)
-    plt.grid(alpha = 0.3)
+    plt.xlabel(rf" penalty parameter $\lambda$", fontsize = 16)
+    plt.ylabel(f"$\\theta$", fontsize = 16)
+    plt.xticks(size = 16)
+    plt.yticks(size = 16)
+    plt.grid(alpha = 0.4)
     plt.legend(fontsize = 16)
     plt.savefig('figures/lambda_values.pdf', dpi=300)
 

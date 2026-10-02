@@ -38,6 +38,7 @@ def main(x, y):
         plt.tick_params(axis='y', labelsize=16)
         plt.gca().yaxis.get_offset_text().set_fontsize(16)
         plt.legend(fontsize = "14")
+        plt.grid(alpha = 0.4)
         plt.savefig('figures/cross_validation_ols.pdf', dpi=300)
 
 
@@ -68,6 +69,7 @@ def main(x, y):
         plt.xticks(size = "16")
         plt.yticks(size = "16")
         plt.legend(fontsize = 16)
+        plt.grid(alpha = 0.4)
         print("The optimal lambda (minimum MSE) is a lambda value of", our_logspace[np.where(cv_mse == np.min(cv_mse))][0])
     plt.savefig(f"figures/cross_validation_ridge.pdf")
 

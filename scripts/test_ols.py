@@ -9,6 +9,8 @@ def main(x, y):
     # Center the target to zero mean
     y = y - y.mean()
 
+    colours = ["#aa333c", "#99d2fb", "#9aab64", "#21534c", "#ef9d2c", "#B0a6df"]
+
     degrees = np.arange(1, 16)
     mse_train_values = []
     mse_test_values = []
@@ -33,16 +35,16 @@ def main(x, y):
     print("The optimal polynomial degree, according to the MSE value for the test data, is", np.argmin(mse_test_values))
 
     plt.figure(figsize = (9,6.5))
-    plt.plot(degrees, mse_train_values, "-o", label = "Train MSE", color = "#bb0303", markersize = 3)
-    plt.plot(degrees, mse_test_values, "-o", label = "Test MSE", color = "#01123d", markersize = 3)
-    plt.plot(degrees, R2_values_train, "-o", label = f"$R^2$ train", color = "#195f3a", markersize = 3)
-    plt.plot(degrees, R2_values_test, "-o", label = f"$R^2$ test", color = "#ed7e08", markersize = 3)
+    plt.plot(degrees, mse_train_values, "-o", label = "Train MSE", color = colours[0], markersize = 3)
+    plt.plot(degrees, mse_test_values, "-o", label = "Test MSE", color = colours[1], markersize = 3)
+    plt.plot(degrees, R2_values_train, "-o", label = f"$R^2$ train", color = colours[4], markersize = 3)
+    plt.plot(degrees, R2_values_test, "-o", label = f"$R^2$ test", color = colours[3], markersize = 3)
 
     plt.xlabel(f"Polynomial degree", fontsize = 20)
     # plt.ylabel("Mean Square Error (MSE)")
     plt.xticks(size = 18)
     plt.yticks(size = 18)
-    plt.grid(alpha = 0.3)
+    plt.grid(alpha = 0.4)
     plt.legend(loc = "center right", fontsize = 20)
     plt.savefig('figures/mse_values.pdf', dpi=300)
 
@@ -71,7 +73,7 @@ def main(x, y):
     plt.ylabel(f"$\\theta$", fontsize = 22)
     plt.xticks(size = 18)
     plt.yticks(size = 18)
-    plt.grid(alpha = 0.3)
+    plt.grid(alpha = 0.4)
     plt.legend(fontsize = 16)
     plt.savefig('figures/theta_vs_degree.pdf', dpi=300)
 
