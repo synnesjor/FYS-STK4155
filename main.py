@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 
 from scripts import test_ols, ridge_regression, bias_variance, cross_validation, gradient_descent, optimisers, lasso, stochastic_gradient_descent
 
+seed = np.random.seed(2026)
+
 def runge(x):
     return 1.0 / (1.0 + 25.0 * x**2)
 
@@ -23,10 +25,10 @@ def main():
     # ridge_regression.main(x, y) # runs part 1b
     # bias_variance.main(x, y) # runs part 1c
     # cross_validation.main(x, y) # runs part 1d
-    # gradient_descent.main(x, y, n, rng) # runs part 1e
+    gradient_descent.main(x, y, n, rng) # runs part 1e
     # optimisers.main(x, y) # runs part 1f
     # lasso.main(x, y) # runs part 1g
-    stochastic_gradient_descent.main(x, y)
+    # stochastic_gradient_descent.main(x, y)
 
 
 if __name__ == "__main__":

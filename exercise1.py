@@ -240,7 +240,7 @@ for degree in np.arange(polynomial_degree):
     bias.append(np.mean((y_test - np.mean(y_pred, axis=1, keepdims=True))**2))
     variance.append(np.mean(np.var(y_pred, axis=1, keepdims=True)))    
 
-# plt.figure(figsize=(6.6, 4.0))
+plt.figure(figsize=(6.6, 4.0))
 plt.plot(np.arange(polynomial_degree), test_error, "o-", color = BLUE, label="test error")
 plt.plot(np.arange(polynomial_degree), bias, "s-", color = RED, label=r"bias$^2$ (+ $\sigma^2$)")
 plt.plot(np.arange(polynomial_degree), variance, "d-", color = YELLOW, label="variance")
@@ -252,7 +252,7 @@ plt.ylabel("MSE decomposition")
 # plt.ylim(3*10**-3, 3*10**1)
 plt.legend(loc = "upper left")
 plt.title(f"number of bootstraps = {number_of_bootstraps}")
-# plt.show()
+plt.show()
 
 
 print(f"For n = {number_of_bootstraps}:")

@@ -11,11 +11,13 @@ def main(x, y, n, rng):
     # Set regularization parameter, either a single value or a vector of values 
     # Note that lambda is a python keyword: the lambda keyword creates small anonymous functions. # 2/n * X.T @ X + 2 * lam * I
 
-    lam = 0.1
+    lam = 0.0391
+    lam_array = np.logspace(-4, 2, 10)
     gamma = 0.1
+    gamma_array = np.logspace(-3,-1,10)
 
     # for deg in [2,5,15]:
-    for deg in [15]:
+    for deg in [7]:
 
         X_norm = rescale_design_matrix(x, deg)
         y_centered = y - y.mean()    
@@ -27,23 +29,23 @@ def main(x, y, n, rng):
         theta_closed_formRidge = np.linalg.pinv(X_norm.T @ X_norm + n * lam * I) @ X_norm.T @ y_centered
         theta_closed_formOLS = np.linalg.pinv(X_norm.T @ X_norm) @ X_norm.T @ y_centered
 
+        # # OLS
+        for each in gamma_array:
+            theta_OLS, k_OLS = grad_ridge(theta, each, X_norm, y_centered, lam=0.0) # OLS
+            print(f"Number of iterations for deg={deg} is (OLS):", k_OLS)
+            print(f"Gradient descent after {k_OLS+1} iterations (OLS):", theta_OLS.ravel())
+            print("Closed-form OLS coefficients:", theta_closed_formOLS)
 
-        theta_OLS, k_OLS = grad_ridge(theta, gamma, X_norm, y_centered, lam=0.0) # OLS
-        print(f"Number of iterations for deg={deg} is (OLS):", k_OLS)
-
-        theta_ridge, k_ridge = grad_ridge(theta, gamma, X_norm, y_centered, lam) # Ridge
-        print(f"Number of iterations for deg={deg} is (Ridge):", k_ridge)
-
-        print(f"Gradient descent after {k_ridge+1} iterations (Ridge):", theta_ridge.ravel())
-        print(f"Gradient descent after {k_OLS+1} iterations (OLS):", theta_OLS.ravel())
-
-        print("Closed-form Ridge coefficients:", theta_closed_formRidge)
-        print("Closed-form OLS coefficients:", theta_closed_formOLS)
+        # # Ridge
+        # theta_ridge, k_ridge = grad_ridge(theta, gamma, X_norm, y_centered, lam) # Ridge
+        # print(f"Number of iterations for deg={deg} is (Ridge):", k_ridge)
+        # print(f"Gradient descent after {k_ridge+1} iterations (Ridge):", theta_ridge.ravel())
+        # print("Closed-form Ridge coefficients:", theta_closed_formRidge)
 
         clf = Ridge(alpha = lam*n, fit_intercept=False)
         clf.fit(X_norm, y_centered)
 
-        print(f"Coefficients from scikit-learn Ridge():", clf.coef_)
+        # print(f"Coefficients from scikit-learn Ridge():", clf.coef_)
 
         # second part
 
@@ -64,9 +66,9 @@ def main(x, y, n, rng):
         grad_ols_analytic = 2.0 / len(y_centered) * X_norm.T @ (X_norm @ theta0 - y_centered)
         grad_ridge_analytic = grad_ols_analytic + 2.0 * lam * theta0
 
-        print(f"OLS   max |AD - analytic| for deg={deg}", np.max(np.abs(grad_ols_ad(theta0, X_norm, y_centered) - grad_ols_analytic)))
-        print(f"Ridge max |AD - analytic| for deg={deg}", np.max(np.abs(grad_ridge_ad(theta0, X_norm, y_centered, lam) - grad_ridge_analytic)))
+        # print(f"OLS   max |AD - analytic| for deg={deg}", np.max(np.abs(grad_ols_ad(theta0, X_norm, y_centered) - grad_ols_analytic)))
+        # print(f"Ridge max |AD - analytic| for deg={deg}", np.max(np.abs(grad_ridge_ad(theta0, X_norm, y_centered, lam) - grad_ridge_analytic)))
 
         # the largest safe learning rate for plain gradient descent: eta < 2 / lambda_max(Hessian)
         H = 2.0 / len(y) * X_norm.T @ X_norm
-        print("eta_max for OLS  =", 2.0 / np.linalg.eigvalsh(H).max())
+        # print("eta_max for OLS  =", 2.0 / np.linalg.eigvalsh(H).max())
