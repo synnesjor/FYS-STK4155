@@ -151,5 +151,7 @@ def stochastic_gradient_descent(X, y, method="plain", n_epochs=50, batch_size=5,
             theta, state = optimiser_step(method, theta, g, state, t, gamma_t, **kw)
         if np.linalg.norm(theta - theta_old) < tol:
             break
+        if np.linalg.norm(theta - theta_old)>1e3: # breaks if theta explodes
+            break
         history.append(theta.copy())
     return epoch, np.array(history)
