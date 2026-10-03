@@ -71,7 +71,7 @@ def gradient_lasso(theta, x, y, degree, lam=0.0):
     residual = y - X @ theta
 
     mse_grad = -(2 / n) * X.T @ residual
-    l1_grad = 2.0 * lam * np.sign(theta)
+    l1_grad = lam * np.sign(theta)
 
     return mse_grad + l1_grad
 
