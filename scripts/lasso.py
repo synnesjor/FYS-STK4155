@@ -9,8 +9,7 @@ def main(x, y):
 
     methods = ("plain", "momentum", "adagrad", "rmsprop", "adam")
     # methods = ("adam")
-    max_iters = 100000 # må velge ganske lavt verdi her...? # divergerer for = 100
-
+    max_iters = 100000
     iters = {}
     gam = np.logspace(-6,-4,10)
     for i in methods:
@@ -18,7 +17,7 @@ def main(x, y):
         iters[i] = []
         for j in gam:
             print(f"for gamma = {j}:")
-            opt = optimise(grad_lasso, np.zeros(degree), i, j, num_iters = max_iters, tol=1e-6)
+            opt = optimise(grad_lasso, np.zeros(degree), i, j, num_iters = max_iters, tol=1e-8)
             if len(opt) >= max_iters:
                 iters[i].append(np.nan)
             else:
