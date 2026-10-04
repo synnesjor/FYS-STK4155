@@ -26,33 +26,33 @@ def main(x, y):
 
     max_iters = 10000
 
-    # print("For OLS:")
-    # iters = {}
-    # gam = np.logspace(-4,0,10)
-    # for i in methods:
-    #     # print(f"For {i}")
-    #     iters[i] = []
-    #     for j in gam:
-    #         opt = optimise(grads["ols"], np.zeros(degree), i, j, num_iters = max_iters)
-    #         if len(opt) > max_iters:
-    #             iters[i].append(np.nan)
-    #         else:
-    #             iters[i].append(len(opt))
-    # print(iters)
-
-
-    print("For ridge:")
+    print("For OLS:")
     iters = {}
     gam = np.logspace(-4,0,10)
     for i in methods:
+        # print(f"For {i}")
         iters[i] = []
         for j in gam:
-            opt = optimise(grads['ridge'], np.zeros(degree), i, j, num_iters = max_iters)
+            opt = optimise(grads["ols"], np.zeros(degree), i, j, num_iters = max_iters, lasso_bool=False)
             if len(opt) > max_iters:
                 iters[i].append(np.nan)
             else:
                 iters[i].append(len(opt))
     print(iters)
+
+
+    # print("For ridge:")
+    # iters = {}
+    # gam = np.logspace(-4,0,10)
+    # for i in methods:
+    #     iters[i] = []
+    #     for j in gam:
+    #         opt = optimise(grads['ridge'], np.zeros(degree), i, j, num_iters = max_iters, lasso_bool=False)
+    #         if len(opt) > max_iters:
+    #             iters[i].append(np.nan)
+    #         else:
+    #             iters[i].append(len(opt))
+    # print(iters)
 
     # vi har funnet ut: alle konvergerer for minst en gamma-verdi, utenom rmsprop. 
     # Vi burde se om optimal gamma analytisk stemmer overens med den beste gamma-verdien numerisk.
@@ -70,4 +70,4 @@ def main(x, y):
         plt.grid(alpha = 0.4)
     plt.axvline(max_gamma_ridge*(1/0.9), linestyle = "dashed", color = "#a9a9a9", label = r"2/$\lambda_{max}$")
     plt.legend(fontsize = "13")
-    plt.savefig("figures/optimiser_algorithms_ridge_small_lambda.pdf")
+    plt.savefig("optimiser_algorithms_ols.pdf")
