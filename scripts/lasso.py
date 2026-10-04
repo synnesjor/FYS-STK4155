@@ -12,7 +12,7 @@ def main(x, y):
     grad_lasso = lambda th: gradient_lasso(th, x, y, lam=lam, degree=degree)
 
 
-    methods = ("momentum", "adagrad", "rmsprop", "adam", "plain")
+    methods = ("momentum", "adagrad", "rmsprop", "adam","plain")
     # methods = ("plain", "momentum")
     # methods = ("adam")
     max_iters = 100000
@@ -24,7 +24,7 @@ def main(x, y):
         iters[i] = []
         for j in g:
             print(f"for gamma = {j}:")
-            opt = optimise(grad_lasso, np.zeros(degree), i, j, num_iters = max_iters, tol=1e-8)
+            opt = optimise(grad_lasso, np.zeros(degree), i, j, num_iters = max_iters, tol=1e-8, lasso_bool = True)
             if len(opt) >= max_iters:
                 iters[i].append(np.nan)
             else:
@@ -44,7 +44,7 @@ def main(x, y):
 
         plt.yscale("log")
         plt.legend(fontsize=12)
-        plt.grid(True, which="both", alpha=0.3)
+        plt.grid(True, which="both", alpha=0.4)
         plt.savefig(f"figures/lasso/lasso_convergence_{i}.pdf", dpi=300, bbox_inches="tight")
     print(iters)
 

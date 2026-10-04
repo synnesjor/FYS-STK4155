@@ -33,8 +33,8 @@ def main():
     # gradient_descent.main(x, y, n, rng) # runs part 1e
     # optimisers.main(x, y) # runs part 1f
     # lasso.main(x, y) # runs part 1g
-    stochastic_gradient_descent.main(x, y)
-    # plot_estimated_runge.main(x, y, y_offset=y_offset)
+    # stochastic_gradient_descent.main(x, y)
+    plot_estimated_runge.main(x, y, y_offset=y_offset)
 
     # plt.show()
 if __name__ == "__main__":
