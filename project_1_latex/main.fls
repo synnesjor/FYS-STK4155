@@ -439,6 +439,14 @@ INPUT ../figures/optimiser_algorithms.pdf
 INPUT ./sections/conclusions.tex
 INPUT ./sections/conclusions.tex
 INPUT sections/conclusions.tex
+INPUT ./sections/figures.tex
+INPUT ./sections/figures.tex
+INPUT sections/figures.tex
+INPUT ../figures/lasso/lasso_convergence_adagrad.pdf
+INPUT ../figures/lasso/lasso_convergence_adagrad.pdf
+INPUT ../figures/lasso/lasso_convergence_adagrad.pdf
+INPUT ../figures/lasso/lasso_convergence_adagrad.pdf
+INPUT ../figures/lasso/lasso_convergence_adagrad.pdf
 INPUT ./main.bbl
 INPUT ./main.bbl
 INPUT main.bbl

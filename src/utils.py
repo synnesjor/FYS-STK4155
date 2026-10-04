@@ -123,6 +123,7 @@ def optimise(grad, theta0, method, gamma, num_iters = 100, tol = 1e-6, lasso_boo
                 break
         elif np.linalg.norm(g) < tol:
             break
+    history = np.array(history)
     return history
 
 def make_batches(n, batch_size, rng):
