@@ -11,11 +11,11 @@ def main(x, y):
     # methods = ("adam")
     max_iters = 100000
     iters = {}
-    gam = np.logspace(-6,-4,10)
+    g = np.logspace(-6,-4,10)
     for i in methods:
         plt.figure()
         iters[i] = []
-        for j in gam:
+        for j in g:
             print(f"for gamma = {j}:")
             opt = optimise(grad_lasso, np.zeros(degree), i, j, num_iters = max_iters, tol=1e-8)
             if len(opt) >= max_iters:
