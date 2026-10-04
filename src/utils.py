@@ -108,7 +108,7 @@ def optimiser_step(method, theta, g, state, t, gamma, beta=0.9, rho=0.99,
         return theta - gamma * m_hat / (np.sqrt(r_hat) + eps), state   # Eq. (4.55)
     raise ValueError(f"unknown method {method}")
 
-def optimise(grad, theta0, method, gamma, num_iters = 100, tol = 1e-6, **kw):
+def optimise(grad, theta0, method, gamma, num_iters = 100, tol = 1e-6, lasso_bool=False, **kw):
     """Run one optimiser from theta0 with the full gradient; returns all iterates."""
     theta, state = np.array(theta0, dtype=float), {}
     history = [theta.copy()]
@@ -117,11 +117,11 @@ def optimise(grad, theta0, method, gamma, num_iters = 100, tol = 1e-6, **kw):
         theta_old = theta.copy()
         theta, state = optimiser_step(method, theta, g, state, t, gamma, **kw)
         history.append(theta.copy())
-        # if np.linalg.norm(g) < tol:
-        #     # print("Final iteration", t)
-        #     # print("Final theta", theta)
-        #     break
-        if np.linalg.norm(theta - theta_old) < tol:
+        if lasso_bool:
+            # Check for convergence based on the change in theta
+            if np.linalg.norm(theta - theta_old) < tol:
+                break
+        elif np.linalg.norm(g) < tol:
             break
     return history
 
