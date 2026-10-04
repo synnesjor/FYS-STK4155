@@ -26,6 +26,7 @@ def main(x, y):
 
         for each in np.arange(polynomial_degree):
             model = make_pipeline(PolynomialFeatures(degree = each), StandardScaler(), Ridge(alpha = lam)) #this is what actually makes the fit
+            print(each, model)
             scores = -cross_val_score(model, x, y, cv = kfold, scoring="neg_mean_squared_error")
             mse[each] = scores.mean()
 
@@ -45,10 +46,8 @@ def main(x, y):
     nlambdas = 100
     our_logspace = np.logspace(-5,0,n)
     k = [5,10,n]
-    poly = PolynomialFeatures(degree=6)
 
     optimal_lambdas = []
-
 
     plt.figure(figsize = (8.5,6))
     for i, each in enumerate(k):
@@ -56,7 +55,7 @@ def main(x, y):
         for idx, lam in enumerate(our_logspace):
             kfold = KFold(n_splits = each, shuffle=True, random_state=2026)
             model = make_pipeline(PolynomialFeatures(degree = 6), StandardScaler(), Ridge(alpha = lam)) #this is what actually makes the fit
-            scores = -cross_val_score(model, x.reshape(-1,1), y, cv = kfold, scoring="neg_mean_squared_error")
+            scores = -cross_val_score(model, x, y, cv = kfold, scoring="neg_mean_squared_error")
             cv_mse[idx] = np.mean(scores)
 
         optimal_lambdas.append(our_logspace[np.where(cv_mse == np.min(cv_mse))][0])
