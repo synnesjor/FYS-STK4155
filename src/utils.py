@@ -121,6 +121,9 @@ def optimise(grad, theta0, method, gamma, num_iters = 100, tol = 1e-6, **kw):
         #     # print("Final iteration", t)
         #     # print("Final theta", theta)
         #     break
+        if t == num_iters:
+            print(theta - theta_old)
+            print(np.linalg.norm(g))
         if np.linalg.norm(theta - theta_old) < tol:
             break
     return history
