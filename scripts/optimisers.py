@@ -9,7 +9,7 @@ def main(x, y):
     degree = 6
     X_norm = rescale_design_matrix(x, degree=degree)
 
-    grads = {'ols': lambda th: gradient(th, x, y, lam=0.0, degree=degree), 'ridge': lambda th: gradient(th, x, y, lam = 0.0343, degree=degree)}
+    grads = {'ols': lambda th: gradient(th, x, y, lam=0.0, degree=degree), 'ridge': lambda th: gradient(th, x, y, lam = 0.1, degree=degree)}
 
 
     eigenvalues_hessian_OLS = hessian_eigs(X_norm,lam = 0)
@@ -27,33 +27,33 @@ def main(x, y):
 
     max_iters = 100000
 
-    # print("For OLS:")
-    # iters = {}
-    # gam = np.logspace(-4,1,10)
-    # for i in methods:
-    #     # print(f"For {i}")
-    #     iters[i] = []
-    #     for j in gam:
-    #         opt = optimise(grads["ols"], np.zeros(degree), i, j, num_iters = max_iters, lasso_bool=False)
-    #         if len(opt) > max_iters:
-    #             iters[i].append(np.nan)
-    #         else:
-    #             iters[i].append(len(opt))
-    # print(iters)
-
-
-    print("For ridge:")
+    print("For OLS:")
     iters = {}
     gam = np.logspace(-4,1,10)
     for i in methods:
+        # print(f"For {i}")
         iters[i] = []
         for j in gam:
-            opt = optimise(grads['ridge'], np.zeros(degree), i, j, num_iters = max_iters, lasso_bool=False)
+            opt = optimise(grads["ols"], np.zeros(degree), i, j, num_iters = max_iters, lasso_bool=False)
             if len(opt) > max_iters:
                 iters[i].append(np.nan)
             else:
                 iters[i].append(len(opt))
     print(iters)
+
+
+    # print("For ridge:")
+    # iters = {}
+    # gam = np.logspace(-4,1,10)
+    # for i in methods:
+    #     iters[i] = []
+    #     for j in gam:
+    #         opt = optimise(grads['ridge'], np.zeros(degree), i, j, num_iters = max_iters, lasso_bool=False)
+    #         if len(opt) > max_iters:
+    #             iters[i].append(np.nan)
+    #         else:
+    #             iters[i].append(len(opt))
+    # print(iters)
 
     # vi har funnet ut: alle konvergerer for minst en gamma-verdi, utenom rmsprop. 
     # Vi burde se om optimal gamma analytisk stemmer overens med den beste gamma-verdien numerisk.
@@ -71,7 +71,7 @@ def main(x, y):
     plt.gcf().canvas.draw()
     plt.tick_params(axis='x', which='both', labelsize=15)
     plt.tick_params(axis='y', which='both', labelsize=15)
-    plt.savefig("optimiser_algorithms_ridge_small_lambda.pdf", bbox_inches="tight")
+    plt.savefig("optimiser_algorithms_ols.pdf", bbox_inches="tight")
 
     # plt.figure(figsize = (8,6))
     # for idx, k in enumerate(methods):

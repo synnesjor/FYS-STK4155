@@ -16,7 +16,7 @@ def main():
     # Initialise values
     rng = np.random.default_rng(2026)
     n = 100
-    sigma = 0.01                                  # noise level: explore it!
+    sigma = 0.1                                  # noise level: explore it!
     x = np.sort(rng.uniform(-1, 1, n))
     y = runge(x) + rng.normal(0, sigma, n)
 

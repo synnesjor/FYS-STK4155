@@ -12,7 +12,7 @@ def main(x, y):
     grad_lasso = lambda th: gradient_lasso(th, x, y, lam=lam, degree=degree)
 
 
-    methods = ("momentum", "adagrad", "rmsprop", "adam","plain")
+    methods = ("plain", "momentum", "adagrad", "rmsprop", "adam")
     # methods = ("plain", "momentum")
     # methods = ("adam")
     max_iters = 100000

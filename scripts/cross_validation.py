@@ -32,7 +32,7 @@ def main(x, y):
 
         print("The optimal polynomial degree is", np.arange(polynomial_degree)[np.where(mse == np.min(mse))])
         plt.plot(np.arange(polynomial_degree), mse, "o-", label = f"k-fold = {k}", color = colours[idx])
-        plt.xlabel("polynomial degree", fontsize = 16)
+        plt.xlabel("Polynomial degree", fontsize = 16)
         plt.yscale("log")
         plt.ylabel("MSE", fontsize = 16)
         plt.tick_params(axis='x', labelsize=16)
@@ -63,7 +63,7 @@ def main(x, y):
         plt.plot((our_logspace), cv_mse, "--", color = colours[i], label = f"k-fold = {each}")
         plt.plot((our_logspace[np.where(cv_mse == np.min(cv_mse))][0]), np.min(cv_mse), "o", color = colours[i+3], label = rf"optimal $\lambda$ for k-fold {each}")
         plt.xscale("log")
-        plt.xlabel(rf"penalty parameter $\lambda$", fontsize = "18")
+        plt.xlabel(rf"Penalty parameter $\lambda$", fontsize = "18")
         plt.ylabel("MSE", fontsize = "18")
         plt.xticks(size = "16")
         plt.yticks(size = "16")

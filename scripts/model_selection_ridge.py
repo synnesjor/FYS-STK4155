@@ -77,7 +77,7 @@ def main(x, y):
         plt.xlabel("Polynomial degree", fontsize=14)
         plt.ylabel("MSE decomposition", fontsize=14)
         plt.legend(loc="upper left", fontsize=13)
-        plt.xticks(degrees, size=12)
+        plt.xticks(degrees, size=13)
         plt.yticks(size=14)
         plt.grid(alpha=0.4)
         plt.tight_layout()

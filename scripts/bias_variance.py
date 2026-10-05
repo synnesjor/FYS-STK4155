@@ -42,7 +42,7 @@ def main(x, y):
     plt.plot(degrees, variance, "d-", color = "#9aab64", label="variance")
 
     plt.yscale("log")
-    plt.xlabel("polynomial degree", fontsize = "14")
+    plt.xlabel("Polynomial degree", fontsize = "14")
     plt.ylabel("MSE decomposition", fontsize = "14")
     # plt.xlim(-1, 14)
     # plt.ylim(3*10**-3, 3*10**1)

@@ -70,7 +70,7 @@ def main(x, y):
 
     plt.plot(degrees[14:], filtered_theta[14], "o", label="$\\theta_{15}$")
     plt.xlabel(f"Polynomial degree", fontsize = 22)
-    plt.ylabel(f"$\\theta$", fontsize = 22)
+    plt.ylabel(f"Polynomial coefficient $\\theta$", fontsize = 22)
     plt.xticks(size = 18)
     plt.yticks(size = 18)
     plt.grid(alpha = 0.4)
