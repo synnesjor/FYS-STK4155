@@ -65,6 +65,15 @@ def gradient_batch(theta, X, y, lam=0.0):
     return (2.0 / n) * X.T @ (X @ theta - y) + 2.0 * lam * theta
 
 def gradient_lasso(theta, x, y, degree, lam=0.0):
+    """ 
+    LLM ASSISTED: 
+    
+    Tools: Chat GPT and UiO GPT (September / October 2026) 
+    Role: The LLM took in a function we had written, and performed debugging and suggested solutions. We have performed tests 
+          against our Ridge and OLS gradient functions to verify the LLM solution, and we have concluded that we have 
+          implemented the function correctly.
+    """
+
     X = rescale_design_matrix(x, degree)
     n = len(y)
 

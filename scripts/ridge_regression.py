@@ -1,3 +1,11 @@
+""" 
+    LLM ASSISTED: 
+    
+    Tools: Chat GPT and UiO GPT (September / October 2026) 
+    Role: The LLM has fixed bugs and written short snippets of code to help with formatting plots.
+"""
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 from src.utils import *
