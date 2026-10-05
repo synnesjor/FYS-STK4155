@@ -16,7 +16,7 @@ def main(x, y):
 
     colours = ["#aa333c", "#99d2fb", "#9aab64", "#21534c", "#ef9d2c", "#B0a6df"]
 
-    plt.figure(figsize = (8,5.5))
+    plt.figure(figsize = (10.5,6.5))
     for idx, k in enumerate([5,10, n]):
         lam = 0
         polynomial_degree = 16
@@ -32,14 +32,17 @@ def main(x, y):
 
         print("The optimal polynomial degree is", np.arange(polynomial_degree)[np.where(mse == np.min(mse))])
         plt.plot(np.arange(polynomial_degree), mse, "o-", label = f"k-fold = {k}", color = colours[idx])
-        plt.xlabel("Polynomial degree", fontsize = 16)
+        plt.xlabel("Polynomial degree", fontsize = 18)
         plt.yscale("log")
-        plt.ylabel("MSE", fontsize = 16)
-        plt.tick_params(axis='x', labelsize=16)
-        plt.tick_params(axis='y', labelsize=16)
-        plt.gca().yaxis.get_offset_text().set_fontsize(16)
-        plt.legend(fontsize = "14")
+        plt.ylabel("MSE", fontsize = 18)
+        # plt.tick_params(axis='x', labelsize=16)
+        # plt.tick_params(axis='y', labelsize=16)
+        # plt.gca().yaxis.get_offset_text().set_fontsize(16)
+        plt.legend(fontsize = "16")
         plt.grid(alpha = 0.4)
+        plt.gcf().canvas.draw()
+        plt.tick_params(axis='x', which='both', labelsize=17)
+        plt.tick_params(axis='y', which='both', labelsize=15)
         plt.savefig('figures/cross_validation_ols.pdf', dpi=300)
 
 
@@ -49,28 +52,28 @@ def main(x, y):
 
     optimal_lambdas = []
 
-    plt.figure(figsize = (8.5,6))
-    for i, each in enumerate(k):
-        cv_mse = np.zeros(len(our_logspace))
-        for idx, lam in enumerate(our_logspace):
-            kfold = KFold(n_splits = each, shuffle=True, random_state=2026)
-            model = make_pipeline(PolynomialFeatures(degree = 6), StandardScaler(), Ridge(alpha = lam)) #this is what actually makes the fit
-            scores = -cross_val_score(model, x, y, cv = kfold, scoring="neg_mean_squared_error")
-            cv_mse[idx] = np.mean(scores)
+    # plt.figure(figsize = (8.5,6))
+    # for i, each in enumerate(k):
+    #     cv_mse = np.zeros(len(our_logspace))
+    #     for idx, lam in enumerate(our_logspace):
+    #         kfold = KFold(n_splits = each, shuffle=True, random_state=2026)
+    #         model = make_pipeline(PolynomialFeatures(degree = 6), StandardScaler(), Ridge(alpha = lam)) #this is what actually makes the fit
+    #         scores = -cross_val_score(model, x, y, cv = kfold, scoring="neg_mean_squared_error")
+    #         cv_mse[idx] = np.mean(scores)
 
-        optimal_lambdas.append(our_logspace[np.where(cv_mse == np.min(cv_mse))][0])
+    #     optimal_lambdas.append(our_logspace[np.where(cv_mse == np.min(cv_mse))][0])
 
-        plt.plot((our_logspace), cv_mse, "--", color = colours[i], label = f"k-fold = {each}")
-        plt.plot((our_logspace[np.where(cv_mse == np.min(cv_mse))][0]), np.min(cv_mse), "o", color = colours[i+3], label = rf"optimal $\lambda$ for k-fold {each}")
-        plt.xscale("log")
-        plt.xlabel(rf"Penalty parameter $\lambda$", fontsize = "18")
-        plt.ylabel("MSE", fontsize = "18")
-        plt.xticks(size = "16")
-        plt.yticks(size = "16")
-        plt.legend(fontsize = 16)
-        plt.grid(alpha = 0.4)
-        print("The optimal lambda (minimum MSE) is a lambda value of", our_logspace[np.where(cv_mse == np.min(cv_mse))][0])
-    plt.savefig(f"figures/cross_validation_ridge.pdf")
+    #     plt.plot((our_logspace), cv_mse, "--", color = colours[i], label = f"k-fold = {each}")
+    #     plt.plot((our_logspace[np.where(cv_mse == np.min(cv_mse))][0]), np.min(cv_mse), "o", color = colours[i+3], label = rf"optimal $\lambda$ for k-fold {each}")
+    #     plt.xscale("log")
+    #     plt.xlabel(rf"Penalty parameter $\lambda$", fontsize = "18")
+    #     plt.ylabel("MSE", fontsize = "18")
+    #     plt.xticks(size = "16")
+    #     plt.yticks(size = "16")
+    #     plt.legend(fontsize = 16)
+    #     plt.grid(alpha = 0.4)
+    #     print("The optimal lambda (minimum MSE) is a lambda value of", our_logspace[np.where(cv_mse == np.min(cv_mse))][0])
+    # plt.savefig(f"figures/cross_validation_ridge.pdf")
 
         # print(np.where(cv_mse == np.min(cv_mse)))
 

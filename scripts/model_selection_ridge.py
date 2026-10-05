@@ -73,7 +73,7 @@ def main(x, y):
         plt.plot(degrees, bias, "s-", color=colors[1], label=r"bias$^2$ (+ $\sigma^2$)",)
         plt.plot(degrees, variance, "d-", color=colors[2], label="variance")
         plt.yscale("log")
-        plt.title(f"Ridge MSE Decomposition ({folds}-Fold CV)")
+        # plt.title(f"Ridge MSE Decomposition ({folds}-Fold CV)")
         plt.xlabel("Polynomial degree", fontsize=14)
         plt.ylabel("MSE decomposition", fontsize=14)
         plt.legend(loc="upper left", fontsize=13)
@@ -81,6 +81,6 @@ def main(x, y):
         plt.yticks(size=14)
         plt.grid(alpha=0.4)
         plt.tight_layout()
-        plt.savefig(f"figures/MSE_decomposition_ridge_{folds}fold.pdf", dpi=300)
+        # plt.savefig(f"figures/MSE_decomposition_ridge_{folds}fold_n250.pdf", dpi=300)
         plt.close()
     return optimal_parameters
