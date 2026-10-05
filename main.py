@@ -15,8 +15,8 @@ def runge(x):
 def main():
     # Initialise values
     rng = np.random.default_rng(2026)
-    n = 100
-    sigma = 0.1                                  # noise level: explore it!
+    n = 100 # also choose 250
+    sigma = 0.1 # also choose 0.01
     x = np.sort(rng.uniform(-1, 1, n))
     y = runge(x) + rng.normal(0, sigma, n)
 
@@ -33,8 +33,14 @@ def main():
     # gradient_descent.main(x, y, n, rng) # runs part 1e
     # optimisers.main(x, y) # runs part 1f
     # lasso.main(x, y) # runs part 1g
-    # stochastic_gradient_descent.main(x, y)
-    plot_estimated_runge.main(x, y, y_offset=y_offset)
+    # stochastic_gradient_descent.main(x, y) # runs part 1h
+    
+    # Scripts for part 1i
+
+    # model_selection_ols.main(x, y) 
+    # model_selection_ridge.main(x, y) 
+    # model_selection_lasso.main(x, y) 
+    # plot_estimated_runge.main(x, y, y_offset=y_offset)
 
     # plt.show()
 if __name__ == "__main__":

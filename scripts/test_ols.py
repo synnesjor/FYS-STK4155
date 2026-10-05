@@ -79,3 +79,4 @@ def main(x, y):
 
     print("Theta values for OLS:")
     print(theta_values[:,4])
+

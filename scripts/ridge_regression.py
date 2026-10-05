@@ -34,9 +34,8 @@ def main(x, y):
 
     print("Theta values for Ridge:")
     for each in ridge_values:
-        print(each)
+        print(each[0]) # print first value of each theta, which corresponds to the first lambda value
 
     # vi sammenlikner start theta-verdier for OLS og Ridge for å sjekke at det gir mening, vi burde starte på ca samme sted siden vi begynner med en liter verdi for lambda. 
     # deretter skal vi se hvordan theta verdiene for ridge utvikler seg, spesielt med tanke på hvordan de avhenger av lambda. 
 
-    print(ridge_values)
