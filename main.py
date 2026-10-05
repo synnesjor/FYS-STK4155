@@ -32,7 +32,7 @@ def main():
     # cross_validation.main(x, y) # runs part 1d
     # gradient_descent.main(x, y, n, rng) # runs part 1e
     # optimisers.main(x, y) # runs part 1f
-    # lasso.main(x, y) # runs part 1g
+    lasso.main(x, y) # runs part 1g
     # stochastic_gradient_descent.main(x, y) # runs part 1h
     
     # Scripts for part 1i

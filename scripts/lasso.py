@@ -12,7 +12,7 @@ def main(x, y):
     grad_lasso = lambda th: gradient_lasso(th, x, y, lam=lam, degree=degree)
 
 
-    methods = ("plain", "momentum", "adagrad", "rmsprop", "adam")
+    methods = ("momentum", "adagrad", "rmsprop", "adam", "plain")
     # methods = ("plain", "momentum")
     # methods = ("adam")
     max_iters = 100000
@@ -40,7 +40,7 @@ def main(x, y):
         plt.rcParams['ytick.labelsize'] = 16
 
         plt.xlabel("Iterations", fontsize = 18)
-        plt.ylabel("Lasso objective", fontsize = 18)
+        plt.ylabel("Loss function", fontsize = 18)
 
         plt.yscale("log")
         plt.legend(fontsize=12)
