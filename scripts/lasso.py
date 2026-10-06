@@ -2,7 +2,8 @@
     LLM ASSISTED: 
     
     Tools: Chat GPT and UiO GPT (September / October 2026) 
-    Role: The LLM has fixed bugs and written short snippets of code to help with formatting plots.
+    Role: The LLM has fixed bugs and written short snippets of code to help with formatting plots. It suggested the change of
+    tolerance definition, which have been used through our the Lasso analysis.
 """
 
 
