@@ -70,6 +70,16 @@ def accuracy(predictions, targets):
     """Fraction of rows whose largest predicted probability sits in the correct class."""
     return accuracy_score(np.argmax(np.asarray(predictions), axis=0), np.argmax(np.asarray(targets)))
 
+# i b så ber de om å bruke bare mse - accuracy er ett klassifikasjon problem og vi gjør regression her
+def train_network(inputs, layers, activation_funcs, targets, gamma=1.0, epochs=300):
+    history = []
+    for epoch in range(epochs):
+        layers_grad = gradient_func(inputs, layers, activation_funcs, targets)
+        layers = [(W - gamma*dW, b - gamma*db) for (W, b), (dW, db) in zip(layers, layers_grad)]
+        if epoch % 50 == 0 or epoch == epochs - 1:
+            predictions = feed_forward_batch(inputs, layers, activation_funcs)
+            history.append((epoch, float(cost(inputs, layers, activation_funcs, targets)), mse(predictions, targets)))
+    return layers, history
 
 inputs = np.random.uniform(-1,1,100)
 
@@ -79,10 +89,6 @@ activation_funcs = [sigmoid, sigmoid, softmax]
 
 layers_batch = create_layers_batch(network_input_size, layer_output_sizes)
 
-
-# feed_forward_batch(inputs, layers_batch, activation_funcs)
-
-
 predictions = feed_forward_batch(inputs, layers_batch, activation_funcs)
 
 targets = runge_1d(inputs)
@@ -91,19 +97,8 @@ print(targets)
 gradient_func = jax.grad(cost, argnums=1)  # Taking the gradient wrt. the second input to the cost function, i.e. the layers
 layers_grad = gradient_func(inputs, layers_batch, activation_funcs, targets) 
 
-def train_network(inputs, layers, activation_funcs, targets, gamma=1.0, epochs=300):
-    history = []
-    for epoch in range(epochs):
-        layers_grad = gradient_func(inputs, layers, activation_funcs, targets)
-        layers = [(W - gamma*dW, b - gamma*db) for (W, b), (dW, db) in zip(layers, layers_grad)]
-        if epoch % 50 == 0 or epoch == epochs - 1:
-            predictions = feed_forward_batch(inputs, layers, activation_funcs)
-            history.append((epoch, float(cost(inputs, layers, activation_funcs, targets)), accuracy(predictions, targets)))
-    return layers, history
-
 trained, history = train_network(inputs, layers_batch, activation_funcs, targets)
-for epoch, c, acc in history:
-    print(f"epoch {epoch:4d}: cost {c:.4f}  accuracy {acc:.4f}")
-
+for epoch, c, mse in history:
+    print(f"epoch {epoch:4d}: cost {c:.4f}  mse {mse:.4f}")
 
 
