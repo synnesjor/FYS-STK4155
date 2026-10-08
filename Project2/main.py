@@ -8,10 +8,11 @@ from sklearn.metrics import accuracy_score
 
 rng = np.random.default_rng()
 
-
 def runge_1d(x):
     return 1 / (1+(25*x**2))
 
+def no_activation_func(z):
+    return z
 
 def sigmoid(z):
     return 1 / (1 + jnp.exp(-z))
@@ -22,8 +23,8 @@ def ReLU(z):
 def softmax(z):
     """Compute softmax values for each set of scores in the rows of the matrix z.
     Used with batched input data: one row of scores per sample."""
-    e_z = jnp.exp(z - jnp.max(z, axis=0, keepdims=False))
-    return e_z / jnp.sum(e_z, axis=0, keepdims=True)
+    e_z = jnp.exp(z - jnp.max(z, axis=1, keepdims=False))
+    return e_z / jnp.sum(e_z, axis=1, keepdims=True)
 
 
 def softmax_vec(z):
@@ -68,10 +69,10 @@ def feed_forward_batch(inputs, layers, activation_funcs):
 
 def accuracy(predictions, targets):
     """Fraction of rows whose largest predicted probability sits in the correct class."""
-    return accuracy_score(np.argmax(np.asarray(predictions), axis=0), np.argmax(np.asarray(targets)))
+    return accuracy_score(np.argmax(np.asarray(predictions), axis=1), np.argmax(np.asarray(targets)))
 
 # i b så ber de om å bruke bare mse - accuracy er ett klassifikasjon problem og vi gjør regression her
-def train_network(inputs, layers, activation_funcs, targets, gamma=1.0, epochs=300):
+def train_network(inputs, layers, activation_funcs, targets, gamma=0.1, epochs=300):
     history = []
     for epoch in range(epochs):
         layers_grad = gradient_func(inputs, layers, activation_funcs, targets)
@@ -81,11 +82,12 @@ def train_network(inputs, layers, activation_funcs, targets, gamma=1.0, epochs=3
             history.append((epoch, float(cost(inputs, layers, activation_funcs, targets)), mse(predictions, targets)))
     return layers, history
 
-inputs = np.random.uniform(-1,1,100)
+inputs = np.random.uniform(-1,1,100).reshape(-1, 1)
 
-network_input_size = len(inputs)
+network_input_size = inputs.shape[1]
 layer_output_sizes = [12, 10, 1]
-activation_funcs = [sigmoid, sigmoid, softmax]
+#activation_funcs = [sigmoid, sigmoid, softmax]
+activation_funcs = [sigmoid, sigmoid, no_activation_func]
 
 layers_batch = create_layers_batch(network_input_size, layer_output_sizes)
 
