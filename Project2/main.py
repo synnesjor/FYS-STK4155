@@ -5,6 +5,8 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import accuracy_score
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
 
 rng = np.random.default_rng()
 
@@ -85,7 +87,7 @@ def train_network(inputs, layers, activation_funcs, targets, gamma=0.1, epochs=3
 inputs = np.random.uniform(-1,1,100).reshape(-1, 1)
 
 network_input_size = inputs.shape[1]
-layer_output_sizes = [12, 10, 1]
+layer_output_sizes = [100, 100, 1]
 #activation_funcs = [sigmoid, sigmoid, softmax]
 activation_funcs = [sigmoid, sigmoid, no_activation_func]
 
@@ -104,3 +106,38 @@ for epoch, c, mse in history:
     print(f"epoch {epoch:4d}: cost {c:.4f}  mse {mse:.4f}")
 
 
+"""
+Comparison to OLS regression values.
+"""
+
+def design_matrix(x, degree, intercept = False):
+    start = 0 if intercept else 1
+    return np.vstack([x**p for p in range(start, degree + 1)]).T
+
+def rescale_design_matrix(x, degree):
+    X = design_matrix(x, degree)
+    X_mean = X.mean(axis=0)
+    X_std = X.std(axis=0)
+    X_std[X_std == 0] = 1  # safeguard to avoid division by zero for constant features
+    X_norm = (X - X_mean) / X_std
+    return X_norm
+
+def ols(X, y):
+    U, s, Vt = np.linalg.svd(X, full_matrices=False)
+    return Vt.T @ ((U.T @ y) / s)
+
+def calculate_mse(x, y, degree):
+    X = rescale_design_matrix(x, degree)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state = 2026)
+    model = LinearRegression(fit_intercept=False)
+    model.fit(X_train, y_train)
+    y_tilde = model.predict(X)
+    y_tilde_test = model.predict(X_test)
+    y_tilde_train = model.predict(X_train)
+    mean_squared_error_train = mean_squared_error(y_train, model.predict(X_train))
+    mean_squared_error_test = mean_squared_error(y_test, model.predict(X_test))
+    theta = ols(X_test, y_test)
+    return mean_squared_error_train, mean_squared_error_test, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test
+
+#X = rescale_design_matrix(inputs,deg=6)
+mse_train, mse_test, theta,  y_tilde, y_tilde_test, y_tilde_train, y_train, y_test = calculate_mse(inputs, targets, degree=6)
