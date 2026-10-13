@@ -8,7 +8,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 
-rng = np.random.default_rng()
+rng = np.random.default_rng(seed = 2026)
 
 def runge_1d(x):
     return 1 / (1+(25*x**2))
@@ -74,7 +74,7 @@ def accuracy(predictions, targets):
     return accuracy_score(np.argmax(np.asarray(predictions), axis=1), np.argmax(np.asarray(targets)))
 
 # i b så ber de om å bruke bare mse - accuracy er ett klassifikasjon problem og vi gjør regression her
-def train_network(inputs, layers, activation_funcs, targets, gamma=0.1, epochs=300):
+def train_network(inputs, layers, activation_funcs, targets, gamma=0.1, epochs=1000):
     history = []
     for epoch in range(epochs):
         layers_grad = gradient_func(inputs, layers, activation_funcs, targets)
@@ -82,28 +82,43 @@ def train_network(inputs, layers, activation_funcs, targets, gamma=0.1, epochs=3
         if epoch % 50 == 0 or epoch == epochs - 1:
             predictions = feed_forward_batch(inputs, layers, activation_funcs)
             history.append((epoch, float(cost(inputs, layers, activation_funcs, targets)), mse(predictions, targets)))
-    return layers, history
+    return layers, history, predictions
+
+def inputs_scale(x):
+    X = x
+    X_mean = X.mean()
+    X_std = X.std()
+    # X_std[X_std == 0] = 1  # safeguard to avoid division by zero for constant features
+    X_norm = (X - X_mean) / X_std
+    return X_norm
 
 inputs = np.random.uniform(-1,1,100).reshape(-1, 1)
+print(type(inputs))
+inputs_scaled = inputs_scale(inputs)
 
-network_input_size = inputs.shape[1]
+
+# print(np.mean(inputs_scaled))
+# print(np.std(inputs_scaled))
+
+network_input_size = inputs_scaled.shape[1]
 layer_output_sizes = [100, 100, 1]
 #activation_funcs = [sigmoid, sigmoid, softmax]
 activation_funcs = [sigmoid, sigmoid, no_activation_func]
 
 layers_batch = create_layers_batch(network_input_size, layer_output_sizes)
 
-predictions = feed_forward_batch(inputs, layers_batch, activation_funcs)
+predictions = feed_forward_batch(inputs_scaled, layers_batch, activation_funcs)
 
-targets = runge_1d(inputs)
-print(targets)
+targets = runge_1d(inputs_scaled)
+targets_centered = targets - np.mean(targets)
+# print(targets)
 
 gradient_func = jax.grad(cost, argnums=1)  # Taking the gradient wrt. the second input to the cost function, i.e. the layers
-layers_grad = gradient_func(inputs, layers_batch, activation_funcs, targets) 
+layers_grad = gradient_func(inputs_scaled, layers_batch, activation_funcs, targets) 
 
-trained, history = train_network(inputs, layers_batch, activation_funcs, targets)
-for epoch, c, mse in history:
-    print(f"epoch {epoch:4d}: cost {c:.4f}  mse {mse:.4f}")
+trained, history, preds = train_network(inputs_scaled, layers_batch, activation_funcs, targets)
+# for epoch, c, mse in history:
+#     print(f"epoch {epoch:4d}: cost {c:.4f}  mse {mse:.4f}")
 
 
 """
@@ -139,5 +154,19 @@ def calculate_mse(x, y, degree):
     theta = ols(X_test, y_test)
     return mean_squared_error_train, mean_squared_error_test, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test
 
+# print(np.shape(targets_centered))
+# print(np.shape(inputs))
+
 #X = rescale_design_matrix(inputs,deg=6)
-mse_train, mse_test, theta,  y_tilde, y_tilde_test, y_tilde_train, y_train, y_test = calculate_mse(inputs, targets, degree=6)
+mse_train, mse_test, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test = calculate_mse(inputs_scaled[:,0], targets_centered[:,0], degree=6)
+
+
+
+
+# print(preds)
+
+plt.figure()
+plt.plot(inputs_scaled, preds, "o", color = "#ff46a2")
+plt.plot(inputs_scaled, y_tilde, "o", color = "#2da9cf" )
+plt.show()
+
