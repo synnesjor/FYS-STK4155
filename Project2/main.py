@@ -47,7 +47,7 @@ def create_layers_batch(network_input_size, layer_output_sizes):
     i_size = network_input_size
     for layer_output_size in layer_output_sizes:
         W = rng.normal(0, 1/np.sqrt(i_size), (i_size, layer_output_size))
-        print(np.shape(W))
+        # print(np.shape(W))
         b = np.zeros(layer_output_size) + 0.01
         layers.append((W, b))
 
@@ -155,23 +155,23 @@ def optimiser_step(method, param, g, state, t, gamma, beta=0.9, rho=0.99,
         return param - gamma * m_hat / (np.sqrt(r_hat) + eps), state   # Eq. (4.55)
     raise ValueError(f"unknown method {method}")
 
-def optimise(grad, theta0, method, gamma, num_iters = 100, tol = 1e-6, lasso_bool=False, **kw):
-    """Run one optimiser from theta0 with the full gradient; returns all iterates."""
-    theta, state = np.array(theta0, dtype=float), {}
-    history = [theta.copy()]
-    for t in range(1, num_iters + 1):
-        g = grad(theta)
-        theta_old = theta.copy()
-        theta, state = optimiser_step(method, theta, g, state, t, gamma, **kw)
-        history.append(theta.copy())
-        if lasso_bool:
-            # Check for convergence based on the change in theta
-            if np.linalg.norm(theta - theta_old) < tol:
-                break
-        elif np.linalg.norm(g) < tol:
-            break
-    history = np.array(history)
-    return history
+# def optimise(grad, theta0, method, gamma, num_iters = 100, tol = 1e-6, lasso_bool=False, **kw):
+#     """Run one optimiser from theta0 with the full gradient; returns all iterates."""
+#     theta, state = np.array(theta0, dtype=float), {}
+#     history = [theta.copy()]
+#     for t in range(1, num_iters + 1):
+#         g = grad(theta)
+#         theta_old = theta.copy()
+#         theta, state = optimiser_step(method, theta, g, state, t, gamma, **kw)
+#         history.append(theta.copy())
+#         if lasso_bool:
+#             # Check for convergence based on the change in theta
+#             if np.linalg.norm(theta - theta_old) < tol:
+#                 break
+#         elif np.linalg.norm(g) < tol:
+#             break
+#     history = np.array(history)
+#     return history
 
 
 inputs = np.random.uniform(-1,1,100).reshape(-1, 1)
@@ -195,15 +195,19 @@ predictions_100 = feed_forward_batch(inputs_scaled, layers_batch_100, activation
 layers_grad_100 = gradient_func(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered)
 # trained_100, history_100, preds_100 = train_network(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered)
 
-colours = ["#aa333c", "#99d2fb", "#9aab64", "#21534c", "#ef9d2c", "#B0a6df"]
+colours = ["#aa333c", "#99d2fb", "#9aab64", "#21534c", "#ef9d2c", "#B0a6df", "#2da9cf", "#ff46a2", "#e5194f", "#8f1cab", "#2da9cf", "#3ba336"]
 learning_rates = [0.001, 0.01, 0.1, 0.3]
 plt.figure()
 for idx, each in enumerate(learning_rates):
+    print(f"For a learning rate gamma = {each}:")
+    print("Doing plain")
     trained_plain, history_plain, predictions_plain = train_network_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="plain")
+    print("Doing adam")
     trained_plain_adam, history_plain_adam, predictions_plain_adam = train_network_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="adam")
-    plt.plot(inputs_scaled, predictions_plain, color = colours[idx], label = "plain")
-    plt.plot(inputs_scaled, predictions_plain_adam, color = colours[idx+3], label = "adam")
+    plt.plot(inputs_scaled, predictions_plain, "o", color = colours[idx], label = f"plain {each}", markersize = 2)
+    plt.plot(inputs_scaled, predictions_plain_adam, "o", color = colours[idx+5], label = f"adam {each}", markersize = 2)
 plt.plot(inputs_scaled, targets_centered,  "o", color = "#3ba336", label = "True function", markersize = 2)
+plt.legend()
 plt.show()
 # print(predictions_plain)
 # for epoch, c, mse in history_plain:
@@ -264,12 +268,12 @@ mse_train, mse_test, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_tes
 
 # print(preds)
 
-plt.figure()
-# plt.plot(inputs_scaled, preds_100, "o", color = "#ff46a2", label = "Neural network size 100", markersize = 2)
-# plt.plot(inputs_scaled, preds_50, "o", color = "#8f1cab", label = "Neural network size 50", markersize = 2)
-plt.plot(inputs_scaled, predictions_plain, "o", color = "#e5194f", label = "Neural network plain gradient decent layer size 100", markersize = 2)
-plt.plot(inputs_scaled, y_tilde, "o", color = "#2da9cf", label = "Polyomial fit", markersize = 2)
-plt.plot(inputs_scaled, targets_centered,  "o", color = "#3ba336", label = "True function", markersize = 2)
-plt.legend()
-plt.show()
+# plt.figure()
+# # plt.plot(inputs_scaled, preds_100, "o", color = "#ff46a2", label = "Neural network size 100", markersize = 2)
+# # plt.plot(inputs_scaled, preds_50, "o", color = "#8f1cab", label = "Neural network size 50", markersize = 2)
+# plt.plot(inputs_scaled, predictions_plain, "o", color = "#e5194f", label = "Neural network plain gradient decent layer size 100", markersize = 2)
+# plt.plot(inputs_scaled, y_tilde, "o", color = "#2da9cf", label = "Polyomial fit", markersize = 2)
+# plt.plot(inputs_scaled, targets_centered,  "o", color = "#3ba336", label = "True function", markersize = 2)
+# plt.legend()
+# plt.show()
 
