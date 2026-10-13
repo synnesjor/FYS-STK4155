@@ -92,6 +92,90 @@ def inputs_scale(x):
     X_norm = (X - X_mean) / X_std
     return X_norm
 
+
+def gradient_batch(theta, X, y, lam=0.0):
+    """Eqs. (4.13) and (4.17): the gradient of (1/n)||X theta - y||^2 + lambda theta^T theta."""
+    n = len(y)
+    return (2.0 / n) * X.T @ (X @ theta - y) + 2.0 * lam * theta
+
+def optimiser_step(method, theta, g, state, t, gamma, beta=0.9, rho=0.99,
+                beta1=0.9, beta2=0.999, eps=1e-6):
+    """One update of theta from the gradient g at step t (t = 1, 2, ...), Eqs. (4.10), (4.28),
+    (4.42)-(4.45), (4.47)-(4.48) and (4.51)-(4.55).  state carries the running quantities."""
+    if method == "plain":
+        return theta - gamma * g, state
+    if method == "momentum":
+        v = beta * state.get("v", 0.0) + gamma * g               # Eq. (4.28)
+        state["v"] = v
+        return theta - v, state
+    if method == "adagrad":
+        r = state.get("r", 0.0) + g * g                           # Eq. (4.42)
+        state["r"] = r
+        return theta - gamma * g / (np.sqrt(r) + eps), state      # Eq. (4.45)
+    if method == "rmsprop":
+        r = rho * state.get("r", 0.0) + (1.0 - rho) * g * g       # Eq. (4.47)
+        state["r"] = r
+        return theta - gamma * g / (np.sqrt(r) + eps), state      # Eq. (4.48)
+    if method == "adam":
+        m = beta1 * state.get("m", 0.0) + (1.0 - beta1) * g       # Eq. (4.51)
+        r = beta2 * state.get("r", 0.0) + (1.0 - beta2) * g * g   # Eq. (4.52)
+        state["m"], state["r"] = m, r
+        m_hat = m / (1.0 - beta1**t)                              # Eq. (4.54)
+        r_hat = r / (1.0 - beta2**t)
+        return theta - gamma * m_hat / (np.sqrt(r_hat) + eps), state   # Eq. (4.55)
+    raise ValueError(f"unknown method {method}")
+
+def optimise(grad, theta0, method, gamma, num_iters = 100, tol = 1e-6, lasso_bool=False, **kw):
+    """Run one optimiser from theta0 with the full gradient; returns all iterates."""
+    theta, state = np.array(theta0, dtype=float), {}
+    history = [theta.copy()]
+    for t in range(1, num_iters + 1):
+        g = grad(theta)
+        theta_old = theta.copy()
+        theta, state = optimiser_step(method, theta, g, state, t, gamma, **kw)
+        history.append(theta.copy())
+        if lasso_bool:
+            # Check for convergence based on the change in theta
+            if np.linalg.norm(theta - theta_old) < tol:
+                break
+        elif np.linalg.norm(g) < tol:
+            break
+    history = np.array(history)
+    return history
+
+def make_batches(n, batch_size, rng):
+    """Shuffle the indices and split them into minibatches."""
+    idx = rng.permutation(n)
+    return [idx[i:i + batch_size] for i in range(0, n, batch_size)]
+
+def step_length(t, t0, t1):
+    """The schedule of Eq. (4.40)."""
+    return t0 / (t + t1)
+
+
+def stochastic_gradient_descent(X, y, method="plain", n_epochs=50, batch_size=5, gamma=0.1, schedule=None, lam=0.0, seed=2026, tol=1e-6, **kw,):
+    """Minibatch SGD, Eq. (4.34), with any optimiser. schedule=(t0, t1) replaces gamma by Eq. (4.40).
+    Returns the iterate after every epoch."""
+    rng = np.random.default_rng(seed)
+    n, p = X.shape
+    theta, state, t = np.zeros(p), {}, 0
+    history = [theta.copy()]
+    
+    for epoch in range(n_epochs):
+        theta_old = theta.copy()
+        for batch in make_batches(n, batch_size, rng):
+            t += 1
+            g = gradient_batch(theta, X[batch], y[batch], lam)                                    # the gradient of the cost on this minibatch
+            gamma_t = gamma if schedule is None else step_length(t, *schedule)                           # constant, or the schedule
+            theta, state = optimiser_step(method, theta, g, state, t, gamma_t, **kw)
+        if np.linalg.norm(theta - theta_old) < tol:
+            break
+        if np.linalg.norm(theta - theta_old)>1e2: # breaks if theta explodes
+            break
+        history.append(theta.copy())
+    return np.array(history)
+
+
 inputs = np.random.uniform(-1,1,100).reshape(-1, 1)
 print(type(inputs))
 inputs_scaled = inputs_scale(inputs)
@@ -102,21 +186,21 @@ inputs_scaled = inputs_scale(inputs)
 
 network_input_size = inputs_scaled.shape[1]
 layer_output_sizes = [100, 100, 1]
-#activation_funcs = [sigmoid, sigmoid, softmax]
+# activation_funcs = [sigmoid, sigmoid, softmax]
 activation_funcs = [sigmoid, sigmoid, no_activation_func]
 
 layers_batch = create_layers_batch(network_input_size, layer_output_sizes)
 
 predictions = feed_forward_batch(inputs_scaled, layers_batch, activation_funcs)
 
-targets = runge_1d(inputs_scaled)
+targets = runge_1d(inputs)
 targets_centered = targets - np.mean(targets)
 # print(targets)
 
 gradient_func = jax.grad(cost, argnums=1)  # Taking the gradient wrt. the second input to the cost function, i.e. the layers
-layers_grad = gradient_func(inputs_scaled, layers_batch, activation_funcs, targets) 
+layers_grad = gradient_func(inputs_scaled, layers_batch, activation_funcs, targets_centered) 
 
-trained, history, preds = train_network(inputs_scaled, layers_batch, activation_funcs, targets)
+trained, history, preds = train_network(inputs_scaled, layers_batch, activation_funcs, targets_centered)
 # for epoch, c, mse in history:
 #     print(f"epoch {epoch:4d}: cost {c:.4f}  mse {mse:.4f}")
 
@@ -162,11 +246,11 @@ mse_train, mse_test, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_tes
 
 
 
-
 # print(preds)
 
 plt.figure()
 plt.plot(inputs_scaled, preds, "o", color = "#ff46a2")
-plt.plot(inputs_scaled, y_tilde, "o", color = "#2da9cf" )
+# plt.plot(inputs_scaled, y_tilde, "o", color = "#2da9cf" )
+# plt.plot(inputs_scaled, targets_centered,  "o", color = "#3ba336" )
 plt.show()
 
