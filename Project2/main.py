@@ -86,7 +86,7 @@ def train_network(inputs, layers, activation_funcs, targets, gamma=0.1, epochs=1
             history.append((epoch, float(cost(inputs, layers, activation_funcs, targets)), mse(predictions, targets)))
     return layers, history, predictions
 
-def train_network_gradient(inputs, layers, activation_funcs, targets, gamma=0.01, epochs=10000, method="plain"):
+def train_network_gradient(inputs, layers, activation_funcs, targets, gamma=0.01, epochs=10000, method="plain", tol = 0):
     """
         LLM tag needed here
     """
@@ -115,6 +115,50 @@ def train_network_gradient(inputs, layers, activation_funcs, targets, gamma=0.01
             c = cost(inputs, layers, activation_funcs, targets)
             # acc = accuracy(predictions, targets)
             history.append((epoch, float(c), mse(predictions, targets)))
+
+            if np.abs(c[epoch]-c[epoch-1]) < tol: #this needs to be changed into a proper tolerance definition
+                print(f"Converged at epoch {epoch}: cost = {c:.6g}")
+                break
+
+    return layers, history, predictions
+
+def train_network_stochastic_gradient(inputs, layers, activation_funcs, targets, gamma=0.01, epochs=10000, method="plain", batch_size=5, tol=1e-6, seed=2026,
+    schedule=None):
+    """
+        LLM tag needed here
+    """
+    # Independent optimizer states for each weight and bias
+    states = [({"W": {}, "b": {}}, {"W": {}, "b": {}}) for W, b in layers]
+    history = []
+    t = 0
+    for epoch in range(epochs):
+        # Calculate gradients for the whole network
+        for batch in make_batches(len(inputs), batch_size, rng):
+            layers_grad = gradient_func(inputs[batch], layers, activation_funcs, targets[batch])
+        
+            new_layers = []
+            new_states = []
+
+            # Update each layer's weights and biases
+            for (W, b), (dW, db), (state_W, state_b) in zip(layers, layers_grad, states):
+                W, state_W = optimiser_step(method, W, dW, state_W,epoch + 1, gamma)
+                b, state_b = optimiser_step(method, b, db, state_b,epoch + 1, gamma)
+                new_layers.append((W, b))
+                new_states.append((state_W, state_b))
+            layers = new_layers
+            states = new_states
+
+        # Record training progress
+        if epoch % 50 == 0 or epoch == epochs - 1: #find out what this does
+            predictions = feed_forward_batch(inputs, layers, activation_funcs)
+            c = cost(inputs, layers, activation_funcs, targets)
+            # acc = accuracy(predictions, targets)
+            history.append((epoch, float(c), mse(predictions, targets)))
+
+            if c < tol:
+                print(f"Converged at epoch {epoch}: cost = {c:.6g}")
+                break
+
 
     return layers, history, predictions
 
@@ -155,23 +199,59 @@ def optimiser_step(method, param, g, state, t, gamma, beta=0.9, rho=0.99,
         return param - gamma * m_hat / (np.sqrt(r_hat) + eps), state   # Eq. (4.55)
     raise ValueError(f"unknown method {method}")
 
-# def optimise(grad, theta0, method, gamma, num_iters = 100, tol = 1e-6, lasso_bool=False, **kw):
-#     """Run one optimiser from theta0 with the full gradient; returns all iterates."""
-#     theta, state = np.array(theta0, dtype=float), {}
-#     history = [theta.copy()]
-#     for t in range(1, num_iters + 1):
-#         g = grad(theta)
-#         theta_old = theta.copy()
-#         theta, state = optimiser_step(method, theta, g, state, t, gamma, **kw)
-#         history.append(theta.copy())
-#         if lasso_bool:
-#             # Check for convergence based on the change in theta
-#             if np.linalg.norm(theta - theta_old) < tol:
-#                 break
-#         elif np.linalg.norm(g) < tol:
-#             break
-#     history = np.array(history)
-#     return history
+def gradient_batch(theta, X, y, lam=0.0):
+    """Eqs. (4.13) and (4.17): the gradient of (1/n)||X theta - y||^2 + lambda theta^T theta."""
+    n = len(y)
+    return (2.0 / n) * X.T @ (X @ theta - y) + 2.0 * lam * theta
+
+def make_batches(n, batch_size, rng):
+    """Shuffle the indices and split them into minibatches."""
+    idx = rng.permutation(n)
+    return [idx[i:i + batch_size] for i in range(0, n, batch_size)]
+
+def step_length(t, t0, t1):
+    """The schedule of Eq. (4.40)."""
+    return t0 / (t + t1)
+
+def stochastic_gradient_descent(X, y, method="plain", n_epochs=50, batch_size=5, gamma=0.1, schedule=None, lam=0.0, seed=2026, tol=1e-6, **kw,):
+    """Minibatch SGD, Eq. (4.34), with any optimiser. schedule=(t0, t1) replaces gamma by Eq. (4.40).
+    Returns the iterate after every epoch."""
+    rng = np.random.default_rng(seed)
+    n, p = X.shape
+    param, state, t = np.zeros(p), {}, 0
+    history = [param.copy()]
+    
+    for epoch in range(n_epochs):
+        param_old = param.copy()
+        for batch in make_batches(n, batch_size, rng):
+            t += 1
+            g = gradient_batch(param, X[batch], y[batch], lam)                                    # the gradient of the cost on this minibatch
+            gamma_t = gamma if schedule is None else step_length(t, *schedule)                           # constant, or the schedule
+            param, state = optimiser_step(method, param, g, state, t, gamma_t, **kw)
+        if np.linalg.norm(param - param_old) < tol:
+            break
+        if np.linalg.norm(param - param_old)>1e2: # breaks if param explodes
+            break
+        history.append(param.copy())
+    return np.array(history)
+
+def optimise(grad, theta0, method, gamma, num_iters = 100, tol = 1e-6, lasso_bool=False, **kw):
+    """Run one optimiser from theta0 with the full gradient; returns all iterates."""
+    theta, state = np.array(theta0, dtype=float), {}
+    history = [theta.copy()]
+    for t in range(1, num_iters + 1):
+        g = grad(theta)
+        theta_old = theta.copy()
+        theta, state = optimiser_step(method, theta, g, state, t, gamma, **kw)
+        history.append(theta.copy())
+        if lasso_bool:
+            # Check for convergence based on the change in theta
+            if np.linalg.norm(theta - theta_old) < tol:
+                break
+        elif np.linalg.norm(g) < tol:
+            break
+    history = np.array(history)
+    return history
 
 
 inputs = np.random.uniform(-1,1,100).reshape(-1, 1)
@@ -197,18 +277,47 @@ layers_grad_100 = gradient_func(inputs_scaled, layers_batch_100, activation_func
 
 colours = ["#aa333c", "#99d2fb", "#9aab64", "#21534c", "#ef9d2c", "#B0a6df", "#2da9cf", "#ff46a2", "#e5194f", "#8f1cab", "#2da9cf", "#3ba336"]
 learning_rates = [0.001, 0.01, 0.1, 0.3]
+
+# plt.figure()
+# for idx, each in enumerate(learning_rates):
+#     print(f"For a learning rate gamma = {each}:")
+#     print("Doing plain")
+#     trained_plain, history_plain, predictions_plain = train_network_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="plain")
+#     plt.plot(inputs_scaled, predictions_plain, "o", color = colours[idx], label = f"plain {each}", markersize = 2)
+# plt.plot(inputs_scale(np.linspace(0,1,10000)), runge_1d(inputs_scale(np.linspace(0,1,10000)))-np.mean(runge_1d(inputs_scale(np.linspace(0,1,len(inputs_scaled))))),  "-", color = "#3ba336", label = "True function", markersize = 2)
+# plt.legend()
+# plt.show()
+
 plt.figure()
 for idx, each in enumerate(learning_rates):
     print(f"For a learning rate gamma = {each}:")
     print("Doing plain")
-    trained_plain, history_plain, predictions_plain = train_network_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="plain")
-    print("Doing adam")
-    trained_plain_adam, history_plain_adam, predictions_plain_adam = train_network_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="adam")
+    trained_plain, history_plain, predictions_plain = train_network_stochastic_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="adam")
     plt.plot(inputs_scaled, predictions_plain, "o", color = colours[idx], label = f"plain {each}", markersize = 2)
-    plt.plot(inputs_scaled, predictions_plain_adam, "o", color = colours[idx+5], label = f"adam {each}", markersize = 2)
-plt.plot(inputs_scaled, targets_centered,  "o", color = "#3ba336", label = "True function", markersize = 2)
+plt.plot(inputs_scale(np.linspace(0,1,10000)), runge_1d(inputs_scale(np.linspace(0,1,10000)))-np.mean(runge_1d(inputs_scale(np.linspace(0,1,len(inputs_scaled))))),  "-", color = "#3ba336", label = "True function", markersize = 2)
 plt.legend()
 plt.show()
+
+plt.figure()
+for idx, each in enumerate(learning_rates):
+    print(f"For a learning rate gamma = {each}:")
+    print("Doing plain")
+    trained_plain, history_plain, predictions_plain = train_network_stochastic_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="rmsprop")
+    plt.plot(inputs_scaled, predictions_plain, "o", color = colours[idx], label = f"plain {each}", markersize = 2)
+plt.plot(inputs_scale(np.linspace(0,1,10000)), runge_1d(inputs_scale(np.linspace(0,1,10000)))-np.mean(runge_1d(inputs_scale(np.linspace(0,1,len(inputs_scaled))))),  "-", color = "#3ba336", label = "True function", markersize = 2)
+plt.legend()
+plt.show()
+
+# plt.figure()
+# for idx, each in enumerate(learning_rates):
+#     print(f"For a learning rate gamma = {each}:")
+#     print("Doing adam")
+#     trained_plain_adam, history_plain_adam, predictions_plain_adam = train_network_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="adam")
+#     plt.plot(inputs_scaled, predictions_plain_adam, "o", color = colours[idx], label = f"adam {each}", markersize = 2)
+# plt.plot(inputs_scale(np.linspace(0,1,len(inputs_scaled))), runge_1d(inputs_scale(np.linspace(0,1,len(inputs_scaled)))),  "-", color = "#3ba336", label = "True function", markersize = 2)
+# plt.legend()
+# plt.show()
+
 # print(predictions_plain)
 # for epoch, c, mse in history_plain:
 #     print(f"epoch {epoch:4d}: cost {c:.4f}  mse {mse:.4f}")
