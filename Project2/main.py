@@ -18,11 +18,14 @@ def runge_1d(x):
 def no_activation_func(z):
     return z
 
+
 def sigmoid(z):
     return 1 / (1 + jnp.exp(-z))
 
+
 def ReLU(z):
     return jnp.where(z > 0, z, 0.0)
+
 
 def softmax(z):
     """Compute softmax values for each set of scores in the rows of the matrix z.
@@ -40,6 +43,7 @@ def softmax_vec(z):
 
 def weights(n_in, n_out):
     return np.random.normal(0, 2 / (n_in + n_out))  #her vil vi ha n_in = n_out fra forrige layer, n_out er definert av oss i layer_output_size
+
 
 def create_layers_batch(network_input_size, layer_output_sizes):
     layers = []
@@ -116,9 +120,9 @@ def train_network_gradient(inputs, layers, activation_funcs, targets, gamma=0.01
             # acc = accuracy(predictions, targets)
             history.append((epoch, float(c), mse(predictions, targets)))
 
-            if np.abs(c[epoch]-c[epoch-1]) < tol: #this needs to be changed into a proper tolerance definition
-                print(f"Converged at epoch {epoch}: cost = {c:.6g}")
-                break
+            # if np.abs(c[epoch]-c[epoch-1]) < tol: #this needs to be changed into a proper tolerance definition
+            #     print(f"Converged at epoch {epoch}: cost = {c:.6g}")
+            #     break
 
     return layers, history, predictions
 
@@ -235,26 +239,26 @@ def stochastic_gradient_descent(X, y, method="plain", n_epochs=50, batch_size=5,
         history.append(param.copy())
     return np.array(history)
 
-def optimise(grad, theta0, method, gamma, num_iters = 100, tol = 1e-6, lasso_bool=False, **kw):
-    """Run one optimiser from theta0 with the full gradient; returns all iterates."""
-    theta, state = np.array(theta0, dtype=float), {}
-    history = [theta.copy()]
-    for t in range(1, num_iters + 1):
-        g = grad(theta)
-        theta_old = theta.copy()
-        theta, state = optimiser_step(method, theta, g, state, t, gamma, **kw)
-        history.append(theta.copy())
-        if lasso_bool:
-            # Check for convergence based on the change in theta
-            if np.linalg.norm(theta - theta_old) < tol:
-                break
-        elif np.linalg.norm(g) < tol:
-            break
-    history = np.array(history)
-    return history
+# def optimise(grad, theta0, method, gamma, num_iters = 100, tol = 1e-6, lasso_bool=False, **kw):
+#     """Run one optimiser from theta0 with the full gradient; returns all iterates."""
+#     theta, state = np.array(theta0, dtype=float), {}
+#     history = [theta.copy()]
+#     for t in range(1, num_iters + 1):
+#         g = grad(theta)
+#         theta_old = theta.copy()
+#         theta, state = optimiser_step(method, theta, g, state, t, gamma, **kw)
+#         history.append(theta.copy())
+#         if lasso_bool:
+#             # Check for convergence based on the change in theta
+#             if np.linalg.norm(theta - theta_old) < tol:
+#                 break
+#         elif np.linalg.norm(g) < tol:
+#             break
+#     history = np.array(history)
+#     return history
 
 
-inputs = np.random.uniform(-1,1,100).reshape(-1, 1)
+inputs = np.random.uniform(-1,1,1000).reshape(-1, 1)
 inputs_scaled = inputs_scale(inputs)
 
 
@@ -273,50 +277,41 @@ activation_funcs_100 = [sigmoid, sigmoid, no_activation_func]
 layers_batch_100 = create_layers_batch(network_input_size, layer_output_sizes_100)
 predictions_100 = feed_forward_batch(inputs_scaled, layers_batch_100, activation_funcs_100)
 layers_grad_100 = gradient_func(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered)
-# trained_100, history_100, preds_100 = train_network(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered)
+trained_100, history_100, preds_100 = train_network(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered)
 
 colours = ["#aa333c", "#99d2fb", "#9aab64", "#21534c", "#ef9d2c", "#B0a6df", "#2da9cf", "#ff46a2", "#e5194f", "#8f1cab", "#2da9cf", "#3ba336"]
 learning_rates = [0.001, 0.01, 0.1, 0.3]
+
+plt.figure()
+for idx, each in enumerate(learning_rates):
+    print(f"For a learning rate gamma = {each}:")
+    print("Doing plain")
+    trained_plain, history_plain, predictions_plain = train_network_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="plain")
+    plt.plot(inputs_scaled, predictions_plain, "o", color = colours[idx], label = f"plain {each}", markersize = 2)
+plt.plot(inputs, targets_centered,  "o", color = "#040404", label = "True function", markersize = 2)
+plt.legend()
+plt.show()
 
 # plt.figure()
 # for idx, each in enumerate(learning_rates):
 #     print(f"For a learning rate gamma = {each}:")
 #     print("Doing plain")
-#     trained_plain, history_plain, predictions_plain = train_network_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="plain")
-#     plt.plot(inputs_scaled, predictions_plain, "o", color = colours[idx], label = f"plain {each}", markersize = 2)
+#     trained_plain, history_plain, predictions_plain = train_network_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="adam")
+#     plt.plot(inputs_scaled, predictions_plain, "o", color = colours[idx], label = f"adam {each}", markersize = 2)
 # plt.plot(inputs_scale(np.linspace(0,1,10000)), runge_1d(inputs_scale(np.linspace(0,1,10000)))-np.mean(runge_1d(inputs_scale(np.linspace(0,1,len(inputs_scaled))))),  "-", color = "#3ba336", label = "True function", markersize = 2)
 # plt.legend()
 # plt.show()
 
-plt.figure()
-for idx, each in enumerate(learning_rates):
-    print(f"For a learning rate gamma = {each}:")
-    print("Doing plain")
-    trained_plain, history_plain, predictions_plain = train_network_stochastic_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="adam")
-    plt.plot(inputs_scaled, predictions_plain, "o", color = colours[idx], label = f"plain {each}", markersize = 2)
-plt.plot(inputs_scale(np.linspace(0,1,10000)), runge_1d(inputs_scale(np.linspace(0,1,10000)))-np.mean(runge_1d(inputs_scale(np.linspace(0,1,len(inputs_scaled))))),  "-", color = "#3ba336", label = "True function", markersize = 2)
-plt.legend()
-plt.show()
-
-plt.figure()
-for idx, each in enumerate(learning_rates):
-    print(f"For a learning rate gamma = {each}:")
-    print("Doing plain")
-    trained_plain, history_plain, predictions_plain = train_network_stochastic_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="rmsprop")
-    plt.plot(inputs_scaled, predictions_plain, "o", color = colours[idx], label = f"plain {each}", markersize = 2)
-plt.plot(inputs_scale(np.linspace(0,1,10000)), runge_1d(inputs_scale(np.linspace(0,1,10000)))-np.mean(runge_1d(inputs_scale(np.linspace(0,1,len(inputs_scaled))))),  "-", color = "#3ba336", label = "True function", markersize = 2)
-plt.legend()
-plt.show()
-
 # plt.figure()
 # for idx, each in enumerate(learning_rates):
 #     print(f"For a learning rate gamma = {each}:")
-#     print("Doing adam")
-#     trained_plain_adam, history_plain_adam, predictions_plain_adam = train_network_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="adam")
-#     plt.plot(inputs_scaled, predictions_plain_adam, "o", color = colours[idx], label = f"adam {each}", markersize = 2)
-# plt.plot(inputs_scale(np.linspace(0,1,len(inputs_scaled))), runge_1d(inputs_scale(np.linspace(0,1,len(inputs_scaled)))),  "-", color = "#3ba336", label = "True function", markersize = 2)
+#     print("Doing rmsprop")
+#     trained_plain, history_plain, predictions_plain = train_network_stochastic_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=1000, method="rmsprop")
+#     plt.plot(inputs_scaled, predictions_plain, "o", color = colours[idx], label = f"rmsprop {each}", markersize = 2)
+# plt.plot(inputs, targets_centered,  "o", color = "#040404", label = "True function", markersize = 2)
 # plt.legend()
 # plt.show()
+
 
 # print(predictions_plain)
 # for epoch, c, mse in history_plain:
@@ -324,16 +319,16 @@ plt.show()
 
 
 
-
-# #for one hidden layer with size 50
-# layer_output_sizes_50 = [50,1]
-# activation_funcs_50 = [sigmoid, no_activation_func]
-# layers_batch_50 = create_layers_batch(network_input_size, layer_output_sizes_50)
-# predictions = feed_forward_batch(inputs_scaled, layers_batch_50, activation_funcs_50)
-# layers_grad_50 = gradient_func(inputs_scaled, layers_batch_50, activation_funcs_50, targets_centered) 
-# trained_50, history_50, preds_50 = train_network(inputs_scaled, layers_batch_50, activation_funcs_50, targets_centered)
-# # for epoch, c, mse in history:
-# #     print(f"epoch {epoch:4d}: cost {c:.4f}  mse {mse:.4f}")
+print("funker?")
+#for one hidden layer with size 50
+layer_output_sizes_50 = [50,1]
+activation_funcs_50 = [sigmoid, no_activation_func]
+layers_batch_50 = create_layers_batch(network_input_size, layer_output_sizes_50)
+predictions = feed_forward_batch(inputs_scaled, layers_batch_50, activation_funcs_50)
+layers_grad_50 = gradient_func(inputs_scaled, layers_batch_50, activation_funcs_50, targets_centered) 
+trained_50, history_50, preds_50 = train_network(inputs_scaled, layers_batch_50, activation_funcs_50, targets_centered)
+# for epoch, c, mse in history:
+#     print(f"epoch {epoch:4d}: cost {c:.4f}  mse {mse:.4f}")
 
 
 """
@@ -375,14 +370,13 @@ def calculate_mse(x, y, degree):
 #X = rescale_design_matrix(inputs,deg=6)
 mse_train, mse_test, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test = calculate_mse(inputs_scaled[:,0], targets_centered[:,0], degree=6)
 
-# print(preds)
-
-# plt.figure()
-# # plt.plot(inputs_scaled, preds_100, "o", color = "#ff46a2", label = "Neural network size 100", markersize = 2)
-# # plt.plot(inputs_scaled, preds_50, "o", color = "#8f1cab", label = "Neural network size 50", markersize = 2)
+print("funker?")
+plt.figure()
+plt.plot(inputs_scaled, preds_100, "o", color = "#ff46a2", label = "Neural network size 100", markersize = 2)
+plt.plot(inputs_scaled, preds_50, "o", color = "#8f1cab", label = "Neural network size 50", markersize = 2)
 # plt.plot(inputs_scaled, predictions_plain, "o", color = "#e5194f", label = "Neural network plain gradient decent layer size 100", markersize = 2)
-# plt.plot(inputs_scaled, y_tilde, "o", color = "#2da9cf", label = "Polyomial fit", markersize = 2)
-# plt.plot(inputs_scaled, targets_centered,  "o", color = "#3ba336", label = "True function", markersize = 2)
-# plt.legend()
-# plt.show()
+plt.plot(inputs_scaled, y_tilde, "o", color = "#2da9cf", label = "Polyomial fit", markersize = 2)
+plt.plot(inputs_scaled, targets_centered,  "o", color = "#3ba336", label = "True function", markersize = 2)
+plt.legend()
+plt.show()
 
