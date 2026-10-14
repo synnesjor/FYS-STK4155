@@ -98,6 +98,7 @@ def train_network_gradient(inputs, layers, activation_funcs, targets, gamma=0.01
     states = [({"W": {}, "b": {}}, {"W": {}, "b": {}}) for W, b in layers]
     history = []
     for epoch in range(epochs):
+        # param_old = param.copy()
         # Calculate gradients for the whole network
         layers_grad = gradient_func(inputs, layers, activation_funcs, targets)
 
@@ -113,6 +114,8 @@ def train_network_gradient(inputs, layers, activation_funcs, targets, gamma=0.01
         layers = new_layers
         states = new_states
 
+        
+
         # Record training progress
         if epoch % 50 == 0 or epoch == epochs - 1:
             predictions = feed_forward_batch(inputs, layers, activation_funcs)
@@ -123,11 +126,17 @@ def train_network_gradient(inputs, layers, activation_funcs, targets, gamma=0.01
             # if np.abs(c[epoch]-c[epoch-1]) < tol: #this needs to be changed into a proper tolerance definition
             #     print(f"Converged at epoch {epoch}: cost = {c:.6g}")
             #     break
+        
+        # if np.linalg.norm(param - param_old)>1e2: # breaks if param explodes
+        #     break
 
     return layers, history, predictions
 
-def train_network_stochastic_gradient(inputs, layers, activation_funcs, targets, gamma=0.01, epochs=10000, method="plain", batch_size=5, tol=1e-6, seed=2026,
-    schedule=None):
+def step_length(t, t0, t1):
+    """The schedule of Eq. (4.40)."""
+    return t0 / (t + t1)
+
+def train_network_stochastic_gradient(inputs, layers, activation_funcs, targets, schedule, gamma=0.01, epochs=10000, method="plain", batch_size=5, tol=1e-6, seed=2026):
     """
         LLM tag needed here
     """
@@ -138,15 +147,17 @@ def train_network_stochastic_gradient(inputs, layers, activation_funcs, targets,
     for epoch in range(epochs):
         # Calculate gradients for the whole network
         for batch in make_batches(len(inputs), batch_size, rng):
+            t += 1
             layers_grad = gradient_func(inputs[batch], layers, activation_funcs, targets[batch])
+            gamma_t = gamma if schedule is None else step_length(t, *schedule)    
         
             new_layers = []
             new_states = []
 
             # Update each layer's weights and biases
             for (W, b), (dW, db), (state_W, state_b) in zip(layers, layers_grad, states):
-                W, state_W = optimiser_step(method, W, dW, state_W,epoch + 1, gamma)
-                b, state_b = optimiser_step(method, b, db, state_b,epoch + 1, gamma)
+                W, state_W = optimiser_step(method, W, dW, state_W,epoch + 1, gamma_t)
+                b, state_b = optimiser_step(method, b, db, state_b,epoch + 1, gamma_t)
                 new_layers.append((W, b))
                 new_states.append((state_W, state_b))
             layers = new_layers
@@ -161,7 +172,7 @@ def train_network_stochastic_gradient(inputs, layers, activation_funcs, targets,
 
             if c < tol:
                 print(f"Converged at epoch {epoch}: cost = {c:.6g}")
-                break
+                # break
 
 
     return layers, history, predictions
@@ -258,7 +269,7 @@ def stochastic_gradient_descent(X, y, method="plain", n_epochs=50, batch_size=5,
 #     return history
 
 
-inputs = np.random.uniform(-1,1,1000).reshape(-1, 1)
+inputs = np.random.uniform(-1,1,100).reshape(-1, 1)
 inputs_scaled = inputs_scale(inputs)
 
 
@@ -280,37 +291,41 @@ layers_grad_100 = gradient_func(inputs_scaled, layers_batch_100, activation_func
 trained_100, history_100, preds_100 = train_network(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered)
 
 colours = ["#aa333c", "#99d2fb", "#9aab64", "#21534c", "#ef9d2c", "#B0a6df", "#2da9cf", "#ff46a2", "#e5194f", "#8f1cab", "#2da9cf", "#3ba336"]
-learning_rates = [0.001, 0.01, 0.1, 0.3]
-
-plt.figure()
-for idx, each in enumerate(learning_rates):
-    print(f"For a learning rate gamma = {each}:")
-    print("Doing plain")
-    trained_plain, history_plain, predictions_plain = train_network_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="plain")
-    plt.plot(inputs_scaled, predictions_plain, "o", color = colours[idx], label = f"plain {each}", markersize = 2)
-plt.plot(inputs, targets_centered,  "o", color = "#040404", label = "True function", markersize = 2)
-plt.legend()
-plt.show()
+# learning_rates = [0.001, 0.01, 0.1, 0.3]
 
 # plt.figure()
 # for idx, each in enumerate(learning_rates):
 #     print(f"For a learning rate gamma = {each}:")
 #     print("Doing plain")
-#     trained_plain, history_plain, predictions_plain = train_network_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="adam")
-#     plt.plot(inputs_scaled, predictions_plain, "o", color = colours[idx], label = f"adam {each}", markersize = 2)
-# plt.plot(inputs_scale(np.linspace(0,1,10000)), runge_1d(inputs_scale(np.linspace(0,1,10000)))-np.mean(runge_1d(inputs_scale(np.linspace(0,1,len(inputs_scaled))))),  "-", color = "#3ba336", label = "True function", markersize = 2)
+#     trained_plain, history_plain, predictions_plain = train_network_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="plain")
+#     plt.plot(inputs_scaled, predictions_plain, "o", color = colours[idx], label = f"plain {each}", markersize = 2)
+# plt.plot(inputs_scaled, targets_centered,  "o", color = "#040404", label = "True function", markersize = 2)
 # plt.legend()
 # plt.show()
+
 
 # plt.figure()
 # for idx, each in enumerate(learning_rates):
 #     print(f"For a learning rate gamma = {each}:")
-#     print("Doing rmsprop")
-#     trained_plain, history_plain, predictions_plain = train_network_stochastic_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=1000, method="rmsprop")
-#     plt.plot(inputs_scaled, predictions_plain, "o", color = colours[idx], label = f"rmsprop {each}", markersize = 2)
-# plt.plot(inputs, targets_centered,  "o", color = "#040404", label = "True function", markersize = 2)
+#     print("Doing adam")
+#     trained_adam, history_adam, predictions_adam = train_network_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, gamma = each, epochs=10000, method="adam")
+#     plt.plot(inputs_scaled, predictions_adam, "o", color = colours[idx], label = f"adam {each}", alpha = 0.4, markersize = 3, zorder = 3)
+#     print(predictions_adam)
+# plt.plot(inputs_scaled, targets_centered,  "o", color = "#252424", alpha = 0.3, label = "True function", markersize = 3, zorder = 0)
 # plt.legend()
 # plt.show()
+
+learning_rates = [0.01]
+plt.figure()
+for idx, each in enumerate(learning_rates):
+    print(f"For a learning rate gamma = {each}:")
+    print("Doing adam")
+    trained_adam, history_adam, predictions_adam = train_network_stochastic_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, schedule=(1.0,10.0), gamma = each, epochs=10000, method="adam", batch_size=5, tol=1e-6)
+    plt.plot(inputs_scaled, predictions_adam, "o", color = colours[idx], label = f"adam {each}", alpha = 0.4, markersize = 3, zorder = 3)
+    print(predictions_adam)
+plt.plot(inputs_scaled, targets_centered,  "o", color = "#252424", alpha = 0.3, label = "True function", markersize = 3, zorder = 0)
+plt.legend()
+plt.show()
 
 
 # print(predictions_plain)
