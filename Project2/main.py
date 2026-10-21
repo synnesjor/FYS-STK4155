@@ -9,8 +9,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 
 
-rng = np.random.default_rng(seed = 2026)
+rng = np.random.default_rng(2026)
 np.random.seed = 2026
+
 
 def runge_1d(x):
     return 1 / (1+(25*x**2))
@@ -26,6 +27,8 @@ def sigmoid(z):
 def ReLU(z):
     return jnp.where(z > 0, z, 0.0)
 
+def leaky_ReLU(z, alpha = 0.01):
+    return jnp.where(z > 0, z, alpha*z)
 
 def softmax(z):
     """Compute softmax values for each set of scores in the rows of the matrix z.
@@ -92,7 +95,10 @@ def train_network(inputs, layers, activation_funcs, targets, gamma=0.1, epochs=1
 
 def train_network_gradient(inputs, layers, activation_funcs, targets, gamma=0.01, epochs=10000, method="plain", tol = 0):
     """
-        LLM tag needed here
+    LLM tag:
+    With the train_network function as a base, we asked ChatGPT and Claude if it made sense to reuse optimiser step function used in Project 1. 
+    When we had our own suggestion for how to combine the functions, we checked with the LLMs if they agreed. We also got the line creating the 
+    dictionary for "states", and got some help with debbugging the loop where the layer's weight and biases are updated.     
     """
     # Independent optimizer states for each weight and bias
     states = [({"W": {}, "b": {}}, {"W": {}, "b": {}}) for W, b in layers]
@@ -138,7 +144,9 @@ def step_length(t, t0, t1):
 
 def train_network_stochastic_gradient(inputs, layers, activation_funcs, targets, schedule, gamma=0.01, epochs=10000, method="plain", batch_size=5, tol=1e-6, seed=2026):
     """
-        LLM tag needed here
+    LLM tag:
+    When we had our own suggestion for how to combine the functions, we checked with the LLMs if they agreed, especially with the 
+    placement of the epochs loop, and updates of t. We also got the convergence check from ChatGPT.
     """
     # Independent optimizer states for each weight and bias
     states = [({"W": {}, "b": {}}, {"W": {}, "b": {}}) for W, b in layers]
@@ -228,27 +236,27 @@ def step_length(t, t0, t1):
     """The schedule of Eq. (4.40)."""
     return t0 / (t + t1)
 
-def stochastic_gradient_descent(X, y, method="plain", n_epochs=50, batch_size=5, gamma=0.1, schedule=None, lam=0.0, seed=2026, tol=1e-6, **kw,):
-    """Minibatch SGD, Eq. (4.34), with any optimiser. schedule=(t0, t1) replaces gamma by Eq. (4.40).
-    Returns the iterate after every epoch."""
-    rng = np.random.default_rng(seed)
-    n, p = X.shape
-    param, state, t = np.zeros(p), {}, 0
-    history = [param.copy()]
+# def stochastic_gradient_descent(X, y, method="plain", n_epochs=50, batch_size=5, gamma=0.1, schedule=None, lam=0.0, seed=2026, tol=1e-6, **kw,):
+#     """Minibatch SGD, Eq. (4.34), with any optimiser. schedule=(t0, t1) replaces gamma by Eq. (4.40).
+#     Returns the iterate after every epoch."""
+#     rng = np.random.default_rng(seed)
+#     n, p = X.shape
+#     param, state, t = np.zeros(p), {}, 0
+#     history = [param.copy()]
     
-    for epoch in range(n_epochs):
-        param_old = param.copy()
-        for batch in make_batches(n, batch_size, rng):
-            t += 1
-            g = gradient_batch(param, X[batch], y[batch], lam)                                    # the gradient of the cost on this minibatch
-            gamma_t = gamma if schedule is None else step_length(t, *schedule)                           # constant, or the schedule
-            param, state = optimiser_step(method, param, g, state, t, gamma_t, **kw)
-        if np.linalg.norm(param - param_old) < tol:
-            break
-        if np.linalg.norm(param - param_old)>1e2: # breaks if param explodes
-            break
-        history.append(param.copy())
-    return np.array(history)
+#     for epoch in range(n_epochs):
+#         param_old = param.copy()
+#         for batch in make_batches(n, batch_size, rng):
+#             t += 1
+#             g = gradient_batch(param, X[batch], y[batch], lam)                                    # the gradient of the cost on this minibatch
+#             gamma_t = gamma if schedule is None else step_length(t, *schedule)                           # constant, or the schedule
+#             param, state = optimiser_step(method, param, g, state, t, gamma_t, **kw)
+#         if np.linalg.norm(param - param_old) < tol:
+#             break
+#         if np.linalg.norm(param - param_old)>1e2: # breaks if param explodes
+#             break
+#         history.append(param.copy())
+#     return np.array(history)
 
 # def optimise(grad, theta0, method, gamma, num_iters = 100, tol = 1e-6, lasso_bool=False, **kw):
 #     """Run one optimiser from theta0 with the full gradient; returns all iterates."""
@@ -268,17 +276,28 @@ def stochastic_gradient_descent(X, y, method="plain", n_epochs=50, batch_size=5,
 #     history = np.array(history)
 #     return history
 
+sigma = 0.01
+n = 10000
 
-inputs = np.random.uniform(-1,1,100).reshape(-1, 1)
+inputs = np.random.uniform(-1,1,n).reshape(-1, 1)
+noise = np.random.normal(0, sigma, n).reshape(-1, 1)
+# noise = 0
+# inputs_10000 = np.random.uniform(-1,1,10000).reshape(-1, 1)
 inputs_scaled = inputs_scale(inputs)
+# inputs_scaled_10000 = inputs_scale(inputs_10000)
 
-
-targets = runge_1d(inputs)
+targets = runge_1d(inputs_scaled) + noise
+targets_no_noise = runge_1d(inputs_scaled)
+# print(runge_1d(inputs_scaled))
+# print(rng.normal(0, sigma, n))
+# targets_10000 = runge_1d(inputs_10000)
 targets_centered = targets - np.mean(targets)
+targets_centered_no_noise = targets_no_noise - np.mean(targets_no_noise)
+# targets_centered_10000 = targets_10000 - np.mean(targets_10000)
+
+
 
 gradient_func = jax.grad(cost, argnums=1)  # Taking the gradient wrt. the second input to the cost function, i.e. the layers
-
-
 
 
 #for two hidden layers with size 100
@@ -291,7 +310,7 @@ layers_grad_100 = gradient_func(inputs_scaled, layers_batch_100, activation_func
 trained_100, history_100, preds_100 = train_network(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered)
 
 colours = ["#aa333c", "#99d2fb", "#9aab64", "#21534c", "#ef9d2c", "#B0a6df", "#2da9cf", "#ff46a2", "#e5194f", "#8f1cab", "#2da9cf", "#3ba336"]
-# learning_rates = [0.001, 0.01, 0.1, 0.3]
+learning_rates = [0.001, 0.01, 0.1, 0.3]
 
 # plt.figure()
 # for idx, each in enumerate(learning_rates):
@@ -315,17 +334,17 @@ colours = ["#aa333c", "#99d2fb", "#9aab64", "#21534c", "#ef9d2c", "#B0a6df", "#2
 # plt.legend()
 # plt.show()
 
-learning_rates = [0.01]
-plt.figure()
-for idx, each in enumerate(learning_rates):
-    print(f"For a learning rate gamma = {each}:")
-    print("Doing adam")
-    trained_adam, history_adam, predictions_adam = train_network_stochastic_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, schedule=(1.0,10.0), gamma = each, epochs=10000, method="adam", batch_size=5, tol=1e-6)
-    plt.plot(inputs_scaled, predictions_adam, "o", color = colours[idx], label = f"adam {each}", alpha = 0.4, markersize = 3, zorder = 3)
-    print(predictions_adam)
-plt.plot(inputs_scaled, targets_centered,  "o", color = "#252424", alpha = 0.3, label = "True function", markersize = 3, zorder = 0)
-plt.legend()
-plt.show()
+# learning_rates = [0.01]
+# plt.figure()
+# for idx, each in enumerate(learning_rates):
+#     print(f"For a learning rate gamma = {each}:")
+#     print("Doing adam")
+#     trained_adam, history_adam, predictions_adam = train_network_stochastic_gradient(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered, schedule=(1.0,10.0), gamma = each, epochs=10000, method="adam", batch_size=5, tol=1e-6)
+#     plt.plot(inputs_scaled, predictions_adam, "o", color = colours[idx], label = f"adam {each}", alpha = 0.4, markersize = 3, zorder = 3)
+#     print(predictions_adam)
+# plt.plot(inputs_scaled, targets_centered,  "o", color = "#252424", alpha = 0.3, label = "True function", markersize = 3, zorder = 0)
+# plt.legend()
+# plt.show()
 
 
 # print(predictions_plain)
@@ -385,13 +404,38 @@ def calculate_mse(x, y, degree):
 #X = rescale_design_matrix(inputs,deg=6)
 mse_train, mse_test, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test = calculate_mse(inputs_scaled[:,0], targets_centered[:,0], degree=6)
 
+print(np.mean(inputs_scaled))
+
 print("funker?")
 plt.figure()
-plt.plot(inputs_scaled, preds_100, "o", color = "#ff46a2", label = "Neural network size 100", markersize = 2)
-plt.plot(inputs_scaled, preds_50, "o", color = "#8f1cab", label = "Neural network size 50", markersize = 2)
+plt.axvline(x = (np.mean(inputs_scaled)), color = "#9EA09E", linestyle = "dashed", label = rf"$\mu$")
+print(np.mean(inputs_scaled))
+
+"""
+LLM tag:
+The three lines below, used for sorting the points for the true function, was written by ChatGPT.
+"""
+points_no_noise = sorted(zip(inputs_scaled, targets_centered_no_noise))
+x_sorted_no_noise = [p[0] for p in points_no_noise]
+y_sorted_no_noise = [p[1] for p in points_no_noise]
+
+points = sorted(zip(inputs_scaled, targets_centered))
+x_sorted = [p[0] for p in points]
+y_sorted = [p[1] for p in points]
+
+plt.plot(x_sorted_no_noise, y_sorted_no_noise,  "-", color = "#777977", label = "True function no noise", markersize = 1, alpha = 0.7)
+plt.plot(x_sorted, y_sorted,  "-", color = "#878787", label = "True function with noise", markersize = 1, alpha = 0.4)
+plt.plot(inputs_scaled, preds_100, "o", color = "#aa333c", label = "NN, two layers, size 100", markersize = 1)
+plt.plot(inputs_scaled, preds_50, "o", color = "#21534c", label = "NN, one layer, size 50", markersize = 1)
 # plt.plot(inputs_scaled, predictions_plain, "o", color = "#e5194f", label = "Neural network plain gradient decent layer size 100", markersize = 2)
-plt.plot(inputs_scaled, y_tilde, "o", color = "#2da9cf", label = "Polyomial fit", markersize = 2)
-plt.plot(inputs_scaled, targets_centered,  "o", color = "#3ba336", label = "True function", markersize = 2)
-plt.legend()
+plt.plot(inputs_scaled, y_tilde, "o", color = "#ef9d2c", label = "Polyomial fit using OLS", markersize = 1)
+plt.ylim(-0.45, 0.9)
+plt.xticks(size = 13)
+plt.yticks(size = 13)
+plt.xlabel("x", fontsize = 14)
+plt.ylabel("y", fontsize = 14)
+plt.grid(alpha = 0.3)
+plt.legend(fontsize = 10)
+plt.savefig(f"figures/A/neural_network_start_{n}_points.pdf")
 plt.show()
 
