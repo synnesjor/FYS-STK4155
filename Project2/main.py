@@ -441,7 +441,33 @@ plt.show()
 print(mse_for_test_data)
 print(mse_values_test)
 
+"Kode fra Marie med hjelp av Claude med endring"
 
+plt.figure()
+for idx, nod in enumerate(nodes):
+    mse_values_train = []
+    mse_values_test = []
+    for n in n_hidden_layers:
+        for gam in gamma_values:
+            layer_output_sizes = [nod] * n + [1]
+            activation_funcs = [sigmoid] * n + [no_activation_func] #LLM use: Claude used to efficiently create the array for activation functions
+            print(activation_funcs)
+            layers_batch = create_layers_batch(network_input_size, layer_output_sizes)
+            predictions = feed_forward_batch(inputs_scaled, layers_batch, activation_funcs)
+            layers_grad = gradient_func(inputs_scaled, layers_batch, activation_funcs, targets_centered)
+            trained_layers, history, preds, mse_v = train_network_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, gamma = gam)
+            mse_values_train.append(mse_v)
+            for_test_data = predict_network(x_test, trained_layers, activation_funcs)
+            mse_for_test_data = mse(for_test_data, targets_test)
+            mse_values_test.append(mse_for_test_data)
+            # for epoch, c, mse in history:
+            #     print(f"epoch {epoch:4d}: cost {c:.4f}  mse {mse:.4f}")
+plt.plot(gamma_values, mse_values_train, "-o", color = colours[idx], label = f"{act_functions_names[idx]} train")
+plt.plot(gamma_values, mse_values_test, "-o", color = colours[idx+4], label = f"{act_functions_names[idx]} test")
+plt.legend()
+plt.show()
+print(mse_for_test_data)
+print(mse_values_test)
 
 
 
