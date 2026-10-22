@@ -90,7 +90,7 @@ def accuracy(predictions, targets):
     return accuracy_score(np.argmax(np.asarray(predictions), axis=1), np.argmax(np.asarray(targets)))
 
 # i b så ber de om å bruke bare mse - accuracy er ett klassifikasjon problem og vi gjør regression her
-def train_network(inputs, layers, activation_funcs, targets, gamma=0.1, epochs=10000):
+def train_network(inputs, layers, activation_funcs, targets, gamma=0.1, epochs = 10000):
     history = []
     for epoch in range(epochs):
         layers_grad = gradient_func(inputs, layers, activation_funcs, targets)
@@ -98,7 +98,7 @@ def train_network(inputs, layers, activation_funcs, targets, gamma=0.1, epochs=1
         if epoch % 50 == 0 or epoch == epochs - 1:
             predictions = feed_forward_batch(inputs, layers, activation_funcs)
             history.append((epoch, float(cost(inputs, layers, activation_funcs, targets)), mse(predictions, targets)))
-    return layers, history, predictions
+    return layers, history, predictions, mse(predictions, targets)
 
 def train_network_gradient(inputs, layers, activation_funcs, targets, gamma=0.01, epochs=10000, method="plain", tol = 0):
     """
@@ -143,7 +143,7 @@ def train_network_gradient(inputs, layers, activation_funcs, targets, gamma=0.01
         # if np.linalg.norm(param - param_old)>1e2: # breaks if param explodes
         #     break
 
-    return layers, history, predictions
+    return layers, history, predictions, mse(predictions,targets)
 
 def step_length(t, t0, t1):
     """The schedule of Eq. (4.40)."""
@@ -190,7 +190,7 @@ def train_network_stochastic_gradient(inputs, layers, activation_funcs, targets,
                 # break
 
 
-    return layers, history, predictions
+    return layers, history, predictions, mse(predictions,targets)
 
 
 def inputs_scale(x):
@@ -293,6 +293,7 @@ noise = np.random.normal(0, sigma, n).reshape(-1, 1)
 inputs_scaled = inputs_scale(inputs)
 # inputs_scaled_10000 = inputs_scale(inputs_10000)
 
+
 targets = runge_1d(inputs_scaled) + noise
 targets_no_noise = runge_1d(inputs_scaled)
 # print(runge_1d(inputs_scaled))
@@ -302,8 +303,11 @@ targets_centered = targets - np.mean(targets)
 targets_centered_no_noise = targets_no_noise - np.mean(targets_no_noise)
 # targets_centered_10000 = targets_10000 - np.mean(targets_10000)
 
-inputs_scaled, x_test, targets_centered, y_test = train_test_split(inputs_scaled, targets_centered, test_size = 0.2, random_state = 2026)
 
+
+inputs_scaled, x_test, targets_centered, y_test = train_test_split(inputs_scaled, targets_centered, test_size = 0.2, random_state = 2026)
+noise = np.random.normal(0, sigma, len(x_test)).reshape(-1, 1)
+targets_test = runge_1d(x_test) + noise
 
 
 gradient_func = jax.grad(cost, argnums=1)  # Taking the gradient wrt. the second input to the cost function, i.e. the layers
@@ -374,24 +378,93 @@ gradient_func = jax.grad(cost, argnums=1)  # Taking the gradient wrt. the second
 # #     print(f"epoch {epoch:4d}: cost {c:.4f}  mse {mse:.4f}")
 
 act_functions = [sigmoid, leaky_ReLU, ReLU]
-# n_hidden_layers = [1,2,3,4,5,10,50,100,150]
-n_hidden_layers = [1]
+act_functions_names = ["sigmoid", "leaky_ReLU", "ReLU"]
+n_hidden_layers = [1,2,3,5]
+# n_hidden_layers = [1] 
 
-activation_funcs = (np.ones(len(n_hidden_layers))*["sigmoid"]).append([no_activation_func])
-print(activation_funcs)
+colours = ["#aa333c", "#99d2fb", "#21534c", "#ef9d2c", "#B0a6df", "#2da9cf", "#ff46a2", "#9aab64", "#e5194f", "#8f1cab", "#2da9cf", "#3ba336"]
 
-exit()
+# exit()
+network_input_size = inputs_scaled.shape[1]
+#for c)
+# plt.figure()
+# for idx, a in enumerate(act_functions):
+#     mse_values_train = []
+#     mse_values_test = []
+#     for n in n_hidden_layers:
+#         layer_output_sizes = [100] * n + [1]
+#         activation_funcs = [a] * n + [no_activation_func] #LLM use: Claude used to efficiently create the array for activation functions
+#         print(activation_funcs)
+#         layers_batch = create_layers_batch(network_input_size, layer_output_sizes)
+#         predictions = feed_forward_batch(inputs_scaled, layers_batch, activation_funcs)
+#         layers_grad = gradient_func(inputs_scaled, layers_batch, activation_funcs, targets_centered)
+#         trained_layers, history, preds, mse_v = train_network(inputs_scaled, layers_batch, activation_funcs, targets_centered)
+#         mse_values_train.append(mse_v)
+#         for_test_data = predict_network(x_test, trained_layers, activation_funcs)
+#         mse_for_test_data = mse(for_test_data, targets_test)
+#         mse_values_test.append(mse_for_test_data)
+#         # for epoch, c, mse in history:
+#         #     print(f"epoch {epoch:4d}: cost {c:.4f}  mse {mse:.4f}")
+#     plt.plot(n_hidden_layers, mse_values_train, "-o", color = colours[idx], label = f"{act_functions_names[idx]} train")
+#     plt.plot(n_hidden_layers, mse_values_test, "-o", color = colours[idx+4], label = f"{act_functions_names[idx]} test")
+#     plt.legend()
+# plt.show()
 
-# for i in act_functions:
-#     for j in n_hidden_layers:
-#         layer_output_sizes_50 = [50,1]
-#         activation_funcs_50 = (np.ones(len(n_hidden_layers))*[i]).append([no_activation_func])
-        # layers_batch_50 = create_layers_batch(network_input_size, layer_output_sizes_50)
-        # predictions = feed_forward_batch(inputs_scaled, layers_batch_50, activation_funcs_50)
-        # layers_grad_50 = gradient_func(inputs_scaled, layers_batch_50, activation_funcs_50, targets_centered) 
-        # trained_50, history_50, preds_50 = train_network(inputs_scaled, layers_batch_50, activation_funcs_50, targets_centered)
-        # for epoch, c, mse in history:
-        #     print(f"epoch {epoch:4d}: cost {c:.4f}  mse {mse:.4f}")
+nodes = [50,100]
+n_hidden_layers = [1,2]
+gamma_values = np.logspace(-3,0,5)
+
+
+plt.figure()
+for idx, nod in enumerate(nodes):
+    mse_values_train = []
+    mse_values_test = []
+    for n in n_hidden_layers:
+        for gam in gamma_values:
+            layer_output_sizes = [nod] * n + [1]
+            activation_funcs = [sigmoid] * n + [no_activation_func] #LLM use: Claude used to efficiently create the array for activation functions
+            print(activation_funcs)
+            layers_batch = create_layers_batch(network_input_size, layer_output_sizes)
+            predictions = feed_forward_batch(inputs_scaled, layers_batch, activation_funcs)
+            layers_grad = gradient_func(inputs_scaled, layers_batch, activation_funcs, targets_centered)
+            trained_layers, history, preds, mse_v = train_network_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, gamma = gam)
+            mse_values_train.append(mse_v)
+            for_test_data = predict_network(x_test, trained_layers, activation_funcs)
+            mse_for_test_data = mse(for_test_data, targets_test)
+            mse_values_test.append(mse_for_test_data)
+            # for epoch, c, mse in history:
+            #     print(f"epoch {epoch:4d}: cost {c:.4f}  mse {mse:.4f}")
+plt.plot(gamma_values, mse_values_train, "-o", color = colours[idx], label = f"{act_functions_names[idx]} train")
+plt.plot(gamma_values, mse_values_test, "-o", color = colours[idx+4], label = f"{act_functions_names[idx]} test")
+plt.legend()
+plt.show()
+print(mse_for_test_data)
+print(mse_values_test)
+
+
+
+
+
+# plt.plot(x_sorted, y_sorted,  "-", color = "#777977", label = "True function with noise", markersize = 3, alpha = 0.4)
+# plt.plot(inputs_scaled, preds_100, "o", color = "#aa333c", label = "NN, two layers, size 100", markersize = 3)
+# plt.plot(inputs_scaled, preds_50, "o", color = "#21534c", label = "NN, one layer, size 50", markersize = 3)
+# # plt.plot(inputs_scaled, predictions_plain, "o", color = "#e5194f", label = "Neural network plain gradient decent layer size 100", markersize = 2)
+# plt.plot(inputs_scaled, y_tilde, "o", color = "#ef9d2c", label = "Polyomial fit using OLS", markersize = 3)
+# plt.plot(x_test, y_predict, "o", color = "#00ff6a", markersize = 3, label = "test 100")
+# plt.ylim(-0.45, 0.9)
+# plt.xticks(size = 13)
+# plt.yticks(size = 13)
+# plt.xlabel("x", fontsize = 14)
+# plt.ylabel("y", fontsize = 14)
+# plt.grid(alpha = 0.3)
+# plt.legend(fontsize = 10)
+# plt.savefig(f"figures/A/neural_network_start_{n}_points.pdf")
+# plt.show()
+
+# def predict_network(X, layers, activation_functions):
+#     return feed_forward_batch(X, layers, activation_functions)
+
+# plt.figure()
 
 
 
@@ -437,7 +510,7 @@ mse_train, mse_test, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_tes
 
 print(np.mean(inputs_scaled))
 
-y_predict = predict_network(x_test, trained_100, activation_funcs_100)
+# y_predict = predict_network(x_test, trained_100, activation_funcs_100)
 """
 LLM tag for the line above: As the y_predict plotted gave unsatisfying results, we gave the UiO GPT our code for it to debug. The LLM debgugged by identifying 
 our mistake of using the untrained layers in the "predict_network" functions, and we then changed it to use the trained layers instead.
@@ -463,30 +536,30 @@ y_sorted = [p[1] for p in points]
 
 
 # plt.plot(x_sorted_no_noise, y_sorted_no_noise,  "-", color = "#777977", label = "True function no noise", markersize = 1, alpha = 0.7)
-print(len(inputs_scaled))
-print(len(preds_100))
-print(len(preds_50))
-print(len(y_tilde))
-print(len(x_sorted))
-print(len(y_sorted))
-plt.plot(x_sorted, y_sorted,  "-", color = "#777977", label = "True function with noise", markersize = 3, alpha = 0.4)
-plt.plot(inputs_scaled, preds_100, "o", color = "#aa333c", label = "NN, two layers, size 100", markersize = 3)
-plt.plot(inputs_scaled, preds_50, "o", color = "#21534c", label = "NN, one layer, size 50", markersize = 3)
-# plt.plot(inputs_scaled, predictions_plain, "o", color = "#e5194f", label = "Neural network plain gradient decent layer size 100", markersize = 2)
-plt.plot(inputs_scaled, y_tilde, "o", color = "#ef9d2c", label = "Polyomial fit using OLS", markersize = 3)
-plt.plot(x_test, y_predict, "o", color = "#00ff6a", markersize = 3, label = "test 100")
-plt.ylim(-0.45, 0.9)
-plt.xticks(size = 13)
-plt.yticks(size = 13)
-plt.xlabel("x", fontsize = 14)
-plt.ylabel("y", fontsize = 14)
-plt.grid(alpha = 0.3)
-plt.legend(fontsize = 10)
-plt.savefig(f"figures/A/neural_network_start_{n}_points.pdf")
-plt.show()
+# print(len(inputs_scaled))
+# print(len(preds_100))
+# print(len(preds_50))
+# print(len(y_tilde))
+# print(len(x_sorted))
+# print(len(y_sorted))
+# plt.plot(x_sorted, y_sorted,  "-", color = "#777977", label = "True function with noise", markersize = 3, alpha = 0.4)
+# plt.plot(inputs_scaled, preds_100, "o", color = "#aa333c", label = "NN, two layers, size 100", markersize = 3)
+# plt.plot(inputs_scaled, preds_50, "o", color = "#21534c", label = "NN, one layer, size 50", markersize = 3)
+# # plt.plot(inputs_scaled, predictions_plain, "o", color = "#e5194f", label = "Neural network plain gradient decent layer size 100", markersize = 2)
+# plt.plot(inputs_scaled, y_tilde, "o", color = "#ef9d2c", label = "Polyomial fit using OLS", markersize = 3)
+# plt.plot(x_test, y_predict, "o", color = "#00ff6a", markersize = 3, label = "test 100")
+# plt.ylim(-0.45, 0.9)
+# plt.xticks(size = 13)
+# plt.yticks(size = 13)
+# plt.xlabel("x", fontsize = 14)
+# plt.ylabel("y", fontsize = 14)
+# plt.grid(alpha = 0.3)
+# plt.legend(fontsize = 10)
+# plt.savefig(f"figures/A/neural_network_start_{n}_points.pdf")
+# plt.show()
 
-def predict_network(X, layers, activation_functions):
-    return feed_forward_batch(X, layers, activation_functions)
+# def predict_network(X, layers, activation_functions):
+#     return feed_forward_batch(X, layers, activation_functions)
 
-plt.figure()
+# plt.figure()
 
