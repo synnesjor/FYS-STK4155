@@ -7,14 +7,19 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
+jax.config.update("jax_enable_x64", True)
 
 
 rng = np.random.default_rng(2026)
 np.random.seed = 2026
 
+def predict_network(X, layers, activation_functions):
+    return feed_forward_batch(X, layers, activation_functions)
+
 
 def runge_1d(x):
     return 1 / (1+(25*x**2))
+
 
 def no_activation_func(z):
     return z
@@ -27,8 +32,10 @@ def sigmoid(z):
 def ReLU(z):
     return jnp.where(z > 0, z, 0.0)
 
+
 def leaky_ReLU(z, alpha = 0.01):
     return jnp.where(z > 0, z, alpha*z)
+
 
 def softmax(z):
     """Compute softmax values for each set of scores in the rows of the matrix z.
@@ -276,8 +283,8 @@ def step_length(t, t0, t1):
 #     history = np.array(history)
 #     return history
 
-sigma = 0.01
-n = 10000
+sigma = 0.05
+n = 1000
 
 inputs = np.random.uniform(-1,1,n).reshape(-1, 1)
 noise = np.random.normal(0, sigma, n).reshape(-1, 1)
@@ -295,22 +302,24 @@ targets_centered = targets - np.mean(targets)
 targets_centered_no_noise = targets_no_noise - np.mean(targets_no_noise)
 # targets_centered_10000 = targets_10000 - np.mean(targets_10000)
 
+inputs_scaled, x_test, targets_centered, y_test = train_test_split(inputs_scaled, targets_centered, test_size = 0.2, random_state = 2026)
+
 
 
 gradient_func = jax.grad(cost, argnums=1)  # Taking the gradient wrt. the second input to the cost function, i.e. the layers
 
 
 #for two hidden layers with size 100
-network_input_size = inputs_scaled.shape[1]
-layer_output_sizes_100 = [100, 100, 1]
-activation_funcs_100 = [sigmoid, sigmoid, no_activation_func]
-layers_batch_100 = create_layers_batch(network_input_size, layer_output_sizes_100)
-predictions_100 = feed_forward_batch(inputs_scaled, layers_batch_100, activation_funcs_100)
-layers_grad_100 = gradient_func(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered)
-trained_100, history_100, preds_100 = train_network(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered)
+# network_input_size = inputs_scaled.shape[1]
+# layer_output_sizes_100 = [100, 100, 1]
+# activation_funcs_100 = [sigmoid, sigmoid, no_activation_func]
+# layers_batch_100 = create_layers_batch(network_input_size, layer_output_sizes_100)
+# predictions_100 = feed_forward_batch(inputs_scaled, layers_batch_100, activation_funcs_100)
+# layers_grad_100 = gradient_func(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered)
+# trained_100, history_100, preds_100 = train_network(inputs_scaled, layers_batch_100, activation_funcs_100, targets_centered)
 
-colours = ["#aa333c", "#99d2fb", "#9aab64", "#21534c", "#ef9d2c", "#B0a6df", "#2da9cf", "#ff46a2", "#e5194f", "#8f1cab", "#2da9cf", "#3ba336"]
-learning_rates = [0.001, 0.01, 0.1, 0.3]
+# colours = ["#aa333c", "#99d2fb", "#9aab64", "#21534c", "#ef9d2c", "#B0a6df", "#2da9cf", "#ff46a2", "#e5194f", "#8f1cab", "#2da9cf", "#3ba336"]
+# learning_rates = [0.001, 0.01, 0.1, 0.3]
 
 # plt.figure()
 # for idx, each in enumerate(learning_rates):
@@ -353,16 +362,38 @@ learning_rates = [0.001, 0.01, 0.1, 0.3]
 
 
 
-print("funker?")
-#for one hidden layer with size 50
-layer_output_sizes_50 = [50,1]
-activation_funcs_50 = [sigmoid, no_activation_func]
-layers_batch_50 = create_layers_batch(network_input_size, layer_output_sizes_50)
-predictions = feed_forward_batch(inputs_scaled, layers_batch_50, activation_funcs_50)
-layers_grad_50 = gradient_func(inputs_scaled, layers_batch_50, activation_funcs_50, targets_centered) 
-trained_50, history_50, preds_50 = train_network(inputs_scaled, layers_batch_50, activation_funcs_50, targets_centered)
-# for epoch, c, mse in history:
-#     print(f"epoch {epoch:4d}: cost {c:.4f}  mse {mse:.4f}")
+# print("funker?")
+# #for one hidden layer with size 50
+# layer_output_sizes_50 = [50,1]
+# activation_funcs_50 = [sigmoid, no_activation_func]
+# layers_batch_50 = create_layers_batch(network_input_size, layer_output_sizes_50)
+# predictions = feed_forward_batch(inputs_scaled, layers_batch_50, activation_funcs_50)
+# layers_grad_50 = gradient_func(inputs_scaled, layers_batch_50, activation_funcs_50, targets_centered) 
+# trained_50, history_50, preds_50 = train_network(inputs_scaled, layers_batch_50, activation_funcs_50, targets_centered)
+# # for epoch, c, mse in history:
+# #     print(f"epoch {epoch:4d}: cost {c:.4f}  mse {mse:.4f}")
+
+act_functions = [sigmoid, leaky_ReLU, ReLU]
+# n_hidden_layers = [1,2,3,4,5,10,50,100,150]
+n_hidden_layers = [1]
+
+activation_funcs = (np.ones(len(n_hidden_layers))*["sigmoid"]).append([no_activation_func])
+print(activation_funcs)
+
+exit()
+
+# for i in act_functions:
+#     for j in n_hidden_layers:
+#         layer_output_sizes_50 = [50,1]
+#         activation_funcs_50 = (np.ones(len(n_hidden_layers))*[i]).append([no_activation_func])
+        # layers_batch_50 = create_layers_batch(network_input_size, layer_output_sizes_50)
+        # predictions = feed_forward_batch(inputs_scaled, layers_batch_50, activation_funcs_50)
+        # layers_grad_50 = gradient_func(inputs_scaled, layers_batch_50, activation_funcs_50, targets_centered) 
+        # trained_50, history_50, preds_50 = train_network(inputs_scaled, layers_batch_50, activation_funcs_50, targets_centered)
+        # for epoch, c, mse in history:
+        #     print(f"epoch {epoch:4d}: cost {c:.4f}  mse {mse:.4f}")
+
+
 
 
 """
@@ -406,6 +437,13 @@ mse_train, mse_test, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_tes
 
 print(np.mean(inputs_scaled))
 
+y_predict = predict_network(x_test, trained_100, activation_funcs_100)
+"""
+LLM tag for the line above: As the y_predict plotted gave unsatisfying results, we gave the UiO GPT our code for it to debug. The LLM debgugged by identifying 
+our mistake of using the untrained layers in the "predict_network" functions, and we then changed it to use the trained layers instead.
+"""
+
+
 print("funker?")
 plt.figure()
 plt.axvline(x = (np.mean(inputs_scaled)), color = "#9EA09E", linestyle = "dashed", label = rf"$\mu$")
@@ -423,12 +461,20 @@ points = sorted(zip(inputs_scaled, targets_centered))
 x_sorted = [p[0] for p in points]
 y_sorted = [p[1] for p in points]
 
-plt.plot(x_sorted_no_noise, y_sorted_no_noise,  "-", color = "#777977", label = "True function no noise", markersize = 1, alpha = 0.7)
-plt.plot(x_sorted, y_sorted,  "-", color = "#878787", label = "True function with noise", markersize = 1, alpha = 0.4)
-plt.plot(inputs_scaled, preds_100, "o", color = "#aa333c", label = "NN, two layers, size 100", markersize = 1)
-plt.plot(inputs_scaled, preds_50, "o", color = "#21534c", label = "NN, one layer, size 50", markersize = 1)
+
+# plt.plot(x_sorted_no_noise, y_sorted_no_noise,  "-", color = "#777977", label = "True function no noise", markersize = 1, alpha = 0.7)
+print(len(inputs_scaled))
+print(len(preds_100))
+print(len(preds_50))
+print(len(y_tilde))
+print(len(x_sorted))
+print(len(y_sorted))
+plt.plot(x_sorted, y_sorted,  "-", color = "#777977", label = "True function with noise", markersize = 3, alpha = 0.4)
+plt.plot(inputs_scaled, preds_100, "o", color = "#aa333c", label = "NN, two layers, size 100", markersize = 3)
+plt.plot(inputs_scaled, preds_50, "o", color = "#21534c", label = "NN, one layer, size 50", markersize = 3)
 # plt.plot(inputs_scaled, predictions_plain, "o", color = "#e5194f", label = "Neural network plain gradient decent layer size 100", markersize = 2)
-plt.plot(inputs_scaled, y_tilde, "o", color = "#ef9d2c", label = "Polyomial fit using OLS", markersize = 1)
+plt.plot(inputs_scaled, y_tilde, "o", color = "#ef9d2c", label = "Polyomial fit using OLS", markersize = 3)
+plt.plot(x_test, y_predict, "o", color = "#00ff6a", markersize = 3, label = "test 100")
 plt.ylim(-0.45, 0.9)
 plt.xticks(size = 13)
 plt.yticks(size = 13)
@@ -438,4 +484,9 @@ plt.grid(alpha = 0.3)
 plt.legend(fontsize = 10)
 plt.savefig(f"figures/A/neural_network_start_{n}_points.pdf")
 plt.show()
+
+def predict_network(X, layers, activation_functions):
+    return feed_forward_batch(X, layers, activation_functions)
+
+plt.figure()
 
