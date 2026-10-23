@@ -382,7 +382,8 @@ act_functions_names = ["sigmoid", "leaky_ReLU", "ReLU"]
 n_hidden_layers = [1,2,3,5]
 # n_hidden_layers = [1] 
 
-colours = ["#aa333c", "#99d2fb", "#21534c", "#ef9d2c", "#B0a6df", "#2da9cf", "#ff46a2", "#9aab64", "#e5194f", "#8f1cab", "#2da9cf", "#3ba336"]
+colours = ["#aa333c", "#99d2fb", "#4e827b", "#ef9d2c", "#B0a6df", "#2da9cf", "#ff46a2", "#9aab64", "#e5194f", "#8f1cab", "#2da9cf", "#3ba336"]
+colours2 = ["#15353e", "#020202", "#0D3114", "#ef2c2c", "#732775", "#a495cd", "#aaaf0f", "#f4b537", "#5513b9", "#5a585b", "#103a46", "#b83453"]
 
 # exit()
 network_input_size = inputs_scaled.shape[1]
@@ -410,65 +411,101 @@ network_input_size = inputs_scaled.shape[1]
 #     plt.legend()
 # plt.show()
 
-nodes = [50,100]
-n_hidden_layers = [1,2]
-gamma_values = np.logspace(-3,0,5)
+# nodes = [50,100]
+# n_hidden_layers = [1,2]
 
+#================================================================================================================================================
+# FOR PLAIN IKKE ENDRE KODEN:
+# "Kode fra Marie med hjelp av Claude med endring"
+# # gamma_values = np.logspace(-3,0,2)
+# gamma_values = np.logspace(-3, np.log10(0.3), 10)
+# print(gamma_values)
+# nodes = [50, 100]
+# n_hidden_layers = [1, 2]
 
-plt.figure()
-for idx, nod in enumerate(nodes):
-    mse_values_train = []
-    mse_values_test = []
-    for n in n_hidden_layers:
-        for gam in gamma_values:
-            layer_output_sizes = [nod] * n + [1]
-            activation_funcs = [sigmoid] * n + [no_activation_func] #LLM use: Claude used to efficiently create the array for activation functions
-            print(activation_funcs)
-            layers_batch = create_layers_batch(network_input_size, layer_output_sizes)
-            predictions = feed_forward_batch(inputs_scaled, layers_batch, activation_funcs)
-            layers_grad = gradient_func(inputs_scaled, layers_batch, activation_funcs, targets_centered)
-            trained_layers, history, preds, mse_v = train_network_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, gamma = gam)
-            mse_values_train.append(mse_v)
-            for_test_data = predict_network(x_test, trained_layers, activation_funcs)
-            mse_for_test_data = mse(for_test_data, targets_test)
-            mse_values_test.append(mse_for_test_data)
-            # for epoch, c, mse in history:
-            #     print(f"epoch {epoch:4d}: cost {c:.4f}  mse {mse:.4f}")
-plt.plot(gamma_values, mse_values_train, "-o", color = colours[idx], label = f"{act_functions_names[idx]} train")
-plt.plot(gamma_values, mse_values_test, "-o", color = colours[idx+4], label = f"{act_functions_names[idx]} test")
-plt.legend()
-plt.show()
-print(mse_for_test_data)
-print(mse_values_test)
+# m = 0
+# plt.figure(figsize=(8, 5))
+
+# for idx, nod in enumerate(nodes):
+#     for n in n_hidden_layers:
+#         mse_values_train = []
+#         mse_values_test = [] #LLM tag: Claude helped with the placement of the declariation of these lists
+#         layer_output_sizes = [nod] * n + [1]
+#         activation_funcs = [sigmoid] * n + [no_activation_func]
+#         for gam in gamma_values:
+#             print(f"for gamma = {gam}")
+#             layers_batch = create_layers_batch(network_input_size, layer_output_sizes)
+#             trained_layers, history, preds, mse_v = train_network_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, gamma=gam)
+#             test_preds = predict_network(x_test, trained_layers, activation_funcs)
+#             mse_values_train.append(mse_v)
+#             test_mse = mse(test_preds, targets_test)
+#             mse_values_test.append(test_mse)
+#         plt.plot(gamma_values, mse_values_train, "-o", color = colours2[idx+m], label= f" train: {nod} nodes, {n} hidden layer{'s' if n > 1 else ''}")
+#         plt.plot(gamma_values, mse_values_test, "-o", color = colours[idx+m], label=f"test: {nod} nodes, {n} hidden layer{'s' if n > 1 else ''}") #LLM tag: Claude helped with the placement of these plot commands
+#         print("mse train is", mse_values_train)
+#         print("mse test is", mse_values_test)
+#         m+=1
+#     print(np.min(mse_values_train), np.argmin(mse_values_train))
+#     print(np.min(mse_values_test), np.argmin(mse_values_test))
+
+# plt.xlabel("Learning rate γ")
+# plt.ylabel("MSE")
+# plt.legend()
+# plt.show()
+#================================================================================================================================================
+
 
 "Kode fra Marie med hjelp av Claude med endring"
+# gamma_values = np.logspace(-3,0,2)
+gamma_values = np.logspace(-3, np.log10(0.3), 2)
+print(gamma_values)
 nodes = [50, 100]
 n_hidden_layers = [1, 2]
 
-plt.figure(figsize=(8, 5))
+methods = ["adam"]
 
-for nod in nodes:
-    for n in n_hidden_layers:
-        mse_values = []
+for met in methods:
+    if met == "adam":
+        gamma_values = np.logspace(-3, np.log10(0.3), 2)
+    if met == "rmsprop":
+        gamma_values = np.logspace(-3, -1, 2)
+    m = 0
+    plt.figure(figsize=(8, 5))
 
-        layer_output_sizes = [nod] * n + [1]
-        activation_funcs = [sigmoid] * n + [no_activation_func]
+    for idx, nod in enumerate(nodes):
+        for n in n_hidden_layers:
+            mse_values_train = []
+            mse_values_test = [] #LLM tag: Claude helped with the placement of the declariation of these lists
+            layer_output_sizes = [nod] * n + [1]
+            activation_funcs = [sigmoid] * n + [no_activation_func]
+            for gam in gamma_values:
+                print(f"for gamma = {gam}")
+                layers_batch = create_layers_batch(network_input_size, layer_output_sizes)
+                trained_layers, history, preds, mse_v = train_network_stochastic_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, gamma=gam, method = met, schedule = None, epochs = 100)
+                test_preds = predict_network(x_test, trained_layers, activation_funcs)
+                mse_values_train.append(mse_v)
+                test_mse = mse(test_preds, targets_test)
+                mse_values_test.append(test_mse)
+            if (nod == 50 and n == 1):
+                plt.plot(gamma_values, mse_values_train, "-o", color = colours2[idx+m], label= f" train: {nod} nodes, {n} hidden layer{'s' if n > 1 else ''}")
+                plt.plot(gamma_values, mse_values_test, "-o", color = colours[idx+m], label=f"test: {nod} nodes, {n} hidden layer{'s' if n > 1 else ''}") #LLM tag: Claude helped with the placement of these plot commands
+            if (nod == 100 and n == 2):
+                plt.plot(gamma_values, mse_values_train, "-o", color = colours2[idx+m], label= f" train: {nod} nodes, {n} hidden layer{'s' if n > 1 else ''}")
+                plt.plot(gamma_values, mse_values_test, "-o", color = colours[idx+m], label=f"test: {nod} nodes, {n} hidden layer{'s' if n > 1 else ''}") #LLM tag: Claude helped with the placement of these plot commands
+                
+            print("mse train is", mse_values_train)
+            print("mse test is", mse_values_test)
+            m+=1
+        print(np.min(mse_values_train), np.argmin(mse_values_train))
+        print(np.min(mse_values_test), np.argmin(mse_values_test))
 
-        for gam in gamma_values:
-            layers_batch = create_layers_batch(network_input_size, layer_output_sizes)
-            trained_layers, history, preds, mse_v = train_network_gradient(
-                inputs_scaled, layers_batch, activation_funcs, targets_centered, gamma=gam
-            )
-            test_preds = predict_network(x_test, trained_layers, activation_funcs)
-            mse_values.append(mse(test_preds, targets_test))
-
-        plt.plot(gamma_values, mse_values, "-o", label=f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}")
-
-plt.xlabel("Learning rate γ")
-plt.ylabel("MSE")
-plt.title("Test MSE as a function of learning rate")
-plt.legend()
-plt.show()
+    plt.xlabel(rf"Learning rate $\gamma$", fontsize = 14)
+    plt.ylabel("MSE", fontsize = 14)
+    plt.xticks(size = 14)
+    plt.yticks(size = 14)
+    plt.legend()
+    plt.savefig(f"figures/oppgave_b_{met}.pdf")
+    plt.show()
 
 
 
