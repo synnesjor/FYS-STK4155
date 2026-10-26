@@ -288,7 +288,7 @@ def calculate_mse(x, y, degree):
 
 #-------------------------------------------------------- GENERAL PART -----------------------------------------------------------------------------
 part = "part_c"
-sigma = 0.05
+sigma = 0.1
 n = 2000
 
 inputs = rng.uniform(-1,1,n).reshape(-1, 1)
@@ -349,9 +349,10 @@ if part == "part_b":
 
 #-------------------------------------------------------- PART c) -----------------------------------------------------------------------------
 if part == "part_c":
+    ols_deg11_fold25 = np.loadtxt("best_fit_from_project_1_x_and_y.txt")
     print(np.shape(inputs_scaled))
     print(np.shape(targets_centered))
-    mse_train, mse_test, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test= calculate_mse(inputs[:,0], targets[:,0], degree=11)
+    mse_train, mse_test_ols, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test= calculate_mse(inputs[:,0], targets[:,0], degree=7)
     act_functions = [sigmoid, leaky_ReLU, ReLU]
     act_functions_names = ["sigmoid", "leaky_ReLU", "ReLU"]
     n_hidden_layers = [1,2,3,5]
@@ -369,7 +370,7 @@ if part == "part_c":
 nodes = [50, 100]
 n_hidden_layers = [1, 2]
 
-methods = ["rmsprop"]
+methods = ["adam", "rmsprop"]
 
 for met in methods:
     if met == "adam":
@@ -391,6 +392,8 @@ for met in methods:
     x_sorted = [p[0] for p in points]
     y_sorted = [p[1] for p in points]
     plt.plot(x_sorted, y_sorted,  "-", color = "#B5B4B4", label = "True function", markersize = 1, alpha = 0.5)
+    plt.plot(x_test, y_tilde_test, "o", color = "#ef9d2c", label = "Polyomial fit using OLS, deg 6", markersize = 2)
+    plt.plot(ols_deg11_fold25[:,0], ols_deg11_fold25[:,1]+np.mean(targets), "o", color = "#729A72", label = "Polyomial fit using OLS, k-fold 25, deg 11", markersize = 2)
 
     smallest_mse_values = []
     smallest_mse_values_args = []
@@ -423,7 +426,6 @@ for met in methods:
 
             m += 1
 
-    plt.plot(x_test, y_tilde_test, "o", color = "#ef9d2c", label = "Polyomial fit using OLS", markersize = 2)
     plt.plot()
     plt.xlabel("x", fontsize=15)
     plt.ylabel("y", fontsize=15)
@@ -431,7 +433,7 @@ for met in methods:
     plt.yticks(size=15)
     plt.legend(fontsize = 15)
     plt.ylim(-0.33, 1.4)
-    plt.savefig(f"fit_to_runge_{met}_testing_ols_11.pdf")
+    plt.savefig(f"figures/fit_to_runge_{met}_ols_7_and_11.pdf")
     plt.show()
     #------------------------------------------------------------------------------------------------------------------------------------------------
 

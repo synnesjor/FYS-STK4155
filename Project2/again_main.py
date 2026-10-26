@@ -506,7 +506,7 @@ for met in methods:
     plt.yticks(size = 14)
     plt.xscale("log")
     plt.legend()
-    plt.savefig(f"figures/oppgave_b_{met}_2.pdf")
+    plt.savefig(f"figures/oppgave_b_{met}_again_main_2.pdf")
     plt.show()
 
 
