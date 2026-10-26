@@ -11,11 +11,11 @@ rng = np.random.default_rng(2026)
 
 np.random.default_rng(2026)
 
-# your Project 2 network (or the week-41 code: create_layers, feed_forward, backpropagation, train, predict)
+
+# Activation functions
 
 def sigmoid(z):
     return 1 / (1 + jnp.exp(-z))
-
 
 def ReLU(z):
     return jnp.where(z > 0, z, 0.0)
@@ -73,17 +73,28 @@ ACTIVATIONS = {"sigmoid": (sigmoid, lambda z: sigmoid(z) * (1 - sigmoid(z))),
                "lrelu": (leaky_ReLU, leaky_ReLU_derivative),
                "identity": (lambda z: z, lambda z: np.ones_like(z))}
 
-def cost(X, Y, layers, hidden_activation="sigmoid", head="mse"):
+def cost(X, Y, layers, hidden_activation="sigmoid", head="mse", norm="l2", lam=0.0):
     out = predict(X, layers, hidden_activation, head)
+
+    if norm == "l1":
+        norm_value = lam * sum(np.sum(np.abs(W)) for W, _ in layers)
+    elif norm == "l2":
+        norm_value = lam * sum(np.sum(W**2) for W, _ in layers)
+    else:
+        raise ValueError("norm must be 'l1' or 'l2'")
+
     if head == "mse":
-        return 0.5 * np.sum((out - Y) ** 2) / len(X)
-    p = np.clip(out, 1e-12, 1 - 1e-12)
-    if head == "binary":
-        return -np.mean(Y * np.log(p) + (1 - Y) * np.log(1 - p))
-    return -np.mean(np.sum(Y * np.log(p), axis=1))
+        data_loss = 0.5 * np.sum((out - Y) ** 2) / len(X)
+    else:
+        p = np.clip(out, 1e-12, 1 - 1e-12)
+        if head == "binary":
+            data_loss = -np.mean(Y * np.log(p) + (1 - Y) * np.log(1 - p))
+        else:
+            data_loss = -np.mean(np.sum(Y * np.log(p), axis=1))
+    return data_loss + norm_value
 
 
-def backpropagation(X, Y, layers, hidden_activation="sigmoid", head="mse"):
+def backpropagation(X, Y, layers, hidden_activation="sigmoid", head="mse", norm="l2", lam=0.0):
     # The four equations, for all samples at once. Returns [(dW, db), ...] with the shapes of [(W, b), ...].
     act_function, fp = ACTIVATIONS[hidden_activation]
 
@@ -92,13 +103,20 @@ def backpropagation(X, Y, layers, hidden_activation="sigmoid", head="mse"):
     delta = (a[-1] - Y) / len(X)                         # output layer: prediction minus target
     grads = [None] * len(layers)
     for l in range(len(layers) - 1, -1, -1):
-        grads[l] = (a[l].T @ delta, np.sum(delta, axis=0))   # dC/dW = A^T Delta,  dC/db = sum of rows
+        W = layers[l][0]
+        dW = a[l].T @ delta
+        if norm == "l1":
+            dW += lam * np.sign(W)
+        elif norm == "l2":
+            dW += 2 * lam * W
+        else:
+            raise ValueError("norm must be 'l1' or 'l2'")
+        grads[l] = (dW, np.sum(delta, axis=0))   # dC/dW = A^T Delta,  dC/db = sum of rows
         if l > 0:
-            W = layers[l][0]
             delta = (delta @ W.T) * fp(z[l - 1])         # one layer back
     return grads
 
-def train(X, Y, layers, hidden_activation="sigmoid", head="mse", gamma=0.1, epochs=100,
+def train(X, Y, layers, hidden_activation="sigmoid", head="mse", norm="l1", lam=0.0, gamma=0.1, epochs=100,
           batch_size=None, rng=None, X_test=None, y_test=None):
     # Plain gradient descent on minibatches (batch_size=None: all data in every step).
     rng = np.random.default_rng(2026) if rng is None else rng
@@ -109,9 +127,9 @@ def train(X, Y, layers, hidden_activation="sigmoid", head="mse", gamma=0.1, epoc
         order = rng.permutation(n)
         for s in range(0, n, M):
             idx = order[s:s + M]
-            grads = backpropagation(X[idx], Y[idx], layers, hidden_activation, head)
+            grads = backpropagation(X[idx], Y[idx], layers, hidden_activation, head, norm, lam)
             layers = [(W - gamma * dW, b - gamma * db) for (W, b), (dW, db) in zip(layers, grads)]
-        history["cost"].append(cost(X, Y, layers, hidden_activation, head))
+        history["cost"].append(cost(X, Y, layers, hidden_activation, head, norm, lam))
         if X_test is not None:
             pred = np.argmax(predict(X_test, layers, hidden_activation, head), axis=1)
             history["test_accuracy"].append(np.mean(pred == y_test))
@@ -158,7 +176,7 @@ for act_func in ["sigmoid", "tanh", "relu", "lrelu"]:
     t0 = time.time()
     layers = create_layers_batch(784, [100, 10])
     layers, hist = train(x_train, one_hot(y_train, 10), layers, hidden_activation=act_func, head="mse", gamma=0.1, epochs=50,
-            batch_size = 100, rng=None, X_test = x_test, y_test = y_test)
+            batch_size = 100, rng=None, X_test = x_test, y_test = y_test, norm="l2", lam=0.0)
     print(f"test accuracy after 50 epochs for {act_func}: {hist['test_accuracy'][-1]:.2%}  ({time.time() - t0:.0f} s)")
     plt.plot(np.arange(1, len(hist["test_accuracy"])+1), hist["test_accuracy"], label=f"{act_func}")
 plt.ylabel("Accuracy")
@@ -167,6 +185,25 @@ plt.grid()
 plt.legend()
 plt.savefig("Project2/activation_funcs_accuracy.pdf", dpi=300)
 plt.show()
+
+lambda_values = np.logspace(-3, 0, 10)
+# Må fikse plot.
+plt.figure()
+
+for lam in lambda_values:
+    t0 = time.time()
+    layers = create_layers_batch(784, [100, 10])
+    layers, hist = train(x_train, one_hot(y_train, 10), layers, hidden_activation="lrelu", head="mse", gamma=0.1, epochs=50,
+            batch_size = 100, rng=None, X_test = x_test, y_test = y_test, norm="l2", lam=0.0)
+    print(f"test accuracy after 50 epochs for LReLU and lam={lam}: {hist['test_accuracy'][-1]:.2%}  ({time.time() - t0:.0f} s)")
+    plt.plot(np.arange(1, len(hist["test_accuracy"])+1), hist["test_accuracy"], label=f"lam={lam}")
+plt.ylabel("Accuracy")
+plt.xlabel("Epochs")
+plt.grid()
+plt.legend()
+plt.savefig("Project2/l2_accuracy.pdf", dpi=300)
+plt.show()
+
 
 P = predict(x_test, layers, "relu", "softmax")
 pred, pmax = P.argmax(axis=1), P.max(axis=1)
