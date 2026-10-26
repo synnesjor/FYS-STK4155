@@ -63,7 +63,7 @@ def feed_forward_batch(inputs, layers, hidden_activation="sigmoid"):
     return zs, activations
 
 
-def predict(X, layers, hidden_activation="sigmoid", head="mse"):
+def predict(X, layers, hidden_activation="sigmoid"):
     return feed_forward_batch(X, layers, hidden_activation)[1][-1]
 
 # hidden activations: (f, f')
@@ -74,7 +74,7 @@ ACTIVATIONS = {"sigmoid": (sigmoid, lambda z: sigmoid(z) * (1 - sigmoid(z))),
                "identity": (lambda z: z, lambda z: np.ones_like(z))}
 
 def cost(X, Y, layers, hidden_activation="sigmoid", head="mse", norm="l2", lam=0.0):
-    out = predict(X, layers, hidden_activation, head)
+    out = predict(X, layers, hidden_activation)
 
     if norm == "l1":
         norm_value = lam * sum(np.sum(np.abs(W)) for W, _ in layers)
@@ -194,14 +194,14 @@ for lam in lambda_values:
     t0 = time.time()
     layers = create_layers_batch(784, [100, 10])
     layers, hist = train(x_train, one_hot(y_train, 10), layers, hidden_activation="lrelu", head="mse", gamma=0.1, epochs=50,
-            batch_size = 100, rng=None, X_test = x_test, y_test = y_test, norm="l2", lam=0.0)
+            batch_size = 100, rng=None, X_test = x_test, y_test = y_test, norm="l1", lam=0.0)
     print(f"test accuracy after 50 epochs for LReLU and lam={lam}: {hist['test_accuracy'][-1]:.2%}  ({time.time() - t0:.0f} s)")
     plt.plot(np.arange(1, len(hist["test_accuracy"])+1), hist["test_accuracy"], label=f"lam={lam}")
 plt.ylabel("Accuracy")
 plt.xlabel("Epochs")
 plt.grid()
 plt.legend()
-plt.savefig("Project2/l2_accuracy.pdf", dpi=300)
+plt.savefig("Project2/l1_accuracy.pdf", dpi=300)
 plt.show()
 
 
