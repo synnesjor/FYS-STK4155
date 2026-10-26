@@ -104,10 +104,13 @@ def accuracy(predictions, targets):
     return accuracy_score(np.argmax(np.asarray(targets), axis=1), np.argmax(np.asarray(predictions), axis=1))
 
 def gradient_func(inputs, layers, activation_functions, targets, head="mse", norm="l2", lam=0.0):
-    objective = lambda layer_params: cost(
+    '''
+    LLM tag: Claude code, how to write code in needed form for JAX (using lambda command)
+    '''
+    cost_value = lambda layer_params: cost(
         inputs, layer_params, targets, activation_functions, head, norm, lam
     )
-    return jax.grad(objective)(layers)
+    return jax.grad(cost_value)(layers)
 
 
 # i b så ber de om å bruke bare mse - accuracy er ett klassifikasjon problem og vi gjør regression her
@@ -172,7 +175,7 @@ def step_length(t, t0, t1):
     """The schedule of Eq. (4.40)."""
     return t0 / (t + t1)
 
-def train_network_stochastic_gradient(inputs, layers, activation_funcs, targets, schedule, gamma=0.01, epochs=10000, method="plain", batch_size=5, tol=1e-6, seed=2026):
+def train_network_stochastic_gradient(inputs, layers, activation_funcs, targets, schedule, gamma=0.01, epochs=10000, method="plain", batch_size=5, tol=1e-6, seed=2026, norm="l2", lam=0.0):
     """
     LLM tag:
     When we had our own suggestion for how to combine the functions, we checked with the LLMs if they agreed, especially with the 
@@ -186,7 +189,10 @@ def train_network_stochastic_gradient(inputs, layers, activation_funcs, targets,
         # Calculate gradients for the whole network
         for batch in make_batches(len(inputs), batch_size, rng):
             t += 1
-            layers_grad = gradient_func(inputs[batch], layers, activation_funcs, targets[batch])
+            layers_grad = gradient_func(
+                inputs[batch], layers, activation_funcs, targets[batch],
+                norm=norm, lam=lam
+            )
             gamma_t = gamma if schedule is None else step_length(t, *schedule)    
         
             new_layers = []
@@ -204,7 +210,7 @@ def train_network_stochastic_gradient(inputs, layers, activation_funcs, targets,
         # Record training progress
         if epoch % 50 == 0 or epoch == epochs - 1: #find out what this does
             predictions = feed_forward_batch(inputs, layers, activation_funcs)
-            c = cost(inputs, layers, targets, activation_funcs)
+            c = cost(inputs, layers, targets, activation_funcs, norm=norm, lam=lam)
             # acc = accuracy(predictions, targets)
             history.append((epoch, float(c), mse(predictions, targets)))
 
@@ -318,15 +324,16 @@ layer_sizes = [16, 1]
 activation_functions = [sigmoid, no_activation_func]
 layers = create_layers_batch(inputs_scaled.shape[1], layer_sizes)
 
-layers, history, predictions, mse_value = train_network_gradient(
+layers, history, predictions, mse_value = train_network_stochastic_gradient(
     inputs_scaled,
     layers,
     activation_functions,
     targets_centered,
     gamma=0.05,
     epochs=20,
-    norm="l1", # change here to change norm, l1 or l2
-    lam=0.01 # hyperparameter
+    norm="l2", # change here to change norm, l1 or l2
+    lam=0.01,
+    schedule=None
 )
 test_predictions = predict_network(x_test, layers, activation_functions)
 mse_train = mse(predictions, targets_centered)
