@@ -311,8 +311,6 @@ gradient_func = jax.grad(cost, argnums=1)  # Taking the gradient wrt. the second
 #-------------------------------------------------------- PART b) -----------------------------------------------------------------------------
 if part == "part_b":
     ols_deg11_fold25 = np.loadtxt("best_fit_from_project_1_x_and_y.txt")
-    print(np.shape(inputs_scaled))
-    print(np.shape(targets_centered))
     mse_train, mse_test_ols, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test= calculate_mse(inputs[:,0], targets[:,0], degree=7)
     act_functions = [sigmoid, leaky_ReLU, ReLU]
     act_functions_names = ["sigmoid", "leaky_ReLU", "ReLU"]
@@ -327,13 +325,10 @@ if part == "part_b":
 
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    # #Kode fra Marie med hjelp av Claude med endring IKKE ENDRE
-    # #for plotting the actual fit, adam and rmsprop stochastic:
+    #Kode fra Marie med hjelp av Claude med endring IKKE ENDRE
+    #for plotting the actual fit, PLAIN:
     # nodes = [50, 100]
     # n_hidden_layers = [1, 2]
-
-
-    
             
     # m = 0 #just for colours in plot
     # plt.figure(figsize=(8.5, 7.5))
@@ -358,7 +353,10 @@ if part == "part_b":
     # for idx, nod in enumerate(nodes):
     #     for n in n_hidden_layers:
     #         if (nod == 50 and n == 1) or (nod == 100 and n == 2):
-    #             gamma_value = 8
+    #             if (nod == 50 and n == 1):
+    #                 gamma_value = 0.08446
+    #             if (nod == 100 and n == 2):
+    #                 gamma_value = 0.04481
     #             mse_values_train = []
     #             mse_values_test = []
     #             layer_output_sizes = [nod] * n + [1]
@@ -372,10 +370,11 @@ if part == "part_b":
     #             mse_values_test.append(test_mse)
     #             # Plot the MSE values for this architecture
     #             # plt.plot(x_test, test_preds, "-o", markersize = 4, color = colours2[idx+m], label= f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, train")
-    #             plt.plot(x_test, test_preds, "o", markersize = 2, color = colours[idx+m], label=f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, test preds") #LLM tag: Claude helped with the placement of these plot commands
+    #             plt.plot(x_test, test_preds, "o", markersize = 2, color = colours[idx+m], label=f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, test") #LLM tag: Claude helped with the placement of these plot commands
 
+    #             print(f"MSE for {n} hidden layers of {nod} nodes:", mse_values_test)
     #         m += 1
-
+    # print(mse_values_test)
     # plt.plot()
     # plt.xlabel("x", fontsize=15)
     # plt.ylabel("y", fontsize=15)
@@ -389,86 +388,89 @@ if part == "part_b":
     #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    # #Kode fra Marie med hjelp av Claude med endring IKKE ENDRE
-    # #for plotting the actual fit, adam and rmsprop STOCHASTIC:
-    # nodes = [50, 100]
-    # n_hidden_layers = [1, 2]
-    # degree_for_ols_fit = 7
+    #Kode fra Marie med hjelp av Claude med endring IKKE ENDRE
+    #for plotting the actual fit, adam and rmsprop STOCHASTIC:
+    nodes = [50, 100]
+    n_hidden_layers = [1, 2]
+    degree_for_ols_fit = 7
 
-    # methods = ["adam", "rmsprop"]
+    methods = ["rmsprop"]
 
-    # for met in methods:
-    #     if met == "adam":
-    #         gamma_value = 0.013 
-    #     if met == "rmsprop":
-    #         gamma_value = 0.0015
+    for met in methods:
+        if met == "adam":
+            gamma_value = 0.001 
+            print("Doing adam!")
+        if met == "rmsprop":
+            gamma_value = 0.0045
+            print("Doing rmsprop!")
             
-    #     m = 0 #just for colours in plot
-    #     plt.figure(figsize=(8.5, 7.5))
+        m = 0 #just for colours in plot
+        plt.figure(figsize=(8.5, 7.5))
         
-    #     """
-    #     LLM tag:
-    #     The three lines below, used for sorting the points for the true function, was written by ChatGPT.
-    #     """
-    #     points = sorted(zip(inputs_scaled, targets_centered))
-    #     x_sorted = [p[0] for p in points]
-    #     y_sorted = [p[1] for p in points]
-    #     points = sorted(zip(inputs_scaled, targets_centered))
-    #     x_sorted = [p[0] for p in points]
-    #     y_sorted = [p[1] for p in points]
-    #     plt.plot(x_sorted, y_sorted,  "-", color = "#B5B4B4", label = "True function", markersize = 1, alpha = 0.5)
-    #     plt.plot(x_test, y_tilde_test, "o", color = "#ef9d2c", label = "Polyomial fit using OLS, deg {degree_for_ols_fit}", markersize = 2)
-    #     plt.plot(ols_deg11_fold25[:,0], ols_deg11_fold25[:,1]+np.mean(targets), "o", color = "#729A72", label = "Polyomial fit using OLS, k-fold 25, deg 11", markersize = 2)
+        """
+        LLM tag:
+        The three lines below, used for sorting the points for the true function, was written by ChatGPT.
+        """
+        points = sorted(zip(inputs_scaled, targets_centered))
+        x_sorted = [p[0] for p in points]
+        y_sorted = [p[1] for p in points]
+        points = sorted(zip(inputs_scaled, targets_centered))
+        x_sorted = [p[0] for p in points]
+        y_sorted = [p[1] for p in points]
+        plt.plot(x_sorted, y_sorted,  "-", color = "#B5B4B4", label = "True function", markersize = 1, alpha = 0.5)
+        plt.plot(x_test, y_tilde_test, "o", color = "#ef9d2c", label = f"Polyomial fit using OLS, deg {degree_for_ols_fit}", markersize = 2)
+        plt.plot(ols_deg11_fold25[:,0], ols_deg11_fold25[:,1]+np.mean(targets), "o", color = "#729A72", label = "Polyomial fit using OLS, k-fold 25, deg 11", markersize = 2)
 
-    #     smallest_mse_values = []
-    #     smallest_mse_values_args = []
+        smallest_mse_values = []
+        smallest_mse_values_args = []
 
-    #     for idx, nod in enumerate(nodes):
-    #         for n in n_hidden_layers:
-    #             if (nod == 50 and n == 1) or (nod == 100 and n == 2):
-    #                 if (nod == 50 and n == 1) and met == "adam":
-    #                     gamma_value = 0.013
-    #                 if (nod == 50 and n == 1) and met == "adam":
-    #                     gamma_value = 0.013
-    #                 if (nod == 50 and n == 1) and met == "rms_prop":
-    #                     gamma_value = 0.0015
-    #                 if (nod == 50 and n == 1) and met == "rms_prop":
-    #                     gamma_value = 2.1*10**-3
-    #                 mse_values_train = []
-    #                 mse_values_test = []
-    #                 layer_output_sizes = [nod] * n + [1]
-    #                 activation_funcs = [sigmoid] * n + [no_activation_func]
-    #                 layers_batch = create_layers_batch(network_input_size,layer_output_sizes)
-    #                 print("finding trained")
-    #                 trained_layers, history, preds, mse_v = train_network_stochastic_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, gamma = gamma_value, method=met, schedule=None, epochs=100)
-    #                 test_preds = predict_network(x_test,trained_layers,activation_funcs)
-    #                 mse_values_train.append(mse_v)
-    #                 test_mse = mse(test_preds, targets_test)
-    #                 mse_values_test.append(test_mse)
-    #                 # Plot the MSE values for this architecture
-    #                 # plt.plot(x_test, test_preds, "-o", markersize = 4, color = colours2[idx+m], label= f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, train")
-    #                 plt.plot(x_test, test_preds, "o", markersize = 2, color = colours[idx+m], label=f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, test preds") #LLM tag: Claude helped with the placement of these plot commands
+        for idx, nod in enumerate(nodes):
+            for n in n_hidden_layers:
+                if (nod == 50 and n == 1) or (nod == 100 and n == 2):
+                    if (nod == 50 and n == 1) and met == "adam":
+                        gamma_value = 0.007743
+                    if (nod == 100 and n == 2) and met == "adam":
+                        gamma_value = 0.001
+                    if (nod == 50 and n == 1) and met == "rms_prop":
+                        gamma_value = 0.004534
+                    if (nod == 100 and n == 2) and met == "rms_prop":
+                        gamma_value = 0.004534
+                    mse_values_train = []
+                    mse_values_test = []
+                    layer_output_sizes = [nod] * n + [1]
+                    activation_funcs = [sigmoid] * n + [no_activation_func]
+                    layers_batch = create_layers_batch(network_input_size,layer_output_sizes)
+                    print("finding trained")
+                    trained_layers, history, preds, mse_v = train_network_stochastic_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, gamma = gamma_value, method=met, schedule=None, epochs=100)
+                    test_preds = predict_network(x_test,trained_layers,activation_funcs)
+                    mse_values_train.append(mse_v)
+                    test_mse = mse(test_preds, targets_test)
+                    mse_values_test.append(test_mse)
+                    # Plot the MSE values for this architecture
+                    # plt.plot(x_test, test_preds, "-o", markersize = 4, color = colours2[idx+m], label= f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, train")
+                    plt.plot(x_test, test_preds, "o", markersize = 2, color = colours[idx+m], label=f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, test") #LLM tag: Claude helped with the placement of these plot commands
 
-    #             m += 1
+                    print(f"MSE for {n} hidden layers of {nod} nodes:", mse_values_test)
+                m += 1
 
-    #     plt.plot()
-    #     plt.xlabel("x", fontsize=15)
-    #     plt.ylabel("y", fontsize=15)
-    #     plt.xticks(size=15)
-    #     plt.yticks(size=15)
-    #     plt.legend(fontsize = 15)
-    #     plt.ylim(-0.33, 1.4)
-    #     plt.savefig(f"figures/b)/fit_to_runge_{met}_ols_7_and_11.pdf")
-    #     plt.show()
+
+        plt.plot()
+        plt.xlabel("x", fontsize=15)
+        plt.ylabel("y", fontsize=15)
+        plt.xticks(size=15)
+        plt.yticks(size=15)
+        plt.legend(fontsize = 15)
+        plt.ylim(-0.36, 1.4)
+        plt.savefig(f"figures/b)/fit_to_runge_{met}_ols_7_and_11.pdf")
+        plt.show()
 
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    # #Kode fra Marie med hjelp av Claude med endring
-    # #For plotting the mse vs gamma value plots, and finding minumum mse and gamma value for PLAIN
-    # # gamma_values = np.logspace(-3,0,2)
+    # Kode fra Marie med hjelp av Claude med endring
+    # For plotting the mse vs gamma value plots, and finding minumum mse and gamma value for PLAIN
+    # gamma_values = np.logspace(-3,0,2)
     # gamma_values = np.logspace(-3, np.log10(0.3), 10)
-    # print(gamma_values)
-    # print("doing plain!")
+    # print("\nDoing PLAIN!\n")
     # nodes = [50, 100]
     # n_hidden_layers = [1, 2]
 
@@ -488,37 +490,35 @@ if part == "part_b":
     #                 print(f"for gamma = {gam}")
     #                 layers_batch = create_layers_batch(network_input_size, layer_output_sizes)
     #                 trained_layers, history, preds, mse_v = train_network_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, gamma=gam)
-    #                 test_preds = predict_network(x_test, trained_layers, activation_funcs)
+    #                 # test_preds = predict_network(x_test, trained_layers, activation_funcs)
     #                 mse_values_train.append(mse_v)
-    #                 test_mse = mse(test_preds, targets_test)
-    #                 mse_values_test.append(test_mse)
+    #                 # test_mse = mse(test_preds, targets_test)
+    #                 # mse_values_test.append(test_mse)
     #             plt.plot(gamma_values, mse_values_train, "-o", color = colours2[idx+m], label= f" train: {nod} nodes, {n} hidden layer{'s' if n > 1 else ''}")
-    #             plt.plot(gamma_values, mse_values_test, "-o", color = colours[idx+m], label=f"test: {nod} nodes, {n} hidden layer{'s' if n > 1 else ''}") #LLM tag: Claude helped with the placement of these plot commands
-    #             print("mse train is", mse_values_train)
-    #             print("mse test is", mse_values_test)
-    #             smallest_mse_values.append(np.min(mse_values_test))
-    #             smallest_mse_values_args.append(np.argmin(mse_values_test))
+    #             # plt.plot(gamma_values, mse_values_test, "-o", color = colours[idx+m], label=f"test: {nod} nodes, {n} hidden layer{'s' if n > 1 else ''}") #LLM tag: Claude helped with the placement of these plot commands
+    #             # print("mse test is", mse_values_test)
+    #             smallest_mse_values.append(np.min(mse_values_train))
+    #             smallest_mse_values_args.append(np.argmin(mse_values_train))
     #         m+=1
     #     # print(np.min(mse_values_train), np.argmin(mse_values_train))
     #     # print(np.min(mse_values_test), np.argmin(mse_values_test))
 
-    # # Find where the globally lowest architecture-level MSE is located
-    # overall_lowest_index = np.argmin(smallest_mse_values) #LLM tag: UiOGPT was used to identify the smallest mse value and its index, in this line and the two below
-    # # Use the SAME index in both arrays
-    # overall_lowest_mse = smallest_mse_values[overall_lowest_index]
-    # overall_lowest_mse_arg = smallest_mse_values_args[overall_lowest_index]
-    # print("\nSmallest MSE values for each tested architecture:")
-    # print(smallest_mse_values)
-    # print("\nIndices of the smallest MSE for each tested architecture:")
-    # print(smallest_mse_values_args)
-    # print("\nOverall lowest test MSE:")
-    # print("Lowest MSE:", overall_lowest_mse)
-    # print("Index/arg for this lowest MSE:", overall_lowest_mse_arg)
+    #         # Find where the globally lowest architecture-level MSE is located
+    #         overall_lowest_index = np.argmin(smallest_mse_values) #LLM tag: UiOGPT was used to identify the smallest mse value and its index, in this line and the two below
+    #         # Use the SAME index in both arrays
+    #         overall_lowest_mse = smallest_mse_values[overall_lowest_index]
+    #         overall_lowest_mse_arg = smallest_mse_values_args[overall_lowest_index]
+
+    #         if (nod == 50 and n == 1) or (nod == 100 and n == 2):
+    #             print(f"\nFor {n} hidden layers and {nod} nodes:")
+    #             print("Overall lowest test MSE:")
+    #             print("Lowest MSE:", overall_lowest_mse)
+    #             print("Index/arg for this lowest MSE:", overall_lowest_mse_arg)
 
     # # Optional: retrieve the actual learning rate rather than only its index
-    # print("Gamma value for lowest MSE:", gamma_values[overall_lowest_mse_arg])
-    # plt.hlines(overall_lowest_mse, 0, 0.5, label = "Lowest MSE", color = "#7c7c7c", linestyle = "dashed", alpha = 0.4)
-    # plt.axvline(x = gamma_values[overall_lowest_mse_arg], color = "#7c7c7c", label = f"$\\gamma$ for lowest MSE", linestyle = "dotted", alpha = 0.4)
+    #     print("Gamma value for lowest MSE:", gamma_values[overall_lowest_mse_arg], "\n")
+    #     plt.hlines(overall_lowest_mse, 0, 0.5, color = "#7c7c7c", linestyle = "dashed", alpha = 0.4)
+    #     plt.axvline(x = gamma_values[overall_lowest_mse_arg], color = "#7c7c7c", linestyle = "dotted", alpha = 0.4)
     # plt.xlabel(rf"Learning rate $\gamma$", fontsize=15)
     # plt.ylabel("MSE", fontsize=15)
     # plt.xticks(size=15)
@@ -531,84 +531,85 @@ if part == "part_b":
 
 
     #------------------------------------------------------------------------------------------------------------------------------------------------
-    #Kode fra Marie med hjelp av Claude med endring IKKE ENDRE
-    #For plotting the mse vs gamma value plots, and finding minumum mse and gamma value for STOCHASTIC
-    nodes = [50, 100]
-    n_hidden_layers = [1, 2]
+    # Kode fra Marie med hjelp av Claude med endring IKKE ENDRE
+    # For plotting the mse vs gamma value plots, and finding minumum mse and gamma value for STOCHASTIC
+    # nodes = [50, 100]
+    # n_hidden_layers = [1, 2]
 
-    methods = ["rmsprop"]
+    # methods = ["rmsprop"]
 
-    for met in methods:
-        if met == "adam":
-            gamma_values = np.logspace(-3, -1, 10)
-        if met == "rmsprop":
-            gamma_values = np.logspace(-3, np.log10(0.03), 10)
-        print(gamma_values)
-        m = 0 #just for colours in plot
-        if met == "adam":
-            plt.figure(figsize=(8.5, 5.5))
-        if met == "rmsprop":
-            plt.figure(figsize=(9, 5.5))
+    # # print("\nDoing STOCHASIC {method}!\n")
 
-        smallest_mse_values = []
-        smallest_mse_values_args = []
+    # for met in methods:
+    #     if met == "adam":
+    #         gamma_values = np.logspace(-3, -1, 10)
+    #         print("\nDoing STOCHASIC adam!\n")
+    #     if met == "rmsprop":
+    #         gamma_values = np.logspace(-3, np.log10(0.03), 10)
+    #         print("\nDoing STOCHASIC rmsprop!\n")
+    #     m = 0 #just for colours in plot
+    #     if met == "adam":
+    #         plt.figure(figsize=(8.5, 5.5))
+    #     if met == "rmsprop":
+    #         plt.figure(figsize=(9, 5.5))
+
+    #     smallest_mse_values = []
+    #     smallest_mse_values_args = []
     
-        for idx, nod in enumerate(nodes):
-            for n in n_hidden_layers:
-                if (nod == 50 and n == 1) or (nod == 100 and n == 2):
-                    mse_values_train = []
-                    mse_values_test = []
-                    layer_output_sizes = [nod] * n + [1]
-                    activation_funcs = [sigmoid] * n + [no_activation_func]
-                    for gam in gamma_values:
-                        print(f"for gamma = {gam}")
-                        layers_batch = create_layers_batch(network_input_size,layer_output_sizes)
-                        trained_layers, history, preds, mse_v = train_network_stochastic_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, gamma=gam, method=met, schedule=None, epochs=100)
-                        # test_preds = predict_network(x_test,trained_layers,activation_funcs)
-                        mse_values_train.append(mse_v)
-                        # test_mse = mse(test_preds, targets_test)
-                        # mse_values_test.append(test_mse)
-                    # Plot the MSE values for this architecture
-                    plt.plot(gamma_values, mse_values_train, "-o", markersize = 4, color = colours2[idx+m], label= f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, train")
-                    # plt.plot(gamma_values, mse_values_test, "-o", markersize = 4, color = colours[idx+m], label=f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, test") #LLM tag: Claude helped with the placement of these plot commands
-                    print("MSE train is:", mse_values_train)
-                    print("MSE test is:", mse_values_test)
-                    # Save the lowest MSE for THIS architecture,
-                    # plus the index where it occurs in mse_values_test.
-                    smallest_mse_values.append(np.min(mse_values_train))
-                    smallest_mse_values_args.append(np.argmin(mse_values_train))
-                m += 1
-        # Find where the globally lowest architecture-level MSE is located
-        overall_lowest_index = np.argmin(smallest_mse_values) #LLM tag: UiOGPT was used to identify the smallest mse value and its index, in this line and the two below
-        # Use the SAME index in both arrays
-        overall_lowest_mse = smallest_mse_values[overall_lowest_index]
-        overall_lowest_mse_arg = smallest_mse_values_args[overall_lowest_index]
-        print("\nSmallest MSE values for each tested architecture:")
-        print(smallest_mse_values)
-        print("\nIndices of the smallest MSE for each tested architecture:")
-        print(smallest_mse_values_args)
-        print("\nOverall lowest test MSE:")
-        print("Lowest MSE:", overall_lowest_mse)
-        print("Index/arg for this lowest MSE:", overall_lowest_mse_arg)
+    #     for idx, nod in enumerate(nodes):
+    #         for n in n_hidden_layers:
+    #             if (nod == 50 and n == 1) or (nod == 100 and n == 2):
+    #                 mse_values_train = []
+    #                 mse_values_test = []
+    #                 layer_output_sizes = [nod] * n + [1]
+    #                 activation_funcs = [sigmoid] * n + [no_activation_func]
+    #                 for gam in gamma_values:
+    #                     print(f"for gamma = {gam}")
+    #                     layers_batch = create_layers_batch(network_input_size,layer_output_sizes)
+    #                     trained_layers, history, preds, mse_v = train_network_stochastic_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, gamma=gam, method=met, schedule=None, epochs=100)
+    #                     # test_preds = predict_network(x_test,trained_layers,activation_funcs)
+    #                     mse_values_train.append(mse_v)
+    #                     # test_mse = mse(test_preds, targets_test)
+    #                     # mse_values_test.append(test_mse)
+    #                 # Plot the MSE values for this architecture
+    #                 plt.plot(gamma_values, mse_values_train, "-o", markersize = 4, color = colours2[idx+m], label= f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, train")
+    #                 # plt.plot(gamma_values, mse_values_test, "-o", markersize = 4, color = colours[idx+m], label=f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, test") #LLM tag: Claude helped with the placement of these plot commands
+    #                 # Save the lowest MSE for THIS architecture,
+    #                 # plus the index where it occurs in mse_values_test.
+    #                 smallest_mse_values.append(np.min(mse_values_train))
+    #                 smallest_mse_values_args.append(np.argmin(mse_values_train))
+    #             m += 1
+    #     # Find where the globally lowest architecture-level MSE is located
+    #             overall_lowest_index = np.argmin(smallest_mse_values) #LLM tag: UiOGPT was used to identify the smallest mse value and its index, in this line and the two below
+    #             # Use the SAME index in both arrays
+    #             overall_lowest_mse = smallest_mse_values[overall_lowest_index]
+    #             overall_lowest_mse_arg = smallest_mse_values_args[overall_lowest_index]
 
-        # Optional: retrieve the actual learning rate rather than only its index
-        print("Gamma value for lowest MSE:", gamma_values[overall_lowest_mse_arg])
-        plt.hlines(overall_lowest_mse, 0, 0.5, label = "Lowest MSE", color = "#7c7c7c", linestyle = "dashed", alpha = 0.4)
-        plt.axvline(x = gamma_values[overall_lowest_mse_arg], color = "#7c7c7c", label = f"$\\gamma$ for lowest MSE", linestyle = "dotted", alpha = 0.4)
-        plt.xlabel(rf"Learning rate $\gamma$", fontsize=15)
-        plt.ylabel("MSE", fontsize=15)
-        plt.xticks(size=15)
-        plt.yticks(size=15)
-        plt.xscale("log")
-        if met == "adam": 
-            plt.xlim(8*10**-4, 0.2)
-            plt.ylim(0.009, 0.014)
-            plt.legend(fontsize=13, loc = "upper right")
-        if met == "rmsprop":
-            plt.xlim(7.5*10**-4, 5*10**-2)
-            plt.legend(fontsize=13, loc = "upper left")
-        plt.savefig(f"figures/b)/oppgave_b_stochastic_{met}_mse_vs_gamma_with_limits.pdf")
-        plt.show()
+    #             if (nod == 50 and n == 1) or (nod == 100 and n == 2):
+    #                 print(f"\nFor {n} hidden layers and {nod} nodes:")
+    #                 print("Overall lowest test MSE:")
+    #                 print("Lowest MSE:", overall_lowest_mse)
+    #                 print("Index/arg for this lowest MSE:", overall_lowest_mse_arg)
+
+
+    #     # Optional: retrieve the actual learning rate rather than only its index
+    #         print("Gamma value for lowest MSE:", gamma_values[overall_lowest_mse_arg], "\n")
+    #         plt.hlines(overall_lowest_mse, 0, 0.5, color = "#7c7c7c", linestyle = "dashed", alpha = 0.4)
+    #         plt.axvline(x = gamma_values[overall_lowest_mse_arg], color = "#7c7c7c", linestyle = "dotted", alpha = 0.4)
+    #     plt.xlabel(rf"Learning rate $\gamma$", fontsize=15)
+    #     plt.ylabel("MSE", fontsize=15)
+    #     plt.xticks(size=15)
+    #     plt.yticks(size=15)
+    #     plt.xscale("log")
+    #     if met == "adam": 
+    #         plt.xlim(8*10**-4, 0.2)
+    #         plt.ylim(0.009, 0.014)
+    #         plt.legend(fontsize=13, loc = "upper right")
+    #     if met == "rmsprop":
+    #         plt.xlim(7.5*10**-4, 5*10**-2)
+    #         plt.legend(fontsize=13, loc = "upper right")
+    #     plt.savefig(f"figures/b)/oppgave_b_stochastic_{met}_mse_vs_gamma.pdf")
+    #     plt.show()
     #------------------------------------------------------------------------------------------------------------------------------------------------
 
 
