@@ -375,8 +375,7 @@ ax.grid(True, alpha=0.3)
 
 # Limits the y-axis
 padding = max(3 * stds.max(), 0.005)
-ax.set_ylim(max(0, means.min() - padding),
-            min(1, means.max() + padding))
+ax.set_ylim(max(0, means.min() - padding), min(1, means.max() + padding))
 
 for mean in means:
     ax.axhline(mean, ls="--", alpha=0.4, color="black")
@@ -427,6 +426,19 @@ plt.savefig("Project2/norm_accuracy.pdf", dpi=300)
 
 plt.show()
 
+select_baseline_model = True
+
+while select_baseline_model:
+    t0 = time.time()
+    lam_adam = 1e-4
+    layers = create_layers_batch(784, [10])
+    layers, hist = train(x_train, one_hot(y_train, 10), layers, hidden_activation="relu", head="cross", method="plain", gamma=gamma_plain, epochs=50,
+                    batch_size = 100, rng=None, X_test = x_test, y_test = y_test, norm="l2", lam=0.0)
+
+    print(f"test accuracy after 50 epochs for ReLU and lam={0.0}: {hist['test_accuracy'][-1]:.2%}  ({time.time() - t0:.0f} s)")
+
+    select_baseline_model = False
+
 
 select_best_model = False
 # Use the best model, plain, relu, gamma=gamma_plain, no norm
@@ -437,7 +449,7 @@ while select_best_model:
     layers, hist = train(x_train, one_hot(y_train, 10), layers, hidden_activation="relu", head="cross", method="plain", gamma=gamma_plain, epochs=50,
                     batch_size = 100, rng=None, X_test = x_test, y_test = y_test, norm="l2", lam=0.0)
 
-    print(f"test accuracy after 100 epochs for ReLU and lam={0.0}: {hist['test_accuracy'][-1]:.2%}  ({time.time() - t0:.0f} s)")
+    print(f"test accuracy after 50 epochs for ReLU and lam={0.0}: {hist['test_accuracy'][-1]:.2%}  ({time.time() - t0:.0f} s)")
 
     P = predict(x_test, layers, "relu", "cross")
     pred, pmax = P.argmax(axis=1), P.max(axis=1)
@@ -471,11 +483,8 @@ while select_best_model:
 
     for row, i in enumerate(k):
         delta = P[i] - one_hot(y_test[i:i + 1], 10)[0]
+        print(f"image {i} (label {y_test[i]}): " f"delta^L = a - y = {np.round(delta, 3)}")
 
-        print(
-            f"image {i} (label {y_test[i]}): "
-            f"delta^L = a - y = {np.round(delta, 3)}"
-        )
     # LLM-tag - easy way to save the data from the model:
     # Save all weights and biases.
     np.savez(
@@ -512,16 +521,9 @@ history = {"epoch": history_data[0],"cost": history_data[1],"test_accuracy": his
 saved_model = np.load("Project2/best_model_layers.npz")
 P = saved_model["P"]
 
-layer_indices = sorted({
-    int(name.split("_")[1])
-    for name in saved_model.files
-    if name.startswith("layer_")
-})
+layer_indices = sorted({int(name.split("_")[1]) for name in saved_model.files if name.startswith("layer_")})
 
-layers = [
-    (saved_model[f"layer_{i}_W"], saved_model[f"layer_{i}_b"])
-    for i in layer_indices
-]
+layers = [(saved_model[f"layer_{i}_W"], saved_model[f"layer_{i}_b"]) for i in layer_indices]
 
 from sklearn.metrics import (confusion_matrix as sk_confusion_matrix, ConfusionMatrixDisplay,
                              accuracy_score, precision_score, recall_score, f1_score,

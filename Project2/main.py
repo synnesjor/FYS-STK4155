@@ -286,7 +286,7 @@ def calculate_mse(x, y, degree):
 
 
 #-------------------------------------------------------- GENERAL PART -----------------------------------------------------------------------------
-part = "part_c"
+part = "part_f"
 sigma = 0.1
 n = 2000
 
@@ -683,27 +683,71 @@ if part == "part_c":
 
     #================================================================================================================================================
     
+# Cross validation of learning rate
 
+from sklearn.model_selection import KFold
 
+def cross_validate_network(X, y, layer_output_sizes, activation_funcs, gamma=0.01, epochs=100, method="plain", n_splits=5):
+    kfold = KFold(n_splits=n_splits, shuffle=True, random_state=SEED)
+    validation_mse = []
+    train_mse_values = []
 
-       
+    for fold, (train_idx, val_idx) in enumerate(kfold.split(X)):
+        rng = np.random.default_rng(SEED + fold)
 
+        layers = create_layers_batch(X.shape[1], layer_output_sizes)
 
+        trained_layers, _, _, train_mse = train_network_gradient(
+                X[train_idx],
+                layers,
+                activation_funcs,
+                y[train_idx],
+                gamma=gamma,
+                epochs=epochs,
+                method=method
+            )
 
+        train_mse_values.append(train_mse)
 
+        val_predictions = predict_network(X[val_idx], trained_layers, activation_funcs)
+        fold_mse = float(mse(val_predictions,y[val_idx]))
 
+        validation_mse.append(fold_mse)
+        print(f"Fold {fold + 1}: MSE = {fold_mse:.6g}")
 
+    validation_mse = np.array(validation_mse)
 
+    return np.array(train_mse_values), np.array(validation_mse)
 
+if part == "part_f":
 
+    layer_output_sizes = [100] * 5 + [1]
+    activation_funcs = [leaky_ReLU] * 5 + [no_activation_func] #LLM use: Claude used to efficiently create the array for activation functions
 
+    gamma_values = np.logspace(-3, 0, 25)
+    best_parameter = None
+    best_mse = 1e6 # Choose high MSE
 
+    mse_train_values = []
+    mse_val_values = []
+    for gamma in gamma_values:
+        scores_val, scores_train = cross_validate_network(inputs_scaled, targets_centered, layer_output_sizes, activation_funcs, gamma=gamma, epochs=100, method="plain", n_splits=3)
+        print(f"MSE validation Mean {scores_val.mean()} SD {np.std(scores_val)}")
+        print(f"MSE train Mean {scores_train.mean()} SD {np.std(scores_train)}")
+        
+        mse_val_values.append(scores_val.mean())
+        mse_train_values.append(scores_train.mean())
 
+        if scores_val.mean() < best_mse:
+            best_parameter = gamma
+            best_mse = scores_val.mean()
+            print(f"New gamma: {gamma}")
 
+    print("Best gamma from cross validation for method plain", best_parameter)
 
-
-
-
-
-
-
+    plt.figure()
+    plt.plot(gamma_values, mse_val_values, label="Test")
+    plt.plot(gamma_values, mse_train_values, label="Train")
+    plt.grid()
+    plt.legend()
+    plt.show()
