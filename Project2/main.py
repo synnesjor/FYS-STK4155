@@ -79,9 +79,18 @@ def mse(predict, target):
     return jnp.mean((target-predict)**2)
 
 
-def cost(input, layers, activation_funcs, target):
-    predict = feed_forward_batch(input, layers, activation_funcs)
-    return mse(predict, target)
+def cost(inputs, layers, target, hidden_activation="sigmoid", norm="l2", lam=0.0):
+    out = predict_network(inputs, layers, hidden_activation)
+
+    if norm == "l1":
+        norm_value = lam * sum(jnp.sum(jnp.abs(W)) for W, _ in layers)
+    elif norm == "l2":
+        norm_value = lam * sum(jnp.sum(W**2) for W, _ in layers)
+    else:
+        raise ValueError("norm must be 'l1' or 'l2'")
+
+    data_loss = mse(out, target)
+    return data_loss + norm_value
 
 
 def feed_forward_batch(inputs, layers, activation_funcs):
@@ -95,6 +104,16 @@ def accuracy(predictions, targets):
     """Fraction of rows whose largest predicted probability sits in the correct class."""
     return accuracy_score(np.argmax(np.asarray(predictions), axis=1), np.argmax(np.asarray(targets)))
 
+def gradient_func(inputs, layers, activation_functions, targets, norm="l2", lam=0.0):
+    '''
+    LLM tag: Claude code, how to write code in needed form for JAX (using lambda command)
+    '''
+    cost_value = lambda layer_params: cost(
+        inputs, layer_params, targets, activation_functions, norm, lam
+    )
+    return jax.grad(cost_value)(layers)
+
+
 # i b så ber de om å bruke bare mse - accuracy er ett klassifikasjon problem og vi gjør regression her
 def train_network(inputs, layers, activation_funcs, targets, gamma=0.1, epochs = 10000):
     history = []
@@ -106,7 +125,7 @@ def train_network(inputs, layers, activation_funcs, targets, gamma=0.1, epochs =
             history.append((epoch, float(cost(inputs, layers, activation_funcs, targets)), mse(predictions, targets)))
     return layers, history, predictions, mse(predictions, targets)
 
-def train_network_gradient(inputs, layers, activation_funcs, targets, gamma=0.01, epochs=10000, method="plain", tol = 0):
+def train_network_gradient(inputs, layers, activation_funcs, targets, norm="l2", lam=0.0, gamma=0.01, epochs=10000, method="plain", tol = 0):
     """
     LLM tag:
     With the train_network function as a base, we asked ChatGPT and Claude if it made sense to reuse optimiser step function used in Project 1. 
@@ -119,7 +138,9 @@ def train_network_gradient(inputs, layers, activation_funcs, targets, gamma=0.01
     for epoch in range(epochs):
         # param_old = param.copy()
         # Calculate gradients for the whole network
-        layers_grad = gradient_func(inputs, layers, activation_funcs, targets)
+        layers_grad = gradient_func(
+            inputs, layers, activation_funcs, targets, norm=norm, lam=lam
+        )
 
         new_layers = []
         new_states = []
@@ -138,7 +159,7 @@ def train_network_gradient(inputs, layers, activation_funcs, targets, gamma=0.01
         # Record training progress
         if epoch % 50 == 0 or epoch == epochs - 1:
             predictions = feed_forward_batch(inputs, layers, activation_funcs)
-            c = cost(inputs, layers, activation_funcs, targets)
+            c = cost(inputs, layers, targets, activation_funcs, norm=norm, lam=lam)
             # acc = accuracy(predictions, targets)
             history.append((epoch, float(c), mse(predictions, targets)))
 
@@ -301,7 +322,6 @@ targets_centered_no_noise = targets_no_noise - np.mean(targets_no_noise)
 inputs_scaled, x_test, targets_centered, y_test = train_test_split(inputs_scaled, targets_centered, test_size = 0.2, random_state = 2026)
 targets_test = runge_1d(x_test, sigma, len(x_test))
 
-gradient_func = jax.grad(cost, argnums=1)  # Taking the gradient wrt. the second input to the cost function, i.e. the layers
 #-------------------------------------------------------- GENERAL PART -----------------------------------------------------------------------------
 
 
@@ -687,7 +707,7 @@ if part == "part_c":
 
 from sklearn.model_selection import KFold
 
-def cross_validate_network(X, y, layer_output_sizes, activation_funcs, gamma=0.01, epochs=100, method="plain", n_splits=5):
+def cross_validate_network(X, y, layer_output_sizes, activation_funcs, gamma=0.01, norm="l2", lam=0.0, epochs=100, method="plain", n_splits=5):
     kfold = KFold(n_splits=n_splits, shuffle=True, random_state=SEED)
     validation_mse = []
     train_mse_values = []
@@ -704,7 +724,9 @@ def cross_validate_network(X, y, layer_output_sizes, activation_funcs, gamma=0.0
                 y[train_idx],
                 gamma=gamma,
                 epochs=epochs,
-                method=method
+                method=method,
+                norm=norm,
+                lam=lam
             )
 
         train_mse_values.append(train_mse)
