@@ -32,6 +32,13 @@ def softmax(z):
     e_z = jnp.exp(z - jnp.max(z, axis=1, keepdims=True)) # LLM-tag (Claude Code) make this True
     return e_z / jnp.sum(e_z, axis=1, keepdims=True)
 
+# hidden activations: (f, f')
+ACTIVATIONS = {"sigmoid": (sigmoid, lambda z: sigmoid(z) * (1 - sigmoid(z))),
+               "tanh": (np.tanh, lambda z: 1 - np.tanh(z) ** 2),
+               "relu": (ReLU, lambda z: (z > 0).astype(float)),
+               "lrelu": (leaky_ReLU, leaky_ReLU_derivative),
+               "identity": (lambda z: z, lambda z: np.ones_like(z))}
+
 def create_layers_batch(network_input_size, layer_output_sizes):
     layers = []
     i_size = network_input_size
@@ -43,7 +50,7 @@ def create_layers_batch(network_input_size, layer_output_sizes):
         i_size = layer_output_size
     return layers
 
-def feed_forward_batch(inputs, layers, hidden_activation="sigmoid", head="binary"):
+def feed_forward_batch(inputs, layers, hidden_activation="sigmoid", head="cross"):
     """
     LLM tag: Gave ChatGPT some of my functions, as there were some issues with the dictionary used for the activation functions.
     The LLM helped debug some lines. However, the final solution was to hardcode the sigmoid as the activation function, as this is the one
@@ -71,17 +78,11 @@ def feed_forward_batch(inputs, layers, hidden_activation="sigmoid", head="binary
     return zs, activations
 
 
-def predict(X, layers, hidden_activation="sigmoid", head="binary"):
+def predict(X, layers, hidden_activation="sigmoid", head="cross"):
     return feed_forward_batch(X, layers, hidden_activation, head)[1][-1]
 
-# hidden activations: (f, f')
-ACTIVATIONS = {"sigmoid": (sigmoid, lambda z: sigmoid(z) * (1 - sigmoid(z))),
-               "tanh": (np.tanh, lambda z: 1 - np.tanh(z) ** 2),
-               "relu": (ReLU, lambda z: (z > 0).astype(float)),
-               "lrelu": (leaky_ReLU, leaky_ReLU_derivative),
-               "identity": (lambda z: z, lambda z: np.ones_like(z))}
 
-def cost(X, Y, layers, hidden_activation="sigmoid", head="binary", norm="l2", lam=0.0):
+def cost(X, Y, layers, hidden_activation="sigmoid", head="cross", norm="l2", lam=0.0):
     out = predict(X, layers, hidden_activation, head)
 
     if norm == "l1":
@@ -107,11 +108,9 @@ def backpropagation(X, Y, layers, hidden_activation="sigmoid", head="cross", nor
     # The four equations, for all samples at once. Returns [(dW, db), ...] with the shapes of [(W, b), ...].
     act_function, fp = ACTIVATIONS[hidden_activation]
 
-    z, a = feed_forward_batch(X, layers, hidden_activation)
-    if head == "mse":
-        delta = 2*(a[-1] - Y) / len(X)
-    elif head in ["binary", "cross"]:
-        delta = (a[-1] - Y) / len(X)
+    z, a = feed_forward_batch(X, layers, hidden_activation, head)
+    delta = (a[-1] - Y) / len(X)
+
     grads = [None] * len(layers)
     for l in range(len(layers) - 1, -1, -1):
         W = layers[l][0]
@@ -154,7 +153,7 @@ def optimiser_step(method, param, g, state, t, gamma, beta=0.9, rho=0.99,
         return param - gamma * m_hat / (np.sqrt(r_hat) + eps), state   # Eq. (4.55)
     raise ValueError(f"unknown method {method}")
 
-def train(X, Y, layers, hidden_activation="sigmoid", head="cross", norm="l1", lam=0.0, gamma=0.1, epochs=100, method="adam", rng=None, batch_size=None, X_test=None, y_test=None, tol=1e-6):
+def train(X, Y, layers, hidden_activation="sigmoid", head="cross", norm="l1", lam=0.0, gamma=0.1, epochs=100, method="plain", rng=None, batch_size=None, X_test=None, y_test=None, tol=1e-6):
     states = [({"W": {}, "b": {}}, {"W": {}, "b": {}}) for W, b in layers]
     history = {"cost": [], "test_accuracy": [], }
     rng = np.random.default_rng(2026) if rng is None else np.random.default_rng(rng)
@@ -174,6 +173,7 @@ def train(X, Y, layers, hidden_activation="sigmoid", head="cross", norm="l1", la
                 b, state_b = optimiser_step(method, b, db, state_b,epoch + 1, gamma)
                 new_layers.append((W, b))
                 new_states.append((state_W, state_b))
+            states = new_states
             layers = new_layers
         history["cost"].append(cost(X, Y, layers, hidden_activation, head, norm, lam))
         if X_test is not None:
@@ -181,11 +181,6 @@ def train(X, Y, layers, hidden_activation="sigmoid", head="cross", norm="l1", la
             history["test_accuracy"].append(np.mean(pred == y_test))
 
     return layers, history
-
-
-def accuracy(predictions, targets):
-    """Fraction of rows whose largest predicted probability sits in the correct class."""
-    return accuracy_score(np.argmax(np.asarray(predictions), axis=1), np.argmax(np.asarray(targets)))
 
 
 def one_hot(y, n_classes):
@@ -196,7 +191,7 @@ def one_hot(y, n_classes):
 from sklearn.model_selection import StratifiedKFold
 
 
-def cross_validate_neural_network(X, y, hidden_sizes=[100], epochs=50, n_splits=5, norm="l2", lam=0.0, gamma=0.1):
+def cross_validate_neural_network(X, y, hidden_sizes=[100], method="plain", epochs=50, n_splits=5, norm="l2", lam=0.0, gamma=0.1):
     y = np.array(y)
     folds = StratifiedKFold(n_splits=n_splits,shuffle=True, random_state=2026)
 
@@ -221,7 +216,7 @@ def cross_validate_neural_network(X, y, hidden_sizes=[100], epochs=50, n_splits=
             norm=norm,
             lam=lam,
             gamma=gamma,
-            method="plain",
+            method=method,
             batch_size=100,
             epochs=epochs,
             rng=2026 + fold,
@@ -234,7 +229,7 @@ def cross_validate_neural_network(X, y, hidden_sizes=[100], epochs=50, n_splits=
 
         print(f"Fold {fold + 1}: {score:.4f}")
 
-    return np.array(fold_scores)
+    return np.mean(fold_scores), np.std(fold_scores, ddof=1) / np.sqrt(n_splits)
 
 plt.rcParams.update({'font.size': 13})
 
@@ -258,93 +253,236 @@ small_y_train = DATA["y_train"][indices].astype(int)
 
 # First tune architecture:
 
-select_architecture_gamma = False
+select_architecture = False
 
-while select_architecture_gamma:
+while select_architecture:
     architectures = [[50], [100], [100, 10], [100, 50]]
     gammas = np.linspace(0.01, 0.5, 10)
     best_parameters = None
-    best_accuracy = 0
+    best_accuracy = 0 # choose small value since we want to values closest to 1
+    save_parameters = []
+    save_accuracy = []
+    # Hard coding grid search
     for architecture in architectures:
         for gamma in gammas:
-            scores = cross_validate_neural_network(
+            t0 = time.time()
+            cv_mean, cv_sd = cross_validate_neural_network(
                 small_x_train, small_y_train, hidden_sizes=architecture,
                 epochs=50, n_splits=3, lam=0.0, gamma=gamma
             )
-            print(architecture, gamma, f"mean={scores.mean():.4f}", f"SD={scores.std():.4f}")
-            if scores.mean() > best_accuracy:
+            print(architecture, gamma, f"mean={cv_mean:.4f}", f"SD={cv_sd:.4f}", f"({round(time.time()-t0)} s)")
+            save_parameters.append((architecture, gamma))
+            save_accuracy.append(cv_mean)
+            if cv_mean > best_accuracy:
                 best_parameters = (architecture, gamma)
-                best_accuracy = scores.mean()
+                best_accuracy = cv_mean
+                threshold = cv_mean - cv_sd # Minus, since we want higher values
+
+    save_accuracy = np.array(save_accuracy)
+    within_one_sd = save_accuracy >= threshold
+    eligible_indices = np.where(within_one_sd)[0]
+
+    eligible_parameters = [save_parameters[i] for i in eligible_indices]
+    
+    for i in eligible_indices:
+        print(f"Eligible parameters: {save_parameters[i]} " f"with accuracy {save_accuracy[i]:.4f} ")
+
     print(f"Best Architecture: {best_parameters[0]}; Best Learning Rate: {best_parameters[1]}")
-    select_architecture_gamma = False
+    select_architecture = False
 
 best_architecture = [100, 50]
 
-select_learning_rate = False
+select_learning_rate_norm = False
 # Selected using smaller training set (10000):
-while select_learning_rate:
-    gammas = np.linspace(0.01, 0.6, 31)
-    best_gamma = None
+# Change between plain, adam and rms here.
+while select_learning_rate_norm:
+    gammas = np.linspace(0.01, 0.6, 5)
+    lambda_values = np.linspace(0, 1e-3, 5)
+    best_parameters = None
     best_accuracy = 0
+    save_accuracy = []
+    save_parameters = []
+    for gamma in gammas:
+        for lam in lambda_values:
+            t0 = time.time()
+            cv_mean, cv_sd = cross_validate_neural_network(
+                small_x_train, small_y_train, hidden_sizes=best_architecture,
+                epochs=50, n_splits=3, lam=lam, norm="l2", gamma=gamma, method="plain"
+            )
+            print(gamma, lam, f"mean={cv_mean:.4f}", f"SD={cv_sd:.4f}", f"({round(time.time()-t0)} s)")
+
+            save_accuracy.append(cv_mean)
+            save_parameters.append((gamma, lam))
+            if best_accuracy < cv_mean:
+                best_parameters = (gamma, lam)
+                best_accuracy = cv_mean
+                threshold = cv_mean - cv_sd
+    
+    save_accuracy = np.array(save_accuracy)
+    within_one_sd = save_accuracy >= threshold
+    eligible_indices = np.where(within_one_sd)[0]
+
+    eligible_parameters = [save_parameters[i] for i in eligible_indices]
+    
+    for i in eligible_indices:
+        print(f"Eligible parameters: {save_parameters[i]} " f"with accuracy {save_accuracy[i]:.4f} ")
+
+    print(f"Best Learning Rate: {best_parameters[0]}; Best L2 penalty parameter: {best_parameters[1]}")
+    select_learning_rate_norm = False
+    
+eligible_parameters_l2 = [(np.float64(0.305), np.float64(0.00025)), 
+                       (np.float64(0.305), np.float64(0.0005)), 
+                       (np.float64(0.4525), np.float64(0.0)),
+                       (np.float64(0.4525), np.float64(0.00025)),
+                       (np.float64(0.4525), np.float64(0.0005)),
+                       (np.float64(0.6), np.float64(0.0)),
+                       (np.float64(0.6), np.float64(0.00025))]
+
+
+select_learning_rate_norm_with_test_data = False
+# Using test data to confirm learning rate and norm.
+while select_learning_rate_norm_with_test_data:
+    save_parameters = []
+    save_accuracy = []
+    hidden_sizes = best_architecture
+    # Plain:
+    for idx, (gamma, lam) in enumerate(eligible_parameters_l2):
+        t0 = time.time()
+        layers = create_layers_batch(784, hidden_sizes + [10])
+        layers, history = train(
+        x_train,
+        one_hot(y_train, 10),
+        layers,
+        hidden_activation="relu",
+        head="cross",
+        gamma=gamma,
+        method="plain",
+        batch_size=100,
+        epochs=50,
+        rng=2026,
+        X_test=x_test,
+        y_test=y_test,
+        lam=lam
+        )
+        accuracy = history["test_accuracy"][-1]
+
+        save_parameters.append((gamma, lam))
+        save_accuracy.append(accuracy)
+        print(gamma, lam, f"accuracy={accuracy:.4f}" f"({round(time.time()-t0)} s)")
+
+    best_idx = int(np.argmax(save_accuracy))
+
+    print(f"Best parameters: {save_parameters[best_idx]};", f"Accuracy: {save_accuracy[best_idx]}")
+
+    select_learning_rate_norm_with_test_data = False
+
+# Analysis confirms lam=0.0
+optimal_lam = 0
+
+select_learning_rate = False
+
+while select_learning_rate:
+    gammas = np.linspace(0.01, 0.6, 30)
+    best_parameters = None
+    best_accuracy = 0
+    save_accuracy = []
+    save_parameters = []
     for gamma in gammas:
         t0 = time.time()
-        scores = cross_validate_neural_network(
+        cv_mean, cv_sd = cross_validate_neural_network(
             small_x_train, small_y_train, hidden_sizes=best_architecture,
-            epochs=50, n_splits=3, lam=0.0, gamma=gamma
+            epochs=50, n_splits=3, lam=optimal_lam, norm="l2", gamma=gamma, method="plain"
         )
-        print(f"gamma={gamma}", f"mean={scores.mean():.4f}", f"SD={scores.std():.4f}", f"({round(time.time()-t0)}")
-        if best_accuracy < scores.mean():
-            best_gamma = gamma
-            best_accuracy = scores.mean()
+        print(gamma, f"mean={cv_mean:.4f}", f"SD={cv_sd:.4f}", f"({round(time.time()-t0)} s)")
+
+        save_accuracy.append(cv_mean)
+        save_parameters.append(gamma)
+        if best_accuracy < cv_mean:
+            best_parameters = gamma
+            best_accuracy = cv_mean
+            threshold = cv_mean - cv_sd
     
-    print(f"Best learning rate: gamma={best_gamma}")
+    save_accuracy = np.array(save_accuracy)
+    within_one_sd = save_accuracy >= threshold
+    eligible_indices = np.where(within_one_sd)[0]
+
+    eligible_parameters = [save_parameters[i] for i in eligible_indices]
+    
+    for i in eligible_indices:
+        print(f"Eligible parameters: {save_parameters[i]} " f"with accuracy {save_accuracy[i]:.4f} ")
+
+    print(f"Best Learning Rate: {best_parameters}")
     select_learning_rate = False
-    
-gamma_adam = 0.01584893192461114
-gamma_rms = 0.002511886431509582
-gamma_plain = 0.22633333333333333
 
-select_activation_function = False
+eligible_gamma = np.array([0.396551724137931, 0.5186206896551724, 0.579655172413793])
 
-# Selected using full training data, discarded.
-while select_activation_function:
-    # Må fikse plot.
-    plt.figure()
-    for act_func in ["sigmoid", "tanh", "relu", "lrelu"]:
-        for method, gamma in [("plain", gamma_plain), ("rmsprop", gamma_rms), ("adam", gamma_adam)]:
-            t0 = time.time()
-            layers = create_layers_batch(784, best_architecture + [10])
-            layers, hist = train(x_train, one_hot(y_train, 10), layers, hidden_activation=act_func, head="cross", method=method, gamma=gamma, epochs=50,
-                    batch_size = 100, rng=None, X_test = x_test, y_test = y_test, norm="l2", lam=0.0)
-            print(f"test accuracy after 50 epochs for {act_func} and {method}: {hist['test_accuracy'][-1]:.2%}  ({time.time() - t0:.0f} s)")
-            plt.plot(np.arange(1, len(hist["test_accuracy"])+1), hist["test_accuracy"], label=f"{act_func}, {method}")
+select_final_learning_rate = False
 
-    plt.ylabel("Accuracy")
-    plt.xlabel("Epochs")
-    plt.grid()
-    plt.legend()
-    plt.savefig("Project2/activation_funcs_accuracy.pdf", dpi=300)
-    plt.show()
-    select_activation_function = False
+while select_final_learning_rate:
+    save_parameters = []
+    save_accuracy = []
+    hidden_sizes = best_architecture
+    # Plain:
+    for idx, gamma in enumerate(eligible_gamma):
+        t0 = time.time()
+        layers = create_layers_batch(784, hidden_sizes + [10])
+        layers, history = train(
+        x_train,
+        one_hot(y_train, 10),
+        layers,
+        hidden_activation="relu",
+        head="cross",
+        gamma=gamma,
+        method="plain",
+        batch_size=100,
+        epochs=50,
+        rng=2026,
+        X_test=x_test,
+        y_test=y_test,
+        lam=optimal_lam
+        )
+        accuracy = history["test_accuracy"][-1]
+
+        save_parameters.append(gamma)
+        save_accuracy.append(accuracy)
+        print(gamma, f"accuracy={accuracy:.4f}" f"({round(time.time()-t0)} s)")
+
+    best_idx = int(np.argmax(save_accuracy))
+
+    print(f"Best parameters: {save_parameters[best_idx]};", f"Accuracy: {save_accuracy[best_idx]}")
+
+    select_final_learning_rate = False
+
+optimal_gamma = 0.5186206896551724
 
 select_accuracy_analysis = False
 # Selected using full training set
 while select_accuracy_analysis:
     save_accuracy = {"sigmoid": [], "tanh": [], "relu": [], "lrelu": []}
+    save_time = {"sigmoid": [], "tanh": [], "relu": [], "lrelu": []}
     for idx in range(5):
         for act_func in ["sigmoid", "tanh", "relu", "lrelu"]:
             t0 = time.time()
             layers = create_layers_batch(784, best_architecture + [10])
-            layers, hist = train(x_train, one_hot(y_train, 10), layers, hidden_activation=act_func, head="cross", method="plain", gamma=gamma_plain, epochs=50,
-                    batch_size = 100, rng=2026+idx, X_test = x_test, y_test = y_test, norm="l2", lam=0.0)
-            print(f"test accuracy after 50 epochs for plain and {act_func}: {hist['test_accuracy'][-1]:.2%}  ({time.time() - t0:.0f} s)")
+            layers, hist = train(x_train, one_hot(y_train, 10), layers, hidden_activation=act_func, head="cross", method="plain", gamma=optimal_gamma, epochs=50,
+                    batch_size = 100, rng=2026+idx, X_test = x_test, y_test = y_test, norm="l2", lam=optimal_lam)
+            elapsed_time = time.time() - t0
+            print(f"test accuracy after 50 epochs for plain and {act_func}: {hist['test_accuracy'][-1]:.2%}  ({elapsed_time:.0f} s)")
             save_accuracy[act_func].append(hist['test_accuracy'][-1])
+            save_time[act_func].append(elapsed_time)
 
     for act_func in ["sigmoid", "tanh", "relu", "lrelu"]:
         print(f"{act_func} mean: {np.mean(save_accuracy[act_func])}, SD: {np.std(save_accuracy[act_func])}")
     activation_names = ["sigmoid", "tanh", "relu", "lrelu"]
     means = np.array([np.mean(save_accuracy[name]) for name in activation_names])
     stds = np.array([np.std(save_accuracy[name]) for name in activation_names])
+
+
+    for act_func in ["sigmoid", "tanh", "relu", "lrelu"]:
+        time_mean = np.mean(save_time[act_func])
+        time_sd = np.std(save_time[act_func])
+
+    print(f"time mean={time_mean:.2f} s, SD={time_sd:.2f} s")
 
     with open("Project2/activation_accuracy.txt", "w", encoding="utf-8") as f:
         for mean, sd in zip(means, stds):
@@ -361,92 +499,52 @@ stds = data_accuracy[1]
 
 fig, ax = plt.subplots(figsize=(9, 5.5))
 x = np.arange(len(means))
+y = np.linspace(means.min(), means.max(), 6)
 
 ax.errorbar(
     x, means, yerr=stds,
     fmt="o", markersize=8, linewidth=1.8,
-    color="#0072B2", ecolor="#0072B2",
+    color="#FF46A2", ecolor="#F598C6",
     capsize=6
 )
 
-ax.set_xticks(x, labels=display_names, rotation=25, ha="right")
-ax.set_ylabel("Accuracy")
+ax.set_xticks(x, size=20, labels=display_names, rotation=25, ha="right")
+ax.set_ylabel("Accuracy", size=20)
+ax.tick_params(axis="y", labelsize=20)
 ax.grid(True, alpha=0.3)
-
 # Limits the y-axis
 padding = max(3 * stds.max(), 0.005)
 ax.set_ylim(max(0, means.min() - padding), min(1, means.max() + padding))
 
 for mean in means:
-    ax.axhline(mean, ls="--", alpha=0.4, color="black")
+    ax.axhline(mean, ls="--", alpha=0.7, color="grey")
 
 fig.tight_layout()
 fig.savefig("Project2/activation_accuracy_seeds.pdf",
             dpi=300, bbox_inches="tight")
 plt.show()
 
-select_hyperparameter = False
-# Selected using smaller training set, 10000
-while select_hyperparameter: # do for l1 and l2
-    lambda_values = np.linspace(0, 1e-2, 50)  
-    save_accuracy = []
-    norm = "l1"
-    for lam in lambda_values:
-        t0 = time.time()
-        layers = create_layers_batch(784, best_architecture + [10])
-        layers, hist = train(small_x_train, one_hot(small_y_train, 10), layers, hidden_activation="relu", head="cross", method="plain", gamma=gamma_plain, epochs=50,
-                batch_size = 100, rng=None, X_test = x_test, y_test = y_test, norm=norm, lam=lam)
-        print(f"test accuracy after 50 epochs for ReLU and lam={lam}: {hist['test_accuracy'][-1]:.2%}  ({time.time() - t0:.0f} s)")
-        save_accuracy.append(hist["test_accuracy"][-1])
-
-
-    with open(f"Project2/{norm}_accuracy.txt", "w", encoding="utf-8") as f:
-        for lam, accuracy_value in zip(lambda_values, save_accuracy):
-            f.write(f"{lam} {accuracy_value:.16g}\n")
-
-    select_hyperparameter = False
-
-data_hyperparameter_l2 = np.loadtxt("Project2/l2_accuracy.txt", delimiter=" ")
-data_hyperparameter_l2 = data_hyperparameter_l2.T
-lambda_values_l2 = data_hyperparameter_l2[0]
-accuracy_values_l2 = data_hyperparameter_l2[1]
-plt.figure()
-plt.plot(lambda_values_l2, accuracy_values_l2, label="l2")
-plt.ylabel("Accuracy")
-plt.xlabel("Lambda")
-
-data_hyperparameter_l1 = np.loadtxt("Project2/l1_accuracy.txt", delimiter=" ")
-data_hyperparameter_l1 = data_hyperparameter_l1.T
-lambda_values_l1 = data_hyperparameter_l1[0]
-accuracy_values_l1 = data_hyperparameter_l1[1]
-plt.plot(lambda_values_l1, accuracy_values_l1, label="l1")
-plt.legend()
-plt.grid(alpha=0.3)
-plt.savefig("Project2/norm_accuracy.pdf", dpi=300)
-
-plt.show()
-
-select_baseline_model = True
-
+select_baseline_model = False
+# Baseline model gives 92.37%.
 while select_baseline_model:
     t0 = time.time()
     lam_adam = 1e-4
     layers = create_layers_batch(784, [10])
-    layers, hist = train(x_train, one_hot(y_train, 10), layers, hidden_activation="relu", head="cross", method="plain", gamma=gamma_plain, epochs=50,
-                    batch_size = 100, rng=None, X_test = x_test, y_test = y_test, norm="l2", lam=0.0)
+    layers, hist = train(x_train, one_hot(y_train, 10), layers, hidden_activation="relu", head="cross", method="plain", gamma=optimal_gamma, epochs=50,
+                    batch_size = 100, rng=None, X_test = x_test, y_test = y_test, norm="l2", lam=optimal_lam)
 
-    print(f"test accuracy after 50 epochs for ReLU and lam={0.0}: {hist['test_accuracy'][-1]:.2%}  ({time.time() - t0:.0f} s)")
+    print(f"test accuracy after 50 epochs for ReLU, lam={optimal_lam}, gamma={optimal_gamma:.4f}: {hist['test_accuracy'][-1]:.2%}  ({time.time() - t0:.0f} s)")
 
     select_baseline_model = False
 
 
-select_best_model = False
+select_best_model = True
 # Use the best model, plain, relu, gamma=gamma_plain, no norm
 while select_best_model:
     t0 = time.time()
     lam_adam = 1e-4
     layers = create_layers_batch(784, best_architecture + [10])
-    layers, hist = train(x_train, one_hot(y_train, 10), layers, hidden_activation="relu", head="cross", method="plain", gamma=gamma_plain, epochs=50,
+    layers, hist = train(x_train, one_hot(y_train, 10), layers, hidden_activation="relu", head="cross", method="plain", gamma=optimal_gamma, epochs=50,
                     batch_size = 100, rng=None, X_test = x_test, y_test = y_test, norm="l2", lam=0.0)
 
     print(f"test accuracy after 50 epochs for ReLU and lam={0.0}: {hist['test_accuracy'][-1]:.2%}  ({time.time() - t0:.0f} s)")
@@ -456,34 +554,54 @@ while select_best_model:
     # i_A = int(np.argmax(np.where(pred == y_test, pmax, -1)))     # the most confident correct prediction
     # i_B = int(np.argmin(pmax))                                   # the least confident prediction
 
-    k = np.random.choice(len(x_test), size=10, replace=False)
+    k = np.random.choice(len(x_test), size=5, replace=False)
 
-    number_of_images = 10
+    number_of_images = 5
 
-    RED = "#DA2488"
+    PINK = "#FF46A2"
 
-    fig = plt.figure(figsize=(6.2, 1.7 * number_of_images))
-    gs = fig.add_gridspec(number_of_images, 2, width_ratios=[1, 2.6], wspace=0.45, hspace=0.5)
-    for row, i in enumerate((k)):
-        axi = fig.add_subplot(gs[row, 0])
-        axi.imshow(x_test[i].reshape(28, 28), cmap="gray_r")
-        axi.set_title(f"label {y_test[i]}")
-        axi.axis("off")
-        axi.set_xticks([])
-        axi.set_yticks([])
-        axb = fig.add_subplot(gs[row, 1])
-        axb.bar(np.arange(10), P[i], color=RED, width=0.7)
-        axb.set_xticks(np.arange(10))
-        axb.set_ylim(0, 1.05)
-        axb.set_ylabel("p")
-        axb.set_title(f"image {i}")
-    axb.set_xlabel("class $k$")
-    plt.show()
-    fig.savefig("Project2/mnist_question.pdf", dpi=300)
+    fig = plt.figure(figsize=(6.5, 7.0), constrained_layout=True)
+
+    gs = fig.add_gridspec(
+        number_of_images, 2,
+        width_ratios=[1, 2.8],
+        wspace=0.12
+    )
 
     for row, i in enumerate(k):
-        delta = P[i] - one_hot(y_test[i:i + 1], 10)[0]
-        print(f"image {i} (label {y_test[i]}): " f"delta^L = a - y = {np.round(delta, 3)}")
+        axi = fig.add_subplot(gs[row, 0])
+        axi.imshow(x_test[i].reshape(28, 28), cmap="gray_r")
+        axi.set_title(f"True label: {y_test[i]}", fontsize=14)
+        axi.axis("off")
+
+        axb = fig.add_subplot(gs[row, 1])
+        predicted = int(np.argmax(P[i]))
+
+        axb.bar(np.arange(10), P[i], color=PINK, width=0.7)
+        axb.set_xticks(np.arange(10))
+        axb.set_xlim(-0.5, 9.5)
+        axb.set_ylim(0, 1.05)
+
+        axb.set_title(
+            f"Image {i} — predicted: {predicted}",
+            fontsize=14,
+            pad=5
+        )
+        if row == 2:
+            axb.set_ylabel("Probability", fontsize=14)
+        if row == 4:
+            axb.set_xlabel("Class", fontsize=14)
+        axb.tick_params(axis="both", labelsize=12)
+        axb.grid(axis="y", alpha=0.25)
+
+    fig.savefig(
+        "Project2/mnist_question.pdf",
+        dpi=300,
+        bbox_inches="tight",
+        pad_inches=0.08
+    )
+    plt.show()
+    plt.close(fig)
 
     # LLM-tag - easy way to save the data from the model:
     # Save all weights and biases.
@@ -546,9 +664,25 @@ while select_confusion_matrix:
     print("F1:", f1_score(y_true, p_test, average="macro", zero_division=0))
     print(sk_classification_report(y_true, p_test, zero_division=0))
 
+
+    from matplotlib.colors import BoundaryNorm
+    from matplotlib import colormaps
+
+
+    cmap = colormaps["RdPu"].resampled(4)
+
+    norm = BoundaryNorm(
+        boundaries=[0, 7, 11, 15, 1e9],  # 0–7, 8–10, 11+
+        ncolors=cmap.N)
     fig, ax = plt.subplots(figsize=(8, 8))
-    ConfusionMatrixDisplay.from_predictions(y_true, p_test, ax=ax, colorbar=False)
+    ax.tick_params(axis="both", labelsize=19)
+    ax.set_xlabel(ax.get_xlabel(), fontsize=19)
+    ax.set_ylabel(ax.get_ylabel(), fontsize=19)
+    disp = ConfusionMatrixDisplay.from_predictions(y_true, p_test, ax=ax, colorbar=False, cmap=cmap, text_kw={"fontsize": 19})
+    disp.im_.set_norm(norm)
+    disp.im_.set_cmap(cmap)
     fig.tight_layout()
+    fig.savefig("Project2/confusion_matrix_best_model.pdf", dpi=300)
     plt.show()
     plt.close(fig)
 
