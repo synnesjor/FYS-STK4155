@@ -122,7 +122,7 @@ def train_network(inputs, layers, activation_funcs, targets, gamma=0.1, epochs =
         layers = [(W - gamma*dW, b - gamma*db) for (W, b), (dW, db) in zip(layers, layers_grad)]
         if epoch % 50 == 0 or epoch == epochs - 1:
             predictions = feed_forward_batch(inputs, layers, activation_funcs)
-            history.append((epoch, float(cost(inputs, layers, activation_funcs, targets)), mse(predictions, targets)))
+            history.append((epoch, float(cost(inputs, layers, targets, activation_funcs)), mse(predictions, targets)))
     return layers, history, predictions, mse(predictions, targets)
 
 def train_network_gradient(inputs, layers, activation_funcs, targets, norm="l2", lam=0.0, gamma=0.01, epochs=10000, method="plain", tol = 0):
@@ -208,7 +208,7 @@ def train_network_stochastic_gradient(inputs, layers, activation_funcs, targets,
         # Record training progress
         if epoch % 50 == 0 or epoch == epochs - 1: #find out what this does
             predictions = feed_forward_batch(inputs, layers, activation_funcs)
-            c = cost(inputs, layers, activation_funcs, targets)
+            c = cost(inputs, layers, targets, activation_funcs)
             # acc = accuracy(predictions, targets)
             history.append((epoch, float(c), mse(predictions, targets)))
 
