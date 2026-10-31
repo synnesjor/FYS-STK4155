@@ -739,37 +739,43 @@ def cross_validate_network(X, y, layer_output_sizes, activation_funcs, gamma=0.0
 
     validation_mse = np.array(validation_mse)
 
-    return np.array(train_mse_values), np.array(validation_mse)
+    return np.array(validation_mse), np.array(train_mse_values)
 
 if part == "part_f":
 
     layer_output_sizes = [100] * 5 + [1]
     activation_funcs = [leaky_ReLU] * 5 + [no_activation_func] #LLM use: Claude used to efficiently create the array for activation functions
 
-    gamma_values = np.logspace(-3, 0, 25)
+    gamma_values = np.logspace(-3, 0, 3)
+    lambda_values = np.logspace(-5, -3, 3)
+
     best_parameter = None
     best_mse = 1e6 # Choose high MSE
 
     mse_train_values = []
     mse_val_values = []
     for gamma in gamma_values:
-        scores_val, scores_train = cross_validate_network(inputs_scaled, targets_centered, layer_output_sizes, activation_funcs, gamma=gamma, epochs=100, method="plain", n_splits=3)
-        print(f"MSE validation Mean {scores_val.mean()} SD {np.std(scores_val)}")
-        print(f"MSE train Mean {scores_train.mean()} SD {np.std(scores_train)}")
-        
-        mse_val_values.append(scores_val.mean())
-        mse_train_values.append(scores_train.mean())
+        for lam in lambda_values:
+            scores_val, scores_train = cross_validate_network(inputs_scaled, targets_centered, layer_output_sizes, activation_funcs, gamma=gamma, lam=lam, epochs=100, method="plain", n_splits=3)
+            print(f"MSE validation Mean {scores_val.mean()} SD {np.std(scores_val)}")
+            print(f"MSE train Mean {scores_train.mean()} SD {np.std(scores_train)}")
+            
+            mse_val_values.append(scores_val.mean())
+            mse_train_values.append(scores_train.mean())
 
-        if scores_val.mean() < best_mse:
-            best_parameter = gamma
-            best_mse = scores_val.mean()
-            print(f"New gamma: {gamma}")
+            if scores_val.mean() < best_mse:
+                best_parameter = (gamma, lam)
+                best_mse = scores_val.mean()
+                print(f"New gamma: {gamma}")
 
-    print("Best gamma from cross validation for method plain", best_parameter)
+    print("Best learning rate gamma from cross validation for method plain", best_parameter[0])
+    print("Best penalty parameter lamda from cross validation for method plain", best_parameter[1])
 
-    plt.figure()
-    plt.plot(gamma_values, mse_val_values, label="Test")
-    plt.plot(gamma_values, mse_train_values, label="Train")
-    plt.grid()
-    plt.legend()
-    plt.show()
+    
+
+    # plt.figure()
+    # plt.plot(gamma_values, mse_val_values, label="Test")
+    # plt.plot(gamma_values, mse_train_values, label="Train")
+    # plt.grid()
+    # plt.legend()
+    # plt.show()
