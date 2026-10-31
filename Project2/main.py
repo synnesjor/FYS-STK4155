@@ -79,9 +79,18 @@ def mse(predict, target):
     return jnp.mean((target-predict)**2)
 
 
-def cost(input, layers, activation_funcs, target):
-    predict = feed_forward_batch(input, layers, activation_funcs)
-    return mse(predict, target)
+def cost(inputs, layers, target, hidden_activation="sigmoid", norm="l2", lam=0.0):
+    out = predict_network(inputs, layers, hidden_activation)
+
+    if norm == "l1":
+        norm_value = lam * sum(jnp.sum(jnp.abs(W)) for W, _ in layers)
+    elif norm == "l2":
+        norm_value = lam * sum(jnp.sum(W**2) for W, _ in layers)
+    else:
+        raise ValueError("norm must be 'l1' or 'l2'")
+
+    data_loss = mse(out, target)
+    return data_loss + norm_value
 
 
 def feed_forward_batch(inputs, layers, activation_funcs):
@@ -95,6 +104,16 @@ def accuracy(predictions, targets):
     """Fraction of rows whose largest predicted probability sits in the correct class."""
     return accuracy_score(np.argmax(np.asarray(predictions), axis=1), np.argmax(np.asarray(targets)))
 
+def gradient_func(inputs, layers, activation_functions, targets, norm="l2", lam=0.0):
+    '''
+    LLM tag: Claude code, how to write code in needed form for JAX (using lambda command)
+    '''
+    cost_value = lambda layer_params: cost(
+        inputs, layer_params, targets, activation_functions, norm, lam
+    )
+    return jax.grad(cost_value)(layers)
+
+
 # i b så ber de om å bruke bare mse - accuracy er ett klassifikasjon problem og vi gjør regression her
 def train_network(inputs, layers, activation_funcs, targets, gamma=0.1, epochs = 10000):
     history = []
@@ -103,10 +122,10 @@ def train_network(inputs, layers, activation_funcs, targets, gamma=0.1, epochs =
         layers = [(W - gamma*dW, b - gamma*db) for (W, b), (dW, db) in zip(layers, layers_grad)]
         if epoch % 50 == 0 or epoch == epochs - 1:
             predictions = feed_forward_batch(inputs, layers, activation_funcs)
-            history.append((epoch, float(cost(inputs, layers, activation_funcs, targets)), mse(predictions, targets)))
+            history.append((epoch, float(cost(inputs, layers, targets, activation_funcs)), mse(predictions, targets)))
     return layers, history, predictions, mse(predictions, targets)
 
-def train_network_gradient(inputs, layers, activation_funcs, targets, gamma=0.01, epochs=10000, method="plain", tol = 0):
+def train_network_gradient(inputs, layers, activation_funcs, targets, norm="l2", lam=0.0, gamma=0.01, epochs=10000, method="plain", tol = 0):
     """
     LLM tag:
     With the train_network function as a base, we asked ChatGPT and Claude if it made sense to reuse optimiser step function used in Project 1. 
@@ -119,7 +138,9 @@ def train_network_gradient(inputs, layers, activation_funcs, targets, gamma=0.01
     for epoch in range(epochs):
         # param_old = param.copy()
         # Calculate gradients for the whole network
-        layers_grad = gradient_func(inputs, layers, activation_funcs, targets)
+        layers_grad = gradient_func(
+            inputs, layers, activation_funcs, targets, norm=norm, lam=lam
+        )
 
         new_layers = []
         new_states = []
@@ -138,7 +159,7 @@ def train_network_gradient(inputs, layers, activation_funcs, targets, gamma=0.01
         # Record training progress
         if epoch % 50 == 0 or epoch == epochs - 1:
             predictions = feed_forward_batch(inputs, layers, activation_funcs)
-            c = cost(inputs, layers, activation_funcs, targets)
+            c = cost(inputs, layers, targets, activation_funcs, norm=norm, lam=lam)
             # acc = accuracy(predictions, targets)
             history.append((epoch, float(c), mse(predictions, targets)))
 
@@ -187,7 +208,7 @@ def train_network_stochastic_gradient(inputs, layers, activation_funcs, targets,
         # Record training progress
         if epoch % 50 == 0 or epoch == epochs - 1: #find out what this does
             predictions = feed_forward_batch(inputs, layers, activation_funcs)
-            c = cost(inputs, layers, activation_funcs, targets)
+            c = cost(inputs, layers, targets, activation_funcs)
             # acc = accuracy(predictions, targets)
             history.append((epoch, float(c), mse(predictions, targets)))
 
@@ -286,7 +307,7 @@ def calculate_mse(x, y, degree):
 
 
 #-------------------------------------------------------- GENERAL PART -----------------------------------------------------------------------------
-part = "part_c"
+part = "part_f"
 sigma = 0.1
 n = 2000
 
@@ -301,7 +322,6 @@ targets_centered_no_noise = targets_no_noise - np.mean(targets_no_noise)
 inputs_scaled, x_test, targets_centered, y_test = train_test_split(inputs_scaled, targets_centered, test_size = 0.2, random_state = 2026)
 targets_test = runge_1d(x_test, sigma, len(x_test))
 
-gradient_func = jax.grad(cost, argnums=1)  # Taking the gradient wrt. the second input to the cost function, i.e. the layers
 #-------------------------------------------------------- GENERAL PART -----------------------------------------------------------------------------
 
 
@@ -683,27 +703,88 @@ if part == "part_c":
 
     #================================================================================================================================================
     
+# Cross validation of learning rate
 
+from sklearn.model_selection import KFold
 
+def cross_validate_network(X, y, layer_output_sizes, activation_funcs, gamma=0.01, norm="l2", lam=0.0, epochs=100, method="plain", n_splits=5):
+    kfold = KFold(n_splits=n_splits, shuffle=True, random_state=SEED)
+    validation_mse = []
+    train_mse_values = []
 
-       
+    for fold, (train_idx, val_idx) in enumerate(kfold.split(X)):
+        rng = np.random.default_rng(SEED + fold)
 
+        layers = create_layers_batch(X.shape[1], layer_output_sizes)
 
+        trained_layers, _, _, train_mse = train_network_gradient(
+                X[train_idx],
+                layers,
+                activation_funcs,
+                y[train_idx],
+                gamma=gamma,
+                epochs=epochs,
+                method=method,
+                norm=norm,
+                lam=lam
+            )
 
+        train_mse_values.append(train_mse)
 
+        val_predictions = predict_network(X[val_idx], trained_layers, activation_funcs)
+        fold_mse = float(mse(val_predictions,y[val_idx]))
 
+        validation_mse.append(fold_mse)
+        print(f"Fold {fold + 1}: MSE = {fold_mse:.6g}")
 
+    validation_mse = np.array(validation_mse)
 
+    return np.mean(validation_mse), np.std(validation_mse)
 
+if part == "part_f":
 
+    layer_output_sizes = [100] * 5 + [1]
+    activation_funcs = [leaky_ReLU] * 5 + [no_activation_func] #LLM use: Claude used to efficiently create the array for activation functions
 
+    gamma_values = np.logspace(-3, 0, 3)
+    lambda_values = np.logspace(-5, -3, 3)
 
+    best_parameter = None
+    best_mse = 1e6 # Choose high MSE
 
+    mse_values = []
+    save_parameters = []
 
+    for gamma in gamma_values:
+        for lam in lambda_values:
+            cv_mean, cv_sd = cross_validate_network(inputs_scaled, targets_centered, layer_output_sizes, activation_funcs, gamma=gamma, lam=lam, epochs=100, method="plain", n_splits=3)
+            print(f"MSE Mean {cv_mean} SD {cv_sd}")
+            
+            mse_values.append(cv_mean)
+            save_parameters.append((gamma, lam))
 
+            if cv_mean < best_mse:
+                best_parameter = (gamma, lam)
+                best_mse = cv_mean
+                threshold = cv_mean + cv_sd
+                print(f"New gamma: {gamma}")
 
+    mse_values = np.array(mse_values)
+    within_one_sd = mse_values <= threshold
+    eligible_indices = np.where(within_one_sd)[0]
 
+    
+    for i in eligible_indices:
+        print(f"Eligible parameters: {save_parameters[i]} " f"with MSE {mse_values[i]:.4f} ")
 
+    print("Best learning rate gamma from cross validation for method plain", best_parameter[0])
+    print("Best penalty parameter lamda from cross validation for method plain", best_parameter[1])
 
+    
 
-
+    # plt.figure()
+    # plt.plot(gamma_values, mse_val_values, label="Test")
+    # plt.plot(gamma_values, mse_train_values, label="Train")
+    # plt.grid()
+    # plt.legend()
+    # plt.show()
