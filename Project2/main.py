@@ -739,7 +739,7 @@ def cross_validate_network(X, y, layer_output_sizes, activation_funcs, gamma=0.0
 
     validation_mse = np.array(validation_mse)
 
-    return np.array(validation_mse), np.array(train_mse_values)
+    return np.mean(validation_mse), np.std(validation_mse)
 
 if part == "part_f":
 
@@ -752,21 +752,30 @@ if part == "part_f":
     best_parameter = None
     best_mse = 1e6 # Choose high MSE
 
-    mse_train_values = []
-    mse_val_values = []
+    mse_values = []
+    save_parameters = []
+
     for gamma in gamma_values:
         for lam in lambda_values:
-            scores_val, scores_train = cross_validate_network(inputs_scaled, targets_centered, layer_output_sizes, activation_funcs, gamma=gamma, lam=lam, epochs=100, method="plain", n_splits=3)
-            print(f"MSE validation Mean {scores_val.mean()} SD {np.std(scores_val)}")
-            print(f"MSE train Mean {scores_train.mean()} SD {np.std(scores_train)}")
+            cv_mean, cv_sd = cross_validate_network(inputs_scaled, targets_centered, layer_output_sizes, activation_funcs, gamma=gamma, lam=lam, epochs=100, method="plain", n_splits=3)
+            print(f"MSE Mean {cv_mean} SD {cv_sd}")
             
-            mse_val_values.append(scores_val.mean())
-            mse_train_values.append(scores_train.mean())
+            mse_values.append(cv_mean)
+            save_parameters.append((gamma, lam))
 
-            if scores_val.mean() < best_mse:
+            if cv_mean < best_mse:
                 best_parameter = (gamma, lam)
-                best_mse = scores_val.mean()
+                best_mse = cv_mean
+                threshold = cv_mean + cv_sd
                 print(f"New gamma: {gamma}")
+
+    mse_values = np.array(mse_values)
+    within_one_sd = mse_values <= threshold
+    eligible_indices = np.where(within_one_sd)[0]
+
+    
+    for i in eligible_indices:
+        print(f"Eligible parameters: {save_parameters[i]} " f"with MSE {mse_values[i]:.4f} ")
 
     print("Best learning rate gamma from cross validation for method plain", best_parameter[0])
     print("Best penalty parameter lamda from cross validation for method plain", best_parameter[1])
