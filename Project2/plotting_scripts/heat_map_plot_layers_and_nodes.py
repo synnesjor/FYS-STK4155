@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import seaborn as sns
+import pandas
 
 
 """
@@ -10,7 +11,7 @@ The code snippet for modifying the colour map was written by ChatGPT and checked
 """
 
 # Original colormap
-cmap = plt.cm.RdPu
+cmap = plt.cm.RdPu_r
 
 # Remove the lightest 15% of the color scale
 new_colors = cmap(np.linspace(0.20, 1, 256))
@@ -31,13 +32,13 @@ for each in method:
     number_of_nodes = [2, 5, 10, 20, 50, 100, 200]
 
     ax = sns.heatmap(
-        mse, annot=True, annot_kws={"size": 12}, fmt=".3f", cmap = new_cmap, xticklabels=number_of_nodes, yticklabels=n_hidden_layers)
+        mse, annot = True, annot_kws={"size": 12}, fmt=".3f", cmap = new_cmap, xticklabels=number_of_nodes, yticklabels=n_hidden_layers)
 
 
     cbar = ax.collections[0].colorbar
     cbar.ax.tick_params(labelsize=14)
-    plt.xlabel("Nodes per layer", fontsize = 14)
-    plt.ylabel("Hidden layers", fontsize = 14)
+    plt.xlabel("Nodes per layer", fontsize = 13)
+    plt.ylabel("Hidden layers", fontsize = 13)
     plt.xticks(size = 13)
     plt.yticks(size = 13)
     # plt.title(f"Neural Network Architecture vs MSE {each}")

@@ -7,7 +7,9 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
 jax.config.update("jax_enable_x64", True)
+from pathlib import Path
 
 
 #-------------------------------------------------------- FUNCTIONS PART -----------------------------------------------------------------------------
@@ -176,7 +178,7 @@ def step_length(t, t0, t1):
     """The schedule of Eq. (4.40)."""
     return t0 / (t + t1)
 
-def train_network_stochastic_gradient(inputs, layers, activation_funcs, targets, schedule, gamma=0.01, epochs=10000, method="plain", batch_size=5, tol=1e-6, seed=2026):
+def train_network_stochastic_gradient(inputs, layers, activation_funcs, targets, method, norm="l2", lam=0.0, schedule = None, gamma=0.01, epochs=10000, batch_size=5, tol=1e-6):
     """
     LLM tag:
     When we had our own suggestion for how to combine the functions, we checked with the LLMs if they agreed, especially with the 
@@ -208,7 +210,7 @@ def train_network_stochastic_gradient(inputs, layers, activation_funcs, targets,
         # Record training progress
         if epoch % 50 == 0 or epoch == epochs - 1: #find out what this does
             predictions = feed_forward_batch(inputs, layers, activation_funcs)
-            c = cost(inputs, layers, targets, activation_funcs)
+            c = cost(inputs, layers, targets, activation_funcs, norm=norm, lam=lam)
             # acc = accuracy(predictions, targets)
             history.append((epoch, float(c), mse(predictions, targets)))
 
@@ -307,7 +309,7 @@ def calculate_mse(x, y, degree):
 
 
 #-------------------------------------------------------- GENERAL PART -----------------------------------------------------------------------------
-part = "part_f"
+part = "plot_f"
 sigma = 0.1
 n = 2000
 
@@ -643,7 +645,7 @@ if part == "part_c":
     #running this full part TAKES TIME!
     
     mse_train, mse_test_ols, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test= calculate_mse(inputs[:,0], targets[:,0], degree=7)
-    act_functions = [ReLU]
+    act_functions = [leaky_ReLU]
     # act_functions = [sigmoid]
     act_functions_names = ["sigmoid", "leaky_ReLU", "ReLU"]
     # act_functions_names = ["sigmoid"]
@@ -658,8 +660,6 @@ if part == "part_c":
 
     
     network_input_size = inputs_scaled.shape[1]
-
-    from pathlib import Path
 
 
     #LLM tag here: ChatGPT was used in order to write the code so that we would get the desired text files. We check that the outcoming
@@ -697,7 +697,7 @@ if part == "part_c":
         plt.plot(n_hidden_layers, mse_values_test, "-o", color = colours[m+4], label = f"{act_functions_names[idx]} test")
         plt.legend()
         m+=1
-    plt.savefig("figures/c)/exercise_c_mse_vs_hidden_layers_stochastic_{met}_new.pdf")
+    # plt.savefig("figures/c)/exercise_c_mse_vs_hidden_layers_stochastic_{met}_new.pdf")
     plt.show()
 
 
@@ -707,7 +707,7 @@ if part == "part_c":
 
 from sklearn.model_selection import KFold
 
-def cross_validate_network(X, y, layer_output_sizes, activation_funcs, gamma=0.01, norm="l2", lam=0.0, epochs=100, method="plain", n_splits=5):
+def cross_validate_network(X, y, layer_output_sizes, activation_funcs, method, gamma=0.01, norm="l2", lam=0.0, epochs=100, n_splits=5):
     kfold = KFold(n_splits=n_splits, shuffle=True, random_state=SEED)
     validation_mse = []
     train_mse_values = []
@@ -717,17 +717,33 @@ def cross_validate_network(X, y, layer_output_sizes, activation_funcs, gamma=0.0
 
         layers = create_layers_batch(X.shape[1], layer_output_sizes)
 
-        trained_layers, _, _, train_mse = train_network_gradient(
-                X[train_idx],
-                layers,
-                activation_funcs,
-                y[train_idx],
-                gamma=gamma,
-                epochs=epochs,
-                method=method,
-                norm=norm,
-                lam=lam
-            )
+        if method == "plain":
+            print("using standard gradient")
+            trained_layers, _, _, train_mse = train_network_gradient(
+                    X[train_idx],
+                    layers,
+                    activation_funcs,
+                    y[train_idx],
+                    gamma=gamma,
+                    norm=norm,
+                    epochs=epochs,
+                    method=method,
+                    lam=lam
+                )
+
+        else:
+            print("using stochasic:")
+            trained_layers, _, _, train_mse = train_network_stochastic_gradient(
+                    X[train_idx],
+                    layers,
+                    activation_funcs,
+                    y[train_idx], 
+                    schedule = None, 
+                    gamma=gamma,
+                    norm = norm,
+                    epochs=epochs,
+                    method=method,
+                )
 
         train_mse_values.append(train_mse)
 
@@ -735,50 +751,82 @@ def cross_validate_network(X, y, layer_output_sizes, activation_funcs, gamma=0.0
         fold_mse = float(mse(val_predictions,y[val_idx]))
 
         validation_mse.append(fold_mse)
-        print(f"Fold {fold + 1}: MSE = {fold_mse:.6g}")
+        # print(f"Fold {fold + 1}: MSE = {fold_mse:.6g}")
 
     validation_mse = np.array(validation_mse)
 
-    return np.mean(validation_mse), np.std(validation_mse)
+    return np.mean(validation_mse), np.std(validation_mse, ddof = 1) / np.sqrt(n_splits)
 
 if part == "part_f":
 
-    layer_output_sizes = [100] * 5 + [1]
-    activation_funcs = [leaky_ReLU] * 5 + [no_activation_func] #LLM use: Claude used to efficiently create the array for activation functions
-
-    gamma_values = np.logspace(-3, 0, 3)
-    lambda_values = np.logspace(-5, -3, 3)
-
-    best_parameter = None
-    best_mse = 1e6 # Choose high MSE
-
-    mse_values = []
-    save_parameters = []
-
-    for gamma in gamma_values:
-        for lam in lambda_values:
-            cv_mean, cv_sd = cross_validate_network(inputs_scaled, targets_centered, layer_output_sizes, activation_funcs, gamma=gamma, lam=lam, epochs=100, method="plain", n_splits=3)
-            print(f"MSE Mean {cv_mean} SD {cv_sd}")
-            
-            mse_values.append(cv_mean)
-            save_parameters.append((gamma, lam))
-
-            if cv_mean < best_mse:
-                best_parameter = (gamma, lam)
-                best_mse = cv_mean
-                threshold = cv_mean + cv_sd
-                print(f"New gamma: {gamma}")
-
-    mse_values = np.array(mse_values)
-    within_one_sd = mse_values <= threshold
-    eligible_indices = np.where(within_one_sd)[0]
-
+    # method = ["plain", "adam", "rmsprop"]
     
-    for i in eligible_indices:
-        print(f"Eligible parameters: {save_parameters[i]} " f"with MSE {mse_values[i]:.4f} ")
+    method = ["plain"]
+    for met in method:
+        print(f"using {met}:")
+        layer_output_sizes = [100] * 5 + [1]
+        activation_funcs = [leaky_ReLU] * 5 + [no_activation_func] #LLM use: Claude used to efficiently create the array for activation functions
 
-    print("Best learning rate gamma from cross validation for method plain", best_parameter[0])
-    print("Best penalty parameter lamda from cross validation for method plain", best_parameter[1])
+        if met == "plain":
+            # gamma_values = np.logspace(-3, 0, 10)
+            gamma_values = [10**-3, 10**-2, 5*10**-2, 10**-1, 5*10**-1]
+            # lambda_values = np.concatenate(([0.0], np.logspace(-5, -3, 5)))
+            lambda_values = [0, 10**-5, 10**-4, 5*10**-4, 10**-3]
+            # lambda_values = np.logspace(-5, -3, 10)
+        
+        if met == "adam":
+            gamma_values = [10**-3, 10**-2, 5*10**-2, 10**-1, 5*10**-1]
+            lambda_values = [0, 10**-5, 10**-4, 5*10**-4, 10**-3]
+
+        if met == "rmsprop":
+            gamma_values = [10**-3, 10**-2, 5*10**-2, 10**-1, 5*10**-1]
+            lambda_values = [0, 10**-5, 10**-4, 5*10**-4, 10**-3]
+
+        best_parameter = None
+        best_mse = 1e6 # Choose high MSE
+
+        validation_mse_values = []
+        validation_save_parameters = []
+
+        validation_mse_grid = np.zeros((len(gamma_values), len(lambda_values)))
+        # Path("textfiles").mkdir(exist_ok=True)
+        # filename = f"textfiles/mse_crossvalidation_test.txt"
+        for gamma_idx, gamma in enumerate(gamma_values):
+            for lam_idx, lam in enumerate(lambda_values):
+                cv_mean, cv_sd = cross_validate_network(inputs_scaled, targets_centered, layer_output_sizes, activation_funcs, method = met, gamma=gamma, norm = "l1", lam=lam, epochs=100, n_splits=3)
+                # print(f"MSE Mean {cv_mean} SD {cv_sd}")
+                
+                validation_mse_values.append(cv_mean)
+                validation_save_parameters.append((gamma, lam))
+
+                if np.isnan(cv_mean) or cv_mean > 0.1:
+                    print("yes nan")
+                    validation_mse_grid[gamma_idx, lam_idx] = 0.1
+                else:
+                    validation_mse_grid[gamma_idx, lam_idx] = cv_mean
+                    
+
+                if cv_mean < best_mse:
+                    best_parameter = (gamma, lam)
+                    best_mse = cv_mean
+                    threshold = cv_mean + cv_sd
+                    print(f"New gamma: {gamma}")
+
+        filename = f"textfiles/mse_crossvalidation_{met}_l1_only_five.txt"
+
+        np.savetxt(filename, validation_mse_grid, fmt="%.10e", delimiter=" ")
+
+        mse_values = np.array(validation_mse_values)
+        within_one_sd = mse_values <= threshold
+        eligible_indices = np.where(within_one_sd)[0]
+
+        print(best_parameter)
+        
+        for i in eligible_indices:
+            print(f"Eligible parameters: {validation_save_parameters[i]} " f"with MSE {mse_values[i]:.4f} ")
+
+        print("Best learning rate gamma from cross validation for method plain", best_parameter[0])
+        print("Best penalty parameter lamda from cross validation for method plain", best_parameter[1])
 
     
 
@@ -788,3 +836,451 @@ if part == "part_f":
     # plt.grid()
     # plt.legend()
     # plt.show()
+
+
+         #Kode fra Marie med hjelp av Claude med endring IKKE ENDRE
+        #for plotting the actual fit, PLAIN:
+       
+      
+if part == "plot_f":
+    
+    ols_deg11_fold25 = np.loadtxt("best_fit_from_project_1_x_and_y.txt")
+    mse_train, mse_test_ols, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test= calculate_mse(inputs[:,0], targets[:,0], degree=7)
+    act_functions = [sigmoid, leaky_ReLU, ReLU]
+    act_functions_names = ["sigmoid", "leaky_ReLU", "ReLU"]
+    n_hidden_layers = [1,2,3,5]
+    # n_hidden_layers = [1] 
+
+    colours = ["#aa333c", "#99d2fb", "#4e827b", "#ef9d2c", "#B0a6df", "#2da9cf", "#ff46a2", "#9aab64", "#e5194f", "#8f1cab", "#2da9cf", "#3ba336"]
+    colours2 = ["#ef9d2c", "#020202", "#195626", "#ef2c2c", "#732775", "#a495cd", "#aaaf0f", "#f4b537", "#5513b9", "#5a585b", "#103a46", "#b83453"]
+    
+    network_input_size = inputs_scaled.shape[1]
+    
+    methods_list = ["plain", "adam", "rmsprop"]
+    # methods_list = ["rmsprop"]
+    
+    for method in methods_list:
+        if method == "plain":
+            print("running plain")
+            layer_output_sizes = [100] * 5 + [1]
+            activation_funcs = [leaky_ReLU] * 5 + [no_activation_func] #LLM use: Claude used to efficiently create the array for activation functions
+            gamma_value = 0.1
+            lambda_value = 0.0005
+            norm = "l2"
+            method = "plain"
+
+
+            m = 0 #just for colours in plot
+            plt.figure(figsize=(9.6, 9.5))
+
+            """
+            LLM tag:
+            The three lines below, used for sorting the points for the true function, was written by ChatGPT.
+            """
+            points = sorted(zip(inputs_scaled, targets_centered))
+            x_sorted = [p[0] for p in points]
+            y_sorted = [p[1] for p in points]
+            points = sorted(zip(inputs_scaled, targets_centered))
+            x_sorted = [p[0] for p in points]
+            y_sorted = [p[1] for p in points]
+            plt.plot(x_sorted, y_sorted,  "-", color = "#B5B4B4", label = "True function", markersize = 1, alpha = 0.5)
+            plt.plot(x_test, y_tilde_test, "o", color = "#ef9d2c", label = "Polyomial fit using OLS, deg 6", markersize = 2)
+            plt.plot(ols_deg11_fold25[:,0], ols_deg11_fold25[:,1]+np.mean(targets), "o", color = "#729A72", label = "Polyomial fit using OLS, k-fold 25, deg 11", markersize = 2)
+
+
+            # layer_output_sizes = [100] * 5 + [1]
+            # activation_funcs = [leaky_ReLU] * 5 + [no_activation_func]
+            layers_batch = create_layers_batch(network_input_size,layer_output_sizes)
+            print("finding trained")
+            trained_layers_after_crossval, history_after_cross_val, preds_after_cross_val, mse_v_after_cross_val = train_network_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, gamma = gamma_value, epochs=100, norm = norm, lam = lambda_value)
+
+
+            test_preds = predict_network(x_test,trained_layers_after_crossval,activation_funcs)
+            # mse_values_train.append(mse_v)
+            test_mse = mse(test_preds, targets_test)
+            print(test_mse)
+            # mse_values_test.append(test_mse)
+            # Plot the MSE values for this architecture
+            # plt.plot(x_test, test_preds, "-o", markersize = 4, color = colours2[idx+m], label= f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, train")
+            plt.plot(x_test, test_preds, "o", markersize = 2, color = "#cf2b7f", label = "Cross validated fit") #LLM tag: Claude helped with the placement of these plot commands
+
+            # print(f"MSE for {n} hidden layers of {nod} nodes:", mse_values_test)
+                    
+            # print(mse_values_test)
+            plt.plot()
+            plt.xlabel("x", fontsize=24)
+            plt.ylabel("y", fontsize=24)
+            plt.xticks(size=23)
+            plt.yticks(size=23)
+            plt.legend(fontsize = 16)
+            # plt.ylim(-0.33, 1.4)
+            plt.savefig(f"figures/f)/final_fit_plain_l2_compare.pdf")
+            plt.show()
+
+        if method == "adam": 
+            print("running adam:")
+            layer_output_sizes = [100] * 5 + [1]
+            activation_funcs = [leaky_ReLU] * 5 + [no_activation_func] #LLM use: Claude used to efficiently create the array for activation functions
+            gamma_value = 0.001
+            lambda_value = 0.001
+            norm = "l2"
+            method = "adam"
+
+
+            m = 0 #just for colours in plot
+            plt.figure(figsize=(9.6, 9.5))
+
+            """
+            LLM tag:
+            The three lines below, used for sorting the points for the true function, was written by ChatGPT.
+            """
+            points = sorted(zip(inputs_scaled, targets_centered))
+            x_sorted = [p[0] for p in points]
+            y_sorted = [p[1] for p in points]
+            points = sorted(zip(inputs_scaled, targets_centered))
+            x_sorted = [p[0] for p in points]
+            y_sorted = [p[1] for p in points]
+            plt.plot(x_sorted, y_sorted,  "-", color = "#B5B4B4", label = "True function", markersize = 1, alpha = 0.5)
+            plt.plot(x_test, y_tilde_test, "o", color = "#ef9d2c", label = "Polyomial fit using OLS, deg 6", markersize = 2)
+            plt.plot(ols_deg11_fold25[:,0], ols_deg11_fold25[:,1]+np.mean(targets), "o", color = "#729A72", label = "Polyomial fit using OLS, k-fold 25, deg 11", markersize = 2)
+
+
+            # layer_output_sizes = [100] * 5 + [1]
+            # activation_funcs = [leaky_ReLU] * 5 + [no_activation_func]
+            layers_batch = create_layers_batch(network_input_size,layer_output_sizes)
+            print("finding trained")
+            trained_layers_after_crossval, history_after_cross_val, preds_after_cross_val, mse_v_after_cross_val = train_network_stochastic_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, method, gamma = gamma_value, epochs=100, norm = norm, lam = lambda_value)
+
+
+            test_preds = predict_network(x_test,trained_layers_after_crossval,activation_funcs)
+            # mse_values_train.append(mse_v)
+            test_mse = mse(test_preds, targets_test)
+            print(test_mse)
+            # Plot the MSE values for this architecture
+            # plt.plot(x_test, test_preds, "-o", markersize = 4, color = colours2[idx+m], label= f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, train")
+            plt.plot(x_test, test_preds, "o", markersize = 2, color = "#cf2b7f", label = "Cross validated fit") #LLM tag: Claude helped with the placement of these plot commands
+        
+            # print(f"MSE for {n} hidden layers of {nod} nodes:", mse_values_test)
+                    
+            # print(mse_values_test)
+            plt.plot()
+            plt.xlabel("x", fontsize=24)
+            plt.ylabel("y", fontsize=24)
+            plt.xticks(size=23)
+            plt.yticks(size=23)
+            plt.legend(fontsize = 16)
+            # plt.ylim(-0.33, 1.4)
+            plt.savefig(f"figures/f)/final_fit_adam_l2_compare.pdf")
+            plt.show()
+
+        if method == "rmsprop": 
+            print("running rmsprop:")
+
+            baseline_txtfile = np.loadtxt("textfiles/base_line_test_preds.txt")
+            baseline_vals = baseline_txtfile[:][0]   
+
+            layer_output_sizes = [100] * 5 + [1]
+            activation_funcs = [leaky_ReLU] * 5 + [no_activation_func] #LLM use: Claude used to efficiently create the array for activation functions
+            gamma_value = 0.001
+            lambda_value = 0.0005
+            norm = "l2"
+            method = "rmsprop"
+
+
+            m = 0 #just for colours in plot
+            plt.figure(figsize=(9.6, 9.5))
+
+            """
+            LLM tag:
+            The three lines below, used for sorting the points for the true function, was written by ChatGPT.
+            """
+            points = sorted(zip(inputs_scaled, targets_centered))
+            x_sorted = [p[0] for p in points]
+            y_sorted = [p[1] for p in points]
+            points = sorted(zip(inputs_scaled, targets_centered))
+            x_sorted = [p[0] for p in points]
+            y_sorted = [p[1] for p in points]
+            plt.plot(x_sorted, y_sorted,  "-", color = "#B5B4B4", label = "True function", markersize = 1, alpha = 0.5)
+            plt.plot(x_test, y_tilde_test, "o", color = "#ef9d2c", label = "Polyomial fit using OLS, deg 6", markersize = 2)
+            plt.plot(ols_deg11_fold25[:,0], ols_deg11_fold25[:,1]+np.mean(targets), "o", color = "#729A72", label = "Polyomial fit using OLS, k-fold 25, deg 11", markersize = 2)
+
+
+            # layer_output_sizes = [100] * 5 + [1]
+            # activation_funcs = [leaky_ReLU] * 5 + [no_activation_func]
+            layers_batch = create_layers_batch(network_input_size,layer_output_sizes)
+            print("finding trained")
+            trained_layers_after_crossval, history_after_cross_val, preds_after_cross_val, mse_v_after_cross_val = train_network_stochastic_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, method, gamma = gamma_value, epochs=100, norm = norm, lam = lambda_value)
+
+
+            test_preds = predict_network(x_test,trained_layers_after_crossval,activation_funcs)
+            # mse_values_train.append(mse_v)
+            test_mse = mse(test_preds, targets_test)
+            print(test_mse)
+            # Plot the MSE values for this architecture
+            # plt.plot(x_test, test_preds, "-o", markersize = 4, color = colours2[idx+m], label= f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, train")
+            plt.plot(x_test, test_preds, "o", markersize = 2, color = "#cf2b7f", label = "Cross validated fit") #LLM tag: Claude helped with the placement of these plot commands
+            plt.plot(x_test, baseline_vals, "o", markersize = 2, color = "#882bcf", label = "Baseline")
+
+            # print(f"MSE for {n} hidden layers of {nod} nodes:", mse_values_test)
+                    
+            # print(mse_values_test)
+            plt.plot()
+            plt.xlabel("x", fontsize=24)
+            plt.ylabel("y", fontsize=24)
+            plt.xticks(size=23)
+            plt.yticks(size=23)
+            plt.legend(fontsize = 16)
+            # plt.ylim(-0.33, 1.4)
+            plt.savefig(f"figures/f)/final_fit_rmsprop_l2_compare.pdf")
+            plt.show()
+
+
+# if part == "part_mse_and_r2":    
+
+#     method = "plain"
+#     # method = "adam"
+#     # method = "rmsprop"
+
+#     if method == "plain":
+#         network_input_size = inputs_scaled.shape[1]
+#         gam = 0.001
+#         print("\nDoing PLAIN!\n")
+#         nodes = [5]
+#         n_hidden_layers = [2, 5, 10, 20, 50, 100, 200]
+
+#         m = 0
+#         plt.figure(figsize=(8, 6))
+#         smallest_mse_values = []
+#         smallest_mse_values_args = []
+
+
+#         for n in n_hidden_layers:
+#             mse_values_train = []
+#             mse_values_test = [] #LLM tag: Claude helped with the placement of the declariation of these lists
+#             r2_scores_values_train = []
+#             r2_scores_values_test = []
+#             layer_output_sizes = nodes * n + [1]
+#             activation_funcs = [sigmoid] * n + [no_activation_func]
+            
+
+#             layers_batch = create_layers_batch(network_input_size, layer_output_sizes)
+#             trained_layers, history, preds, mse_v = train_network_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, gamma=gam)
+#             test_preds = predict_network(x_test, trained_layers, activation_funcs)
+#             mse_values_train.append(mse_v)
+#             test_mse = mse(test_preds, targets_test)
+#             mse_values_test.append(test_mse)
+#             r2_scores_values_test.append(r2_score(preds, targets_centered))
+#             r2_scores_values_test.append(r2_score(test_preds, targets_test))
+
+
+#             # plt.plot(gamma_values, mse_values_train, "-o", color = colours2[idx+m], label= f" train: {nod} nodes, {n} hidden layer{'s' if n > 1 else ''}")
+#             # plt.plot(gamma_values, mse_values_test, "-o", color = colours[idx+m], label=f"test: {nod} nodes, {n} hidden layer{'s' if n > 1 else ''}") #LLM tag: Claude helped with the placement of these plot commands
+#             # print("mse test is", mse_values_test)
+#             smallest_mse_values.append(np.min(mse_values_train))
+#             smallest_mse_values_args.append(np.argmin(mse_values_train))
+#             m+=1
+#         # print(np.min(mse_values_train), np.argmin(mse_values_train))
+#         # print(np.min(mse_values_test), np.argmin(mse_values_test))
+
+#             # Find where the globally lowest architecture-level MSE is located
+#             overall_lowest_index = np.argmin(smallest_mse_values) #LLM tag: UiOGPT was used to identify the smallest mse value and its index, in this line and the two below
+#             # Use the SAME index in both arrays
+#             overall_lowest_mse = smallest_mse_values[overall_lowest_index]
+#             overall_lowest_mse_arg = smallest_mse_values_args[overall_lowest_index]
+
+            
+#         plt.plot(n_hidden_layers, mse_values_train)
+#         plt.plot(n_hidden_layers, mse_values_test)
+#         plt.plot(n_hidden_layers, r2_scores_values_train)
+#         plt.plot(n_hidden_layers, r2_scores_values_test)
+#         plt.savefig("figures/testing_r2_and_mse_plain.pdf")
+#         plt.show()
+
+#     if method == "adam":
+#         network_input_size = inputs_scaled.shape[1]
+#         gam = 0.001
+#         print("\nDoing ADAM!\n")
+#         nodes = [5]
+#         n_hidden_layers = [2, 5, 10, 20, 50, 100, 200]
+
+#         m = 0
+#         plt.figure(figsize=(8, 6))
+#         smallest_mse_values = []
+#         smallest_mse_values_args = []
+
+
+#         for n in n_hidden_layers:
+#             mse_values_train = []
+#             mse_values_test = [] #LLM tag: Claude helped with the placement of the declariation of these lists
+#             r2_scores_values_train = []
+#             r2_scores_values_test = []
+#             layer_output_sizes = nodes * n + [1]
+#             activation_funcs = [sigmoid] * n + [no_activation_func]
+            
+
+#             layers_batch = create_layers_batch(network_input_size, layer_output_sizes)
+#             trained_layers, history, preds, mse_v = train_network_stochastic_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, method, gamma=gam)
+            
+#             test_preds = predict_network(x_test, trained_layers, activation_funcs)
+#             mse_values_train.append(mse_v)
+#             test_mse = mse(test_preds, targets_test)
+#             mse_values_test.append(test_mse)
+#             r2_scores_values_test.append(r2_score(preds, targets_centered))
+#             r2_scores_values_test.append(r2_score(test_preds, targets_test))
+            
+
+
+#             # plt.plot(gamma_values, mse_values_train, "-o", color = colours2[idx+m], label= f" train: {nod} nodes, {n} hidden layer{'s' if n > 1 else ''}")
+#             # plt.plot(gamma_values, mse_values_test, "-o", color = colours[idx+m], label=f"test: {nod} nodes, {n} hidden layer{'s' if n > 1 else ''}") #LLM tag: Claude helped with the placement of these plot commands
+#             # print("mse test is", mse_values_test)
+#             smallest_mse_values.append(np.min(mse_values_train))
+#             smallest_mse_values_args.append(np.argmin(mse_values_train))
+#             m+=1
+#         # print(np.min(mse_values_train), np.argmin(mse_values_train))
+#         # print(np.min(mse_values_test), np.argmin(mse_values_test))
+
+#             # Find where the globally lowest architecture-level MSE is located
+#             overall_lowest_index = np.argmin(smallest_mse_values) #LLM tag: UiOGPT was used to identify the smallest mse value and its index, in this line and the two below
+#             # Use the SAME index in both arrays
+#             overall_lowest_mse = smallest_mse_values[overall_lowest_index]
+#             overall_lowest_mse_arg = smallest_mse_values_args[overall_lowest_index]
+
+            
+#         plt.plot(n_hidden_layers, mse_values_train)
+#         plt.plot(n_hidden_layers, mse_values_test)
+#         plt.plot(n_hidden_layers, r2_scores_values_train)
+#         plt.plot(n_hidden_layers, r2_scores_values_test)
+#         plt.savefig("figures/testing_r2_and_mse_adam.pdf")
+#         plt.show()
+
+#     if method == "rmsprop":  
+
+#         network_input_size = inputs_scaled.shape[1]
+#         gam = 0.001
+#         print("\nDoing RMSPROP!\n")
+#         nodes = [5]
+#         n_hidden_layers = [2, 5, 10, 20, 50, 100, 200]
+
+#         m = 0
+#         plt.figure(figsize=(8, 6))
+#         smallest_mse_values = []
+#         smallest_mse_values_args = []
+
+
+#         for n in n_hidden_layers:
+#             mse_values_train = []
+#             mse_values_test = [] #LLM tag: Claude helped with the placement of the declariation of these lists
+#             r2_scores_values_train = []
+#             r2_scores_values_test = []
+#             layer_output_sizes = nodes * n + [1]
+#             activation_funcs = [sigmoid] * n + [no_activation_func]
+            
+
+#             layers_batch = create_layers_batch(network_input_size, layer_output_sizes)
+#             trained_layers, history, preds, mse_v = train_network_stochastic_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, method, gamma=gam)
+            
+#             test_preds = predict_network(x_test, trained_layers, activation_funcs)
+#             mse_values_train.append(mse_v)
+#             test_mse = mse(test_preds, targets_test)
+#             mse_values_test.append(test_mse)
+#             r2_scores_values_test.append(r2_score(preds, targets_centered))
+#             r2_scores_values_test.append(r2_score(test_preds, targets_test))
+            
+
+
+#             # plt.plot(gamma_values, mse_values_train, "-o", color = colours2[idx+m], label= f" train: {nod} nodes, {n} hidden layer{'s' if n > 1 else ''}")
+#             # plt.plot(gamma_values, mse_values_test, "-o", color = colours[idx+m], label=f"test: {nod} nodes, {n} hidden layer{'s' if n > 1 else ''}") #LLM tag: Claude helped with the placement of these plot commands
+#             # print("mse test is", mse_values_test)
+#             smallest_mse_values.append(np.min(mse_values_train))
+#             smallest_mse_values_args.append(np.argmin(mse_values_train))
+#             m+=1
+#         # print(np.min(mse_values_train), np.argmin(mse_values_train))
+#         # print(np.min(mse_values_test), np.argmin(mse_values_test))
+
+#             # Find where the globally lowest architecture-level MSE is located
+#             overall_lowest_index = np.argmin(smallest_mse_values) #LLM tag: UiOGPT was used to identify the smallest mse value and its index, in this line and the two below
+#             # Use the SAME index in both arrays
+#             overall_lowest_mse = smallest_mse_values[overall_lowest_index]
+#             overall_lowest_mse_arg = smallest_mse_values_args[overall_lowest_index]
+
+            
+#         plt.plot(n_hidden_layers, mse_values_train)
+#         plt.plot(n_hidden_layers, mse_values_test)
+#         plt.plot(n_hidden_layers, r2_scores_values_train)
+#         plt.plot(n_hidden_layers, r2_scores_values_test)
+#         plt.savefig("figures/testing_r2_and_mse_rmsprop.pdf")
+#         plt.show()
+
+
+if part == "baseline":
+    
+
+    ols_deg11_fold25 = np.loadtxt("best_fit_from_project_1_x_and_y.txt")
+    mse_train, mse_test_ols, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test= calculate_mse(inputs[:,0], targets[:,0], degree=7)
+    act_functions = [sigmoid, leaky_ReLU, ReLU]
+    act_functions_names = ["sigmoid", "leaky_ReLU", "ReLU"]
+    n_hidden_layers = [1,2,3,5]
+    # n_hidden_layers = [1] 
+
+    colours = ["#aa333c", "#99d2fb", "#4e827b", "#ef9d2c", "#B0a6df", "#2da9cf", "#ff46a2", "#9aab64", "#e5194f", "#8f1cab", "#2da9cf", "#3ba336"]
+    colours2 = ["#ef9d2c", "#020202", "#195626", "#ef2c2c", "#732775", "#a495cd", "#aaaf0f", "#f4b537", "#5513b9", "#5a585b", "#103a46", "#b83453"]
+    
+    network_input_size = inputs_scaled.shape[1]    
+
+    print("running rmsprop:")
+    layer_output_sizes = [1]
+    activation_funcs = [no_activation_func] #LLM use: Claude used to efficiently create the array for activation functions
+    gamma_value = 0.001
+    lambda_value = 0.0005
+    norm = "l2"
+    method = "rmsprop"
+
+
+    m = 0 #just for colours in plot
+    plt.figure(figsize=(9.0, 9.5))
+
+    """
+    LLM tag:
+    The three lines below, used for sorting the points for the true function, was written by ChatGPT.
+    """
+    points = sorted(zip(inputs_scaled, targets_centered))
+    x_sorted = [p[0] for p in points]
+    y_sorted = [p[1] for p in points]
+    points = sorted(zip(inputs_scaled, targets_centered))
+    x_sorted = [p[0] for p in points]
+    y_sorted = [p[1] for p in points]
+    plt.plot(x_sorted, y_sorted,  "-", color = "#B5B4B4", label = "True function", markersize = 1, alpha = 0.5)
+    # plt.plot(x_test, y_tilde_test, "o", color = "#ef9d2c", label = "Polyomial fit using OLS, deg 6", markersize = 2)
+    # plt.plot(ols_deg11_fold25[:,0], ols_deg11_fold25[:,1]+np.mean(targets), "o", color = "#729A72", label = "Polyomial fit using OLS, k-fold 25, deg 11", markersize = 2)
+
+
+    # layer_output_sizes = [100] * 5 + [1]
+    # activation_funcs = [leaky_ReLU] * 5 + [no_activation_func]
+    layers_batch = create_layers_batch(network_input_size,layer_output_sizes)
+    print("finding trained")
+    trained_layers_after_crossval, history_after_cross_val, preds_after_cross_val, mse_v_after_cross_val = train_network_stochastic_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, method, gamma = gamma_value, epochs=100, norm = norm, lam = lambda_value)
+
+
+    test_preds = predict_network(x_test,trained_layers_after_crossval,activation_funcs)
+    # mse_values_train.append(mse_v)
+    test_mse = mse(test_preds, targets_test)
+    print(test_mse)
+    # Plot the MSE values for this architecture
+    # plt.plot(x_test, test_preds, "-o", markersize = 4, color = colours2[idx+m], label= f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, train")
+    plt.plot(x_test, test_preds, "o", markersize = 2, color = "#cf2b7f", label = "Cross validated fit") #LLM tag: Claude helped with the placement of these plot commands
+    for each in test_preds:
+        print(each[0])
+    print("mean of test_preds is:", np.mean(test_preds))
+
+    # print(f"MSE for {n} hidden layers of {nod} nodes:", mse_values_test)
+            
+    # print(mse_values_test)
+    plt.plot()
+    plt.xlabel("x", fontsize=21)
+    plt.ylabel("y", fontsize=21)
+    plt.xticks(size=20)
+    plt.yticks(size=20)
+    plt.legend(fontsize = 16)
+    # plt.ylim(-0.33, 1.4)
+    plt.savefig(f"figures/f)/final_fit_rmsprop_l2_baseline.pdf")
+    plt.show()
