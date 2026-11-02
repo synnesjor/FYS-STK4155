@@ -309,7 +309,7 @@ def calculate_mse(x, y, degree):
 
 
 #-------------------------------------------------------- GENERAL PART -----------------------------------------------------------------------------
-part = "plot_f"
+part = "baseline"
 sigma = 0.1
 n = 2000
 
@@ -913,7 +913,7 @@ if part == "plot_f":
             plt.xticks(size=23)
             plt.yticks(size=23)
             plt.legend(fontsize = 16)
-            # plt.ylim(-0.33, 1.4)
+            plt.ylim(-0.35, 1.25)
             plt.savefig(f"figures/f)/final_fit_plain_l2_compare.pdf")
             plt.show()
 
@@ -969,7 +969,7 @@ if part == "plot_f":
             plt.xticks(size=23)
             plt.yticks(size=23)
             plt.legend(fontsize = 16)
-            # plt.ylim(-0.33, 1.4)
+            plt.ylim(-0.35, 1.25)
             plt.savefig(f"figures/f)/final_fit_adam_l2_compare.pdf")
             plt.show()
 
@@ -977,7 +977,7 @@ if part == "plot_f":
             print("running rmsprop:")
 
             baseline_txtfile = np.loadtxt("textfiles/base_line_test_preds.txt")
-            baseline_vals = baseline_txtfile[:][0]   
+            baseline_vals = baseline_txtfile[:]   
 
             layer_output_sizes = [100] * 5 + [1]
             activation_funcs = [leaky_ReLU] * 5 + [no_activation_func] #LLM use: Claude used to efficiently create the array for activation functions
@@ -1030,7 +1030,7 @@ if part == "plot_f":
             plt.xticks(size=23)
             plt.yticks(size=23)
             plt.legend(fontsize = 16)
-            # plt.ylim(-0.33, 1.4)
+            plt.ylim(-0.35, 1.25)
             plt.savefig(f"figures/f)/final_fit_rmsprop_l2_compare.pdf")
             plt.show()
 
@@ -1261,15 +1261,18 @@ if part == "baseline":
     trained_layers_after_crossval, history_after_cross_val, preds_after_cross_val, mse_v_after_cross_val = train_network_stochastic_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, method, gamma = gamma_value, epochs=100, norm = norm, lam = lambda_value)
 
 
-    test_preds = predict_network(x_test,trained_layers_after_crossval,activation_funcs)
+
+
+    baseline_preds = predict_network(x_test,trained_layers_after_crossval,activation_funcs)
+    test_preds = baseline_preds
     # mse_values_train.append(mse_v)
     test_mse = mse(test_preds, targets_test)
-    print(test_mse)
+    print("baseline mse:", test_mse)
     # Plot the MSE values for this architecture
     # plt.plot(x_test, test_preds, "-o", markersize = 4, color = colours2[idx+m], label= f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, train")
     plt.plot(x_test, test_preds, "o", markersize = 2, color = "#cf2b7f", label = "Cross validated fit") #LLM tag: Claude helped with the placement of these plot commands
-    for each in test_preds:
-        print(each[0])
+    # for each in test_preds:
+    #     print(each[0])
     print("mean of test_preds is:", np.mean(test_preds))
 
     # print(f"MSE for {n} hidden layers of {nod} nodes:", mse_values_test)
