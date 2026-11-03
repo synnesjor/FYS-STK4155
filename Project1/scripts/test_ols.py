@@ -9,7 +9,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score
-from src.utils import *
+from Project1.src.utils import *
 
 # Script for part 1a
 

@@ -14,7 +14,7 @@ from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.utils import resample
-from src.utils import *
+from Project1.src.utils import *
 
 # Script for part 1c
 def main(x, y):

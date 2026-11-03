@@ -46,15 +46,11 @@ def leaky_ReLU(z, alpha = 0.01):
 
 
 def softmax(z):
-    """Compute softmax values for each set of scores in the rows of the matrix z.
-    Used with batched input data: one row of scores per sample."""
     e_z = jnp.exp(z - jnp.max(z, axis=1, keepdims=False))
     return e_z / jnp.sum(e_z, axis=1, keepdims=True)
 
 
 def softmax_vec(z):
-    """Compute softmax values for each set of scores in the vector z.
-    Use this function when you use the activation function on one vector at a time."""
     e_z = jnp.exp(z - jnp.max(z))
     return e_z / jnp.sum(e_z)
 
@@ -103,7 +99,6 @@ def feed_forward_batch(inputs, layers, activation_funcs):
     return a
 
 def accuracy(predictions, targets):
-    """Fraction of rows whose largest predicted probability sits in the correct class."""
     return accuracy_score(np.argmax(np.asarray(predictions), axis=1), np.argmax(np.asarray(targets)))
 
 def gradient_func(inputs, layers, activation_functions, targets, norm="l2", lam=0.0):
@@ -175,7 +170,6 @@ def train_network_gradient(inputs, layers, activation_funcs, targets, norm="l2",
     return layers, history, predictions, mse(predictions,targets)
 
 def step_length(t, t0, t1):
-    """The schedule of Eq. (4.40)."""
     return t0 / (t + t1)
 
 def train_network_stochastic_gradient(inputs, layers, activation_funcs, targets, method, norm="l2", lam=0.0, schedule = None, gamma=0.01, epochs=10000, batch_size=5, tol=1e-6):
@@ -259,19 +253,15 @@ def optimiser_step(method, param, g, state, t, gamma, beta=0.9, rho=0.99,
     raise ValueError(f"unknown method {method}")
 
 def gradient_batch(theta, X, y, lam=0.0):
-    """Eqs. (4.13) and (4.17): the gradient of (1/n)||X theta - y||^2 + lambda theta^T theta."""
     n = len(y)
     return (2.0 / n) * X.T @ (X @ theta - y) + 2.0 * lam * theta
 
 def make_batches(n, batch_size, rng):
-    """Shuffle the indices and split them into minibatches."""
     idx = rng.permutation(n)
     return [idx[i:i + batch_size] for i in range(0, n, batch_size)]
 
 def step_length(t, t0, t1):
-    """The schedule of Eq. (4.40)."""
     return t0 / (t + t1)
-
 
 #for OLS comparison
 def design_matrix(x, degree, intercept = False):
@@ -661,9 +651,10 @@ if part == "part_c":
     
     network_input_size = inputs_scaled.shape[1]
 
-
-    #LLM tag here: ChatGPT was used in order to write the code so that we would get the desired text files. We check that the outcoming
-    #values are the same as if we were to print it out manually and more split up, and we confire that we get the same. 
+    """
+    LLM tag here: ChatGPT was used in order to write the code so that we would get the desired text files. We check that the outcoming
+    values are the same as if we were to print it out manually and more split up, and we confire that we get the same. 
+    """
     m = 0
     #for c)
     plt.figure()

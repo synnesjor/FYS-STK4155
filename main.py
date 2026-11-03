@@ -1,10 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from scripts import test_ols, ridge_regression, bias_variance, cross_validation
-from scripts import gradient_descent, optimisers, lasso, stochastic_gradient_descent
-from scripts import model_selection_ridge, model_selection_ols, model_selection_lasso
-from scripts import plot_estimated_runge
+from Project1.scripts import bias_variance, cross_validation, gradient_descent, lasso, model_selection_lasso, model_selection_ols, optimisers, ridge_regression
+from Project1.scripts import test_ols
+from Project1.scripts import stochastic_gradient_descent
+from Project1.scripts import model_selection_ridge
+from Project1.scripts import plot_estimated_runge
 
 
 seed = np.random.seed(2026)
@@ -32,7 +33,7 @@ def main():
     # cross_validation.main(x, y) # runs part 1d
     # gradient_descent.main(x, y, n, rng) # runs part 1e
     # optimisers.main(x, y) # runs part 1f
-    lasso.main(x, y) # runs part 1g
+    # lasso.main(x, y) # runs part 1g
     # stochastic_gradient_descent.main(x, y) # runs part 1h
     
     # Scripts for part 1i
@@ -40,7 +41,7 @@ def main():
     # model_selection_ols.main(x, y) 
     # model_selection_ridge.main(x, y) 
     # model_selection_lasso.main(x, y) 
-    # plot_estimated_runge.main(x, y, y_offset=y_offset)
+    plot_estimated_runge.main(x, y, y_offset=y_offset)
 
     # plt.show()
 if __name__ == "__main__":

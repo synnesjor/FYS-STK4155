@@ -14,18 +14,19 @@ from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import KFold, cross_val_score, train_test_split
 from sklearn.utils import resample
 from sympy import degree
-from src.utils import *
-from scripts import model_selection_ols, model_selection_ridge, model_selection_lasso
+from Project1.scripts import model_selection_lasso, model_selection_ols
+from Project1.src.utils import *
+from Project1.scripts import model_selection_ridge
 
 def main(x, y, y_offset=0.0):
 
     print("Running model selection for OLS, Ridge, and Lasso...")
-    print("OLS")
-    ols_parameters = model_selection_ols.main(x, y)
+    # print("OLS")
+    # ols_parameters = model_selection_ols.main(x, y)
     print("Ridge")
     ridge_parameters = model_selection_ridge.main(x, y)
-    print("Lasso")
-    lasso_parameters = model_selection_lasso.main(x, y)
+    # print("Lasso")
+    # lasso_parameters = model_selection_lasso.main(x, y)
     
     x=x.reshape(-1,1)
     y=y.reshape(-1,1)
@@ -47,21 +48,21 @@ def main(x, y, y_offset=0.0):
     )
 
     colors = ("#aa333c", "#ef9d2c", "#99d2fb")
-    for (folds, parameters), color in zip(sorted(ols_parameters.items()), colors):
-        degree = parameters["degree"]
-        model_ols = make_pipeline(PolynomialFeatures(degree=degree), StandardScaler(), LinearRegression())
-        model_ols.fit(x, y.ravel())
-        plt.plot(x_plot, model_ols.predict(x_plot), color=color, linewidth=2, label=f"OLS: {folds}-fold CV (degree {degree})")
+    # for (folds, parameters), color in zip(sorted(ols_parameters.items()), colors):
+    #     degree = parameters["degree"]
+    #     model_ols = make_pipeline(PolynomialFeatures(degree=degree), StandardScaler(), LinearRegression())
+    #     model_ols.fit(x, y.ravel())
+    #     plt.plot(x_plot, model_ols.predict(x_plot), color=color, linewidth=2, label=f"OLS: {folds}-fold CV (degree {degree})")
 
-    plt.xlabel("x", fontsize = 15)
-    plt.ylabel("Centered y", fontsize = 15)
-    # plt.title("OLS Estimates of the Runge Function")
-    plt.grid(alpha=0.35)
-    plt.xticks(size=15)
-    plt.yticks(size=15)
-    plt.legend(fontsize = 12)
-    plt.tight_layout()
-    plt.savefig("estimated_runge_ols_data_250.pdf", dpi=300)
+    # plt.xlabel("x", fontsize = 15)
+    # plt.ylabel("Centered y", fontsize = 15)
+    # # plt.title("OLS Estimates of the Runge Function")
+    # plt.grid(alpha=0.35)
+    # plt.xticks(size=15)
+    # plt.yticks(size=15)
+    # plt.legend(fontsize = 12)
+    # plt.tight_layout()
+    # plt.savefig("estimated_runge_ols_data_250.pdf", dpi=300)
 
 
     # Ridge
@@ -74,6 +75,9 @@ def main(x, y, y_offset=0.0):
         model_ridge = make_pipeline(PolynomialFeatures(degree=degree), StandardScaler(), Ridge(alpha=alpha))
         model_ridge.fit(x, y.ravel())
         plt.plot(x_plot, model_ridge.predict(x_plot), color=color, linewidth=2, label=rf"Ridge: {folds}-fold CV (degree {degree}, $\lambda$={alpha:.3g})")
+        # print("degree", degree)
+        for each in model_ridge.predict(x_plot):
+            print(each)
 
     plt.xlabel("x", fontsize = 15)
     plt.ylabel("Centered y", fontsize = 15)
@@ -84,26 +88,26 @@ def main(x, y, y_offset=0.0):
     plt.yticks(size=15)
     plt.legend(fontsize = 12, loc = "lower right")
     plt.tight_layout()
-    plt.savefig("estimated_runge_ridge_data_250.pdf", dpi=300)
+    # plt.savefig("estimated_runge_ridge_data_250.pdf", dpi=300)
 
 
-    # Lasso
-    plt.figure(figsize=(8, 5.5))
-    plt.scatter(x, y, color="#21534c", s=24, alpha=0.7, label="Observed data")
-    plt.plot(x_plot, y_runge, color="#21534c", linestyle="--", linewidth=2, label="Centered Runge function")
-    for (folds, parameters), color in zip(sorted(lasso_parameters.items()), colors):
-        degree = parameters["degree"]
-        alpha = parameters["lambda"]
-        model_lasso = make_pipeline(PolynomialFeatures(degree=degree), StandardScaler(), Lasso(alpha=alpha, max_iter=1000000, tol=1e-2, selection="random", random_state=2026))
-        model_lasso.fit(x, y.ravel())
-        plt.plot(x_plot, model_lasso.predict(x_plot), color=color, linewidth=2, label=rf"Lasso: {folds}-fold CV (degree {degree}, $\lambda$={alpha:.3g})")
-    plt.xlabel("x", fontsize = 15)
-    plt.ylabel("Centered y", fontsize = 15)
-    # plt.title("Lasso Estimate of the Runge Function")
-    plt.grid(alpha=0.35)
-    plt.xticks(size=15)
-    plt.yticks(size=15)
-    plt.legend(fontsize = 12)
-    plt.tight_layout()
-    plt.savefig("estimated_runge_lasso_data_250.pdf", dpi=300)
+    # # Lasso
+    # plt.figure(figsize=(8, 5.5))
+    # plt.scatter(x, y, color="#21534c", s=24, alpha=0.7, label="Observed data")
+    # plt.plot(x_plot, y_runge, color="#21534c", linestyle="--", linewidth=2, label="Centered Runge function")
+    # for (folds, parameters), color in zip(sorted(lasso_parameters.items()), colors):
+    #     degree = parameters["degree"]
+    #     alpha = parameters["lambda"]
+    #     model_lasso = make_pipeline(PolynomialFeatures(degree=degree), StandardScaler(), Lasso(alpha=alpha, max_iter=1000000, tol=1e-2, selection="random", random_state=2026))
+    #     model_lasso.fit(x, y.ravel())
+    #     plt.plot(x_plot, model_lasso.predict(x_plot), color=color, linewidth=2, label=rf"Lasso: {folds}-fold CV (degree {degree}, $\lambda$={alpha:.3g})")
+    # plt.xlabel("x", fontsize = 15)
+    # plt.ylabel("Centered y", fontsize = 15)
+    # # plt.title("Lasso Estimate of the Runge Function")
+    # plt.grid(alpha=0.35)
+    # plt.xticks(size=15)
+    # plt.yticks(size=15)
+    # plt.legend(fontsize = 12)
+    # plt.tight_layout()
+    # plt.savefig("estimated_runge_lasso_data_250.pdf", dpi=300)
 

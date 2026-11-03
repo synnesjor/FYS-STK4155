@@ -7,7 +7,7 @@
 
 
 import numpy as np
-from src.utils import *
+from Project1.src.utils import *
 from matplotlib.ticker import LogFormatterSciNotation
 
 def main(x, y):

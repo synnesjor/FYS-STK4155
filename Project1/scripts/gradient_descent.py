@@ -4,7 +4,7 @@ import jax
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 from jax import grad
-from src.utils import *
+from Project1.src.utils import *
 
 
 def main(x, y, n, rng):
