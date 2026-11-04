@@ -14,7 +14,7 @@ from pathlib import Path
 from utils import * #this is where we get all our functions from the utils script
 
 #-------------------------------------------------------- GENERAL PART -----------------------------------------------------------------------------
-part = "plot_f" # choose between part_b, part_c, part_d, part_f, baseline, and plot_f. This is for saving time, we dont want to run everything everytime
+part = "baseline" # choose between part_b, part_c, part_d, part_f, baseline, and plot_f. This is for saving time, we dont want to run everything everytime
 sigma = 0.1 #noise level, this is kept constant throughout the analysis
 n = 2000 #number of data points, this is kept constant through the analysis
 
@@ -532,11 +532,6 @@ if part == "baseline":
     """ 
 
     print("finding baseline")
-    ols_deg11_fold25 = np.loadtxt("best_fit_from_project_1_x_and_y.txt")
-    mse_train, mse_test_ols, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test= calculate_mse(inputs[:,0], targets[:,0], degree=7)
-    act_functions = [sigmoid, leaky_ReLU, ReLU]
-    act_functions_names = ["sigmoid", "leaky_ReLU", "ReLU"]
-    n_hidden_layers = [1,2,3,5]
 
     colours = ["#aa333c", "#99d2fb", "#4e827b", "#ef9d2c", "#B0a6df", "#2da9cf", "#ff46a2", "#9aab64", "#e5194f", "#8f1cab", "#2da9cf", "#3ba336"]
     colours2 = ["#ef9d2c", "#020202", "#195626", "#ef2c2c", "#732775", "#a495cd", "#aaaf0f", "#f4b537", "#5513b9", "#5a585b", "#103a46", "#b83453"]
@@ -565,9 +560,9 @@ if part == "baseline":
     # mse_values_train.append(mse_v)
     test_mse = mse(test_preds, targets_test)
     print("baseline mse:", test_mse)
-    # with open("textfiles/base_line_test_preds_test.txt", "w") as f:
-    #     for i in range(len(test_preds)):
-    #         f.write(f"{test_preds[i][0]} \n")
+    with open("textfiles/base_line_test_preds.txt", "w") as f:
+        for i in range(len(test_preds)):
+            f.write(f"{test_preds[i][0]} \n")
     for each in test_preds:
         print(each[0])
     print("mean of test_preds is:", np.mean(test_preds))
@@ -588,7 +583,7 @@ if part == "plot_f":
     
     network_input_size = inputs_scaled.shape[1]
 
-    baseline_txtfile = np.loadtxt("textfiles/base_line_test_preds_test.txt")
+    baseline_txtfile = np.loadtxt("textfiles/base_line_test_preds.txt")
     baseline_vals = baseline_txtfile[:]
     ridge_comparison_txtfile = np.loadtxt("textfiles/ridge_data_from_project1_deg_12_1.4174741629268048e-05_5.txt")
     ridge_vals_x = ridge_comparison_txtfile[:,0]
