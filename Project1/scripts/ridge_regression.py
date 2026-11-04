@@ -8,7 +8,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from src.utils import *
+from source.utils import *
 
 # Script for part 1b
 def main(x, y):

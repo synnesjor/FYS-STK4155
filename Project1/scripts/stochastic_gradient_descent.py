@@ -6,7 +6,7 @@
 """
 
 
-from src.utils import *
+from source.utils import *
 
 def main(x, y):
     degree = 5
@@ -68,7 +68,6 @@ def main(x, y):
         plt.ylabel("Norm of difference to closed-form Ridge", fontsize = 15)
         plt.legend(loc="upper right", fontsize=12)
         plt.grid(alpha=0.4)
-        plt.yscale("log")
         
         plt.savefig(f"figures/SGD_Ridge/SGD_vs_GD_{method}.pdf", dpi=300, bbox_inches="tight")
 

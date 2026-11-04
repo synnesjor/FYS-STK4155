@@ -13,7 +13,7 @@ from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import KFold
 from sklearn.utils import resample
-from src.utils import *
+from source.utils import *
 
 def main(x, y):
     x = x.reshape(-1, 1)

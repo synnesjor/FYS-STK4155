@@ -13,7 +13,7 @@ from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import KFold, cross_val_score, train_test_split
 from sklearn.utils import resample
-from src.utils import *
+from source.utils import *
 
 import warnings
 from sklearn.exceptions import ConvergenceWarning

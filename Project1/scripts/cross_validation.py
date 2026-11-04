@@ -12,7 +12,7 @@ from sklearn.linear_model import Ridge
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import KFold, cross_val_score
-from src.utils import *
+from source.utils import *
 
 # Script for part 1d
 

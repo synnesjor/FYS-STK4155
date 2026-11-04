@@ -15,7 +15,7 @@ from sklearn.model_selection import KFold, cross_val_score, train_test_split
 from sklearn.utils import resample
 from sympy import degree
 from scripts import model_selection_lasso, model_selection_ols
-from src.utils import *
+from source.utils import *
 from scripts import model_selection_ridge
 
 def main(x, y, y_offset=0.0):
