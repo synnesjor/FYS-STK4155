@@ -62,7 +62,7 @@ def main(x, y, y_offset=0.0):
     # plt.yticks(size=15)
     # plt.legend(fontsize = 12)
     # plt.tight_layout()
-    # plt.savefig("estimated_runge_ols_data_250.pdf", dpi=300)
+    # plt.savefig("Project1/figures/estimated_runge_ols_data_250.pdf", dpi=300)
 
 
     # Ridge
@@ -88,7 +88,7 @@ def main(x, y, y_offset=0.0):
     plt.yticks(size=15)
     plt.legend(fontsize = 12, loc = "lower right")
     plt.tight_layout()
-    # plt.savefig("estimated_runge_ridge_data_250.pdf", dpi=300)
+    # plt.savefig("Project1/figures/estimated_runge_ridge_data_250.pdf", dpi=300)
 
 
     # # Lasso
@@ -109,5 +109,5 @@ def main(x, y, y_offset=0.0):
     # plt.yticks(size=15)
     # plt.legend(fontsize = 12)
     # plt.tight_layout()
-    # plt.savefig("estimated_runge_lasso_data_250.pdf", dpi=300)
+    # plt.savefig("Project1/figures/estimated_runge_lasso_data_250.pdf", dpi=300)
 

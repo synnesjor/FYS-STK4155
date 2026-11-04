@@ -79,7 +79,7 @@ def main(x, y):
     plt.gcf().canvas.draw()
     plt.tick_params(axis='x', which='both', labelsize=15)
     plt.tick_params(axis='y', which='both', labelsize=15)
-    plt.savefig("optimiser_algorithms_ols.pdf", bbox_inches="tight")
+    plt.savefig("Project1/figures/optimiser_algorithms_ols.pdf", bbox_inches="tight")
 
     # plt.figure(figsize = (8,6))
     # for idx, k in enumerate(methods):

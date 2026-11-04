@@ -115,6 +115,6 @@ def main(x, y):
         plt.yticks(size=14)
         plt.grid(alpha=0.4)
         plt.tight_layout()
-        plt.savefig(f"figures/MSE_decomposition_lasso_{folds}fold.pdf", dpi=300)
+        plt.savefig(f"Project1/figures/MSE_decomposition_lasso_{folds}fold.pdf", dpi=300)
         plt.close()
     return optimal_parameters

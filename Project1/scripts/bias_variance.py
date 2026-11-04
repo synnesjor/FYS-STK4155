@@ -60,7 +60,7 @@ def main(x, y):
     plt.yticks(size = 14)
     plt.grid(alpha = 0.4)
     # plt.title(f"number of bootstraps = {number_of_bootstraps}")
-    # plt.savefig("figures/MSE_decomposition_OLS.pdf", dpi=300)
+    # plt.savefig("Project1/figures/MSE_decomposition_OLS.pdf", dpi=300)
 
 
     print(f"For n = {number_of_bootstraps}:")
@@ -109,7 +109,7 @@ def main(x, y):
     plt.legend(loc = "lower left", fontsize = "14")
     # plt.title(f"n = 100")
     plt.grid(alpha = 0.4)
-    # plt.savefig("figures/MSE_decomposition_ridge.pdf")
+    # plt.savefig("Project1/figures/MSE_decomposition_ridge.pdf")
 
     print("The minimum test error is found at a lambda value", our_logspace[np.argmin(test_error)])
 

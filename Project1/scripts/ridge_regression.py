@@ -38,7 +38,7 @@ def main(x, y):
     plt.yticks(size = 16)
     plt.grid(alpha = 0.4)
     plt.legend(fontsize = 16)
-    plt.savefig('figures/lambda_values.pdf', dpi=300)
+    plt.savefig('Project1/figures/lambda_values.pdf', dpi=300)
 
     print("Theta values for Ridge:")
     for each in ridge_values:

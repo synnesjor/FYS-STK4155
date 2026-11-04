@@ -54,7 +54,7 @@ def main(x, y):
     plt.yticks(size = 18)
     plt.grid(alpha = 0.4)
     plt.legend(loc = "center right", fontsize = 20)
-    plt.savefig('figures/mse_values.pdf', dpi=300)
+    plt.savefig('Project1/figures/mse_values.pdf', dpi=300)
 
     
     theta_list=list(theta_values)
@@ -83,7 +83,7 @@ def main(x, y):
     plt.yticks(size = 18)
     plt.grid(alpha = 0.4)
     plt.legend(fontsize = 16)
-    plt.savefig('figures/theta_vs_degree.pdf', dpi=300)
+    plt.savefig('Project1/figures/theta_vs_degree.pdf', dpi=300)
 
     print("Theta values for OLS:")
     print(theta_values[:,4])
