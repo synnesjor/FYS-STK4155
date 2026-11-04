@@ -11,6 +11,11 @@ from sklearn.metrics import r2_score
 jax.config.update("jax_enable_x64", True)
 from pathlib import Path
 
+"""
+In this script we define functions that will be used troughout our regression analysis
+"""
+
+
 SEED = 2026
 rng = np.random.default_rng(SEED)
 
@@ -54,7 +59,7 @@ def softmax_vec(z):
 
 
 def weights(n_in, n_out):
-    return np.random.normal(0, 2 / (n_in + n_out))  #her vil vi ha n_in = n_out fra forrige layer, n_out er definert av oss i layer_output_size
+    return np.random.normal(0, 2 / (n_in + n_out))
 
 
 def create_layers_batch(network_input_size, layer_output_sizes):
@@ -100,9 +105,9 @@ def accuracy(predictions, targets):
     return accuracy_score(np.argmax(np.asarray(predictions), axis=1), np.argmax(np.asarray(targets)))
 
 def gradient_func(inputs, layers, activation_functions, targets, norm="l2", lam=0.0):
-    '''
+    """
     LLM tag: Claude code, how to write code in needed form for JAX (using lambda command)
-    '''
+    """
     cost_value = lambda layer_params: cost(
         inputs, layer_params, targets, activation_functions, norm, lam
     )
