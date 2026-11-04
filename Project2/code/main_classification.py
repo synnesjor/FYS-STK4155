@@ -14,7 +14,7 @@ np.random.default_rng(2026)
 plt.rcParams.update({'font.size': 13})
 
 
-DATA = np.load("Project2/mnist.npz")
+DATA = np.load("../data/mnist.npz")
 x_train = DATA["x_train"].reshape(len(DATA["x_train"]), -1) / 255.0
 x_test = DATA["x_test"].reshape(len(DATA["x_test"]), -1) / 255.0
 y_train = (DATA["y_train"]).astype(int)
@@ -270,7 +270,7 @@ while select_accuracy_analysis:
 
 display_names = ["sigmoid", "tanh", "ReLU", "LReLU"]
 
-data_accuracy = np.loadtxt("Project2/activation_accuracy.txt", delimiter=" ")
+data_accuracy = np.loadtxt("../data/activation_accuracy.txt", delimiter=" ")
 data_accuracy = data_accuracy.T
 means = data_accuracy[0]
 stds = data_accuracy[1]
@@ -298,7 +298,7 @@ for mean in means:
     ax.axhline(mean, ls="--", alpha=0.7, color="grey")
 
 fig.tight_layout()
-fig.savefig("Project2/activation_accuracy_seeds.pdf",
+fig.savefig("../figures/e)/activation_accuracy_seeds.pdf",
             dpi=300, bbox_inches="tight")
 plt.show()
 
@@ -373,7 +373,7 @@ while select_best_model:
         axb.grid(axis="y", alpha=0.25)
 
     fig.savefig(
-        "Project2/mnist_question.pdf",
+        "../figures/e)/mnist_question.pdf",
         dpi=300,
         bbox_inches="tight",
         pad_inches=0.08
@@ -410,11 +410,11 @@ while select_best_model:
 
 # LLM-tag: reading saved data
 # Read history
-history_data = np.loadtxt("Project2/best_model_history.txt",skiprows=1).T
+history_data = np.loadtxt("../data/best_model_history.txt",skiprows=1).T
 history = {"epoch": history_data[0],"cost": history_data[1],"test_accuracy": history_data[2]}
 
 # Read layers.
-saved_model = np.load("Project2/best_model_layers.npz")
+saved_model = np.load("../data/best_model_layers.npz")
 P = saved_model["P"]
 
 layer_indices = sorted({int(name.split("_")[1]) for name in saved_model.files if name.startswith("layer_")})
@@ -460,7 +460,7 @@ while select_confusion_matrix:
     disp.im_.set_norm(norm)
     disp.im_.set_cmap(cmap)
     fig.tight_layout()
-    fig.savefig("Project2/confusion_matrix_best_model.pdf", dpi=300)
+    fig.savefig("../figures/e)/confusion_matrix_best_model.pdf", dpi=300)
     plt.show()
     plt.close(fig)
 
