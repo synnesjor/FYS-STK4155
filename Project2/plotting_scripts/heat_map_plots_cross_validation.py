@@ -26,7 +26,7 @@ new_cmap = mcolors.LinearSegmentedColormap.from_list(
 )
 
 
-mse = np.loadtxt(f"textfiles/mse_crossvalidation_{method}_l1.txt")
+mse = np.loadtxt(f"data/mse_crossvalidation_{method}_l1.txt")
 
 
 gamma_values = [10**-3, 10**-2, 5*10**-2, 10**-1, 5*10**-1]

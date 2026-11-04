@@ -262,7 +262,7 @@ while select_accuracy_analysis:
 
     print(f"time mean={time_mean:.2f} s, SD={time_sd:.2f} s")
 
-    with open("Project2/activation_accuracy.txt", "w", encoding="utf-8") as f:
+    with open("code/activation_accuracy.txt", "w", encoding="utf-8") as f:
         for mean, sd in zip(means, stds):
             f.write(f"{mean:.16g} {sd:.16g}\n")
     
@@ -384,7 +384,7 @@ while select_best_model:
     # LLM-tag - easy way to save the data from the model:
     # Save all weights and biases.
     np.savez(
-        "Project2/best_model_layers.npz",
+        "code/best_model_layers.npz",
         P=P,
         **{
             f"layer_{i}_{name}": value
@@ -395,7 +395,7 @@ while select_best_model:
 
     # Save history as: epoch, cost, test accuracy.
     np.savetxt(
-        "Project2/best_model_history.txt",
+        "code/best_model_history.txt",
         np.column_stack((
             np.arange(1, len(hist["cost"]) + 1),
             hist["cost"],
