@@ -12,7 +12,7 @@ from sklearn.linear_model import Ridge
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import KFold, cross_val_score
-from Project1.src.utils import *
+from src.utils import *
 
 # Script for part 1d
 
@@ -51,7 +51,7 @@ def main(x, y):
         plt.gcf().canvas.draw()
         plt.tick_params(axis='x', which='both', labelsize=17)
         plt.tick_params(axis='y', which='both', labelsize=15)
-        plt.savefig('Project1/figures/cross_validation_ols.pdf', dpi=300)
+        plt.savefig('figures/cross_validation_ols.pdf', dpi=300)
 
 
     nlambdas = 100
@@ -81,11 +81,10 @@ def main(x, y):
     #     plt.legend(fontsize = 16)
     #     plt.grid(alpha = 0.4)
     #     print("The optimal lambda (minimum MSE) is a lambda value of", our_logspace[np.where(cv_mse == np.min(cv_mse))][0])
-    # plt.savefig(f"Project1/figures/cross_validation_ridge.pdf")
+    # plt.savefig(f"figures/cross_validation_ridge.pdf")
 
         # print(np.where(cv_mse == np.min(cv_mse)))
 
 
 
-                
-        
+

@@ -7,7 +7,7 @@
 """
 
 
-from Project1.src.utils import *
+from src.utils import *
 
 def main(x, y):
 
@@ -54,7 +54,7 @@ def main(x, y):
         plt.yscale("log")
         plt.legend(fontsize=12)
         plt.grid(True, which="both", alpha=0.4)
-        plt.savefig(f"Project1/figures/lasso/lasso_convergence_{i}.pdf", dpi=300, bbox_inches="tight")
+        plt.savefig(f"figures/lasso/lasso_convergence_{i}.pdf", dpi=300, bbox_inches="tight")
     print(iters)
 
 

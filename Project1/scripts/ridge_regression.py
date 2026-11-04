@@ -8,7 +8,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from Project1.src.utils import *
+from src.utils import *
 
 # Script for part 1b
 def main(x, y):
@@ -38,12 +38,12 @@ def main(x, y):
     plt.yticks(size = 16)
     plt.grid(alpha = 0.4)
     plt.legend(fontsize = 16)
-    plt.savefig('Project1/figures/lambda_values.pdf', dpi=300)
+    plt.savefig('figures/lambda_values.pdf', dpi=300)
 
     print("Theta values for Ridge:")
     for each in ridge_values:
         print(each[0]) # print first value of each theta, which corresponds to the first lambda value
 
     # vi sammenlikner start theta-verdier for OLS og Ridge for å sjekke at det gir mening, vi burde starte på ca samme sted siden vi begynner med en liter verdi for lambda. 
-    # deretter skal vi se hvordan theta verdiene for ridge utvikler seg, spesielt med tanke på hvordan de avhenger av lambda. 
+    # deretter skal vi se hvordan theta verdiene for ridge utvikler seg, spesielt med tanke på hvordan de avhenger av lambda.
 

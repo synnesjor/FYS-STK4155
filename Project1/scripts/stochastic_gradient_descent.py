@@ -6,7 +6,7 @@
 """
 
 
-from Project1.src.utils import *
+from src.utils import *
 
 def main(x, y):
     degree = 5
@@ -39,7 +39,7 @@ def main(x, y):
         plt.legend(loc="upper right", fontsize=12)
         plt.yscale("log")
         plt.grid(alpha=0.4)
-        plt.savefig(f"Project1/figures/SGD_OLS/SGD_vs_GD_{method}.pdf", dpi=300, bbox_inches="tight")
+        plt.savefig(f"figures/SGD_OLS/SGD_vs_GD_{method}.pdf", dpi=300, bbox_inches="tight")
 
     
     lam=0.1
@@ -72,4 +72,3 @@ def main(x, y):
         
         plt.savefig(f"figures/SGD_Ridge/SGD_vs_GD_{method}.pdf", dpi=300, bbox_inches="tight")
 
-    

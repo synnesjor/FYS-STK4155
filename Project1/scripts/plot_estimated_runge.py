@@ -14,9 +14,9 @@ from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import KFold, cross_val_score, train_test_split
 from sklearn.utils import resample
 from sympy import degree
-from Project1.scripts import model_selection_lasso, model_selection_ols
-from Project1.src.utils import *
-from Project1.scripts import model_selection_ridge
+from scripts import model_selection_lasso, model_selection_ols
+from src.utils import *
+from scripts import model_selection_ridge
 
 def main(x, y, y_offset=0.0):
 
@@ -62,7 +62,7 @@ def main(x, y, y_offset=0.0):
     # plt.yticks(size=15)
     # plt.legend(fontsize = 12)
     # plt.tight_layout()
-    # plt.savefig("Project1/figures/estimated_runge_ols_data_250.pdf", dpi=300)
+    # plt.savefig("figures/estimated_runge_ols_data_250.pdf", dpi=300)
 
 
     # Ridge
@@ -88,7 +88,7 @@ def main(x, y, y_offset=0.0):
     plt.yticks(size=15)
     plt.legend(fontsize = 12, loc = "lower right")
     plt.tight_layout()
-    # plt.savefig("Project1/figures/estimated_runge_ridge_data_250.pdf", dpi=300)
+    # plt.savefig("figures/estimated_runge_ridge_data_250.pdf", dpi=300)
 
 
     # # Lasso
@@ -109,5 +109,5 @@ def main(x, y, y_offset=0.0):
     # plt.yticks(size=15)
     # plt.legend(fontsize = 12)
     # plt.tight_layout()
-    # plt.savefig("Project1/figures/estimated_runge_lasso_data_250.pdf", dpi=300)
+    # plt.savefig("figures/estimated_runge_lasso_data_250.pdf", dpi=300)
 

@@ -1,11 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from Project1.scripts import bias_variance, cross_validation, gradient_descent, lasso, model_selection_lasso, model_selection_ols, optimisers, ridge_regression
-from Project1.scripts import test_ols
-from Project1.scripts import stochastic_gradient_descent
-from Project1.scripts import model_selection_ridge
-from Project1.scripts import plot_estimated_runge
+from scripts import bias_variance, cross_validation, gradient_descent, lasso, model_selection_lasso, model_selection_ols, optimisers, ridge_regression
+from scripts import test_ols
+from scripts import stochastic_gradient_descent
+from scripts import model_selection_ridge
+from scripts import plot_estimated_runge
 
 
 seed = np.random.seed(2026)

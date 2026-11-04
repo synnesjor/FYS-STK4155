@@ -13,7 +13,7 @@ from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import KFold
 from sklearn.utils import resample
-from Project1.src.utils import *
+from src.utils import *
 
 def main(x, y):
     x = x.reshape(-1, 1)
@@ -81,7 +81,7 @@ def main(x, y):
         plt.yticks(size=14)
         plt.grid(alpha=0.4)
         plt.tight_layout()
-        plt.savefig(f"Project1/figures/MSE_decomposition_OLS_{folds}fold.pdf", dpi=300)
+        plt.savefig(f"figures/MSE_decomposition_OLS_{folds}fold.pdf", dpi=300)
         plt.close()
 
     plt.figure(figsize=(8, 5.5))
@@ -101,7 +101,7 @@ def main(x, y):
     plt.legend(fontsize=14)
     plt.grid(alpha=0.4)
     plt.tight_layout()
-    plt.savefig("Project1/figures/model_selection_OLS.pdf", dpi=300)
+    plt.savefig("figures/model_selection_OLS.pdf", dpi=300)
     plt.close()
     return optimal_parameters
 
