@@ -47,5 +47,5 @@ for i, (ad_grad, bp_grad) in enumerate(zip(layers_JAX, layers_backpropagation), 
     print(f"\nLayer {i}")
     for parameter_name, ad_value, bp_value in (("W", ad_W, bp_W), ("b", ad_b, bp_b)):
         difference = ad_value - bp_value
-        print(f" {parameter_name}: total error={np.sum(np.abs(difference)):.3e}, " f" shapes={ad_value.shape}")
+        print(f" {parameter_name}: total error={np.sum(np.abs(difference)):.3e}, max error: {np.max(np.abs(difference)):.3e}, shapes={ad_value.shape}")
 
