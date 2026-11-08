@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from pathlib import Path
 
-Path("data").mkdir(exist_ok=True)
 from source.utils_regression import *
 
 
@@ -461,6 +460,23 @@ def cross_validate_network(X, y, layer_output_sizes, activation_funcs, method, g
 #-------------------------------------------------------- PART d) -----------------------------------------------------------------------------
 
 if part == "part_d":
+
+    SEED = 2026
+    rng = np.random.default_rng(SEED) #LLM tag: ChatGPT suggested to make this more global, as we were having some issues with reproducibility
+
+    sigma = 0.1
+    n = 2000
+
+    inputs = rng.uniform(-1,1,n).reshape(-1, 1)
+    inputs_scaled = inputs_scale(inputs)
+
+    targets = runge_1d(inputs_scaled, sigma, n)
+    targets_no_noise = runge_1d_no_noise(inputs_scaled)
+    targets_centered = targets - np.mean(targets)
+    targets_centered_no_noise = targets_no_noise - np.mean(targets_no_noise)
+
+    inputs_scaled, x_test, targets_centered, y_test = train_test_split(inputs_scaled, targets_centered, test_size = 0.2, random_state = 2026)
+    targets_test = runge_1d(x_test, sigma, len(x_test))
     layer_sizes = [5, 1]
     activation_functions = [leaky_ReLU,leaky_ReLU, leaky_ReLU, leaky_ReLU, no_activation_func]
     layers = create_layers_batch(inputs_scaled.shape[1], layer_sizes)
