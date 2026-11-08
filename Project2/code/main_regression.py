@@ -416,7 +416,6 @@ def cross_validate_network(X, y, layer_output_sizes, activation_funcs, method, g
     train_mse_values = []
 
     for fold, (train_idx, val_idx) in enumerate(kfold.split(X)):
-        rng = np.random.default_rng(SEED + fold)
 
         layers = create_layers_batch(X.shape[1], layer_output_sizes)
 

@@ -1,5 +1,5 @@
-from source import utils_classification
-from source import utils_regression
+from Project2.code.source import utils_classification
+from Project2.code.source import utils_regression
 
 import numpy as np
 import jax

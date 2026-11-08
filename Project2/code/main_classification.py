@@ -1,10 +1,6 @@
-import os
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-import jax
-jax.config.update("jax_enable_x64", True)     # double precision, so that gradient checks agree to ~1e-15
-import jax.numpy as jnp
 from sklearn.metrics import accuracy_score
 from source.utils_classification import *
 

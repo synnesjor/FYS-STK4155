@@ -11,7 +11,7 @@ from sklearn.metrics import r2_score
 jax.config.update("jax_enable_x64", True)
 from pathlib import Path
 
-from regression_utils import * #this is where we get all our functions from the utils script
+from Project2.code.not_used.regression_utils import * #this is where we get all our functions from the utils script
 
 #-------------------------------------------------------- GENERAL PART -----------------------------------------------------------------------------
 part = "part_b" # choose between part_b, part_c, part_d, part_f, baseline, and plot_f. This is for saving time, we dont want to run everything everytime
