@@ -1,8 +1,10 @@
-# FYS-STK4155
+# FYS-STK4155 - Project 2
+
+### By Marie Océane Pilskog, Synne Sigstad Jørgensen and Muhammad Mohsin Mumtaz
 
 Welcome to our repository for Project 2 for FYS-STK3155 / FYS-STK4155!
 
-Here, we present a thorough analysis of Runge's function. We investigate various Linear Regression methods, Gradient Descent algorithms, both regular and stochastic, and optimiser algorithms. We look at optimal polynomial degree, penalty parameter $\lambda$, and learning rate $\gamma$, amongst other ML concepts. We hope you enjoy! 
+Here, we present an examination of neural networks, with a focus on predicting the One Dimensional Runge function and classification of the MNSIT digits dataset. We delve into optimisation of neural network architectures, optimiser methods, learning rates, regularisation (l1 and l2 norms) and activation functions.
 
 ## File Tree and Structure:
 
@@ -34,6 +36,10 @@ The following libraries were used in this project:
 - [Matplotlib](https://matplotlib.org/stable/) – visualization and plotting.
 - [Scikit-learn](https://scikit-learn.org/stable/) – regression methods, cross-validation, and model evaluation.
 - [JAX](https://docs.jax.dev/) – automatic differentiation and numerical optimization.
+
+Other sources:
+
+- LeCun, Yann and Cortes, Corinna and Burges, CJ. (2010). MNIST handwritten digit database. Available at: http://yann.lecun.com/exdb/mnist. 
 
 ## Running the code
 

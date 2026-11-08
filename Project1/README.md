@@ -1,4 +1,6 @@
-# FYS-STK4155
+# FYS-STK4155 - Project 1
+
+### By Marie Océane Pilskog, Synne Sigstad Jørgensen and Muhammad Mohsin Mumtaz
 
 Welcome to our repository for Project 1 for FYS-STK3155 / FYS-STK4155!
 
