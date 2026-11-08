@@ -461,7 +461,7 @@ def cross_validate_network(X, y, layer_output_sizes, activation_funcs, method, g
 
 if part == "part_d":
 
-    with open("../task_d_marie.py", "r") as file:
+    with open("exercise_d.py", "r") as file:
         code = file.read()
 
     exec(code)
