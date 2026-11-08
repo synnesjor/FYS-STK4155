@@ -4,7 +4,7 @@
 
 Welcome to our repository for Project 2 for FYS-STK3155 / FYS-STK4155!
 
-Here, we present an examination of neural networks, with a focus on predicting the One Dimensional Runge function and classification of the MNSIT digits dataset. We delve into optimisation of neural network architectures, optimiser methods, learning rates, regularisation (l1 and l2 norms) and activation functions.
+Here, we present an examination of neural networks, with a focus on predicting the One Dimensional Runge function and classifying the MNSIT digits dataset. We delve into optimisation of neural network architectures, optimiser methods, learning rates, regularisation (l1 and l2 norms) and activation functions.
 
 ## File Tree and Structure:
 
