@@ -1,17 +1,10 @@
 
 import numpy as np
-import jax
-import jax.numpy as jnp
 import matplotlib.pyplot as plt
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import accuracy_score
-from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score
-jax.config.update("jax_enable_x64", True)
 from pathlib import Path
 
-Path("../data").mkdir(exist_ok=True)
+Path("data").mkdir(exist_ok=True)
 from source.utils_regression import *
 
 
@@ -51,7 +44,7 @@ if part == "part_b":
     saving data (debugging). We verify by making sure the plots look like we want. UiOGPT was used to identify the minimum MSE values.
     """
 
-    ols_deg11_fold25 = np.loadtxt("../data/best_fit_from_project_1_x_and_y.txt")
+    ols_deg11_fold25 = np.loadtxt("data/best_fit_from_project_1_x_and_y.txt")
     mse_train, mse_test_ols, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test= calculate_mse(inputs[:,0], targets[:,0], degree=7)
 
     colours = ["#aa333c", "#99d2fb", "#4e827b", "#ef9d2c", "#B0a6df", "#2da9cf", "#ff46a2", "#9aab64", "#e5194f", "#8f1cab", "#2da9cf", "#3ba336"]
@@ -118,7 +111,7 @@ if part == "part_b":
     # plt.yticks(size=23)
     # plt.legend(fontsize = 16)
     # plt.ylim(-0.38, 1.4)
-    # plt.savefig(f"../figures/b)/fit_to_runge_plain_ols_7_and_11.pdf")
+    # plt.savefig(f"figures/b)/fit_to_runge_plain_ols_7_and_11.pdf")
     # plt.show()
 
 
@@ -196,7 +189,7 @@ if part == "part_b":
     #     plt.yticks(size=23)
     #     plt.legend(fontsize = 16)
     #     plt.ylim(-0.38, 1.4)
-    #     plt.savefig(f"../figures/b)/fit_to_runge_{met}_ols_7_and_11.pdf")
+    #     plt.savefig(f"figures/b)/fit_to_runge_{met}_ols_7_and_11.pdf")
     #     plt.show()
 
     
@@ -256,7 +249,7 @@ if part == "part_b":
     plt.xscale("log")
     plt.ylim(0.0, 0.1)
     plt.legend(fontsize = 16)
-    # plt.savefig(f"../figures/b)/oppgave_b_plain_mse_vs_gamma.pdf")
+    # plt.savefig(f"figures/b)/oppgave_b_plain_mse_vs_gamma.pdf")
     plt.show()
 
 
@@ -338,7 +331,7 @@ if part == "part_b":
             plt.xlim(7.5*10**-4, 5*10**-2)
             plt.ylim(0.007, 0.025)
             plt.legend(fontsize=16, loc = "upper left")
-        plt.savefig(f"../figures/b)/oppgave_b_stochastic_{met}_mse_vs_gamma.pdf")
+        plt.savefig(f"figures/b)/oppgave_b_stochastic_{met}_mse_vs_gamma.pdf")
         plt.show()
 #-------------------------------------------------------- PART b) -----------------------------------------------------------------------------
 
@@ -379,7 +372,7 @@ if part == "part_c":
     m = 0
     #for c)
     plt.figure()
-    Path("../data").mkdir(exist_ok=True)
+    Path("data").mkdir(exist_ok=True)
     for idx, a in enumerate(act_functions):
         mse_values_train = []
         mse_values_test = []
@@ -400,7 +393,7 @@ if part == "part_c":
             mse_values_test.append(mse_for_n_layers)
         mse_values_test = np.array(mse_values_test)
 
-        filename = f"../data/mse_{act_functions_names[idx]}_{met}.txt"
+        filename = f"data/mse_{act_functions_names[idx]}_{met}.txt"
 
         # Exactly 5 rows, each with 7 MSE values
         np.savetxt(filename, mse_values_test, fmt="%.10e", delimiter=" ")
@@ -409,7 +402,7 @@ if part == "part_c":
         plt.plot(n_hidden_layers, mse_values_test, "-o", color = colours[m+4], label = f"{act_functions_names[idx]} test")
         plt.legend()
         m+=1
-    # plt.savefig("../figures/c)/exercise_c_mse_vs_hidden_layers_stochastic_{met}_new.pdf")
+    # plt.savefig("figures/c)/exercise_c_mse_vs_hidden_layers_stochastic_{met}_new.pdf")
     plt.show()
 #-------------------------------------------------------- PART c) -----------------------------------------------------------------------------
     
@@ -505,8 +498,8 @@ if part == "part_f":
         validation_save_parameters = []
 
         validation_mse_grid = np.zeros((len(gamma_values), len(lambda_values)))
-        # Path("../data").mkdir(exist_ok=True)
-        # filename = f"../data/mse_crossvalidation_test.txt"
+        # Path("data").mkdir(exist_ok=True)
+        # filename = f"data/mse_crossvalidation_test.txt"
         for gamma_idx, gamma in enumerate(gamma_values):
             for lam_idx, lam in enumerate(lambda_values):
                 cv_mean, cv_sd = cross_validate_network(inputs_scaled, targets_centered, layer_output_sizes, activation_funcs, method = met, gamma=gamma, norm = "l1", lam=lam, epochs=100, n_splits=3)
@@ -528,7 +521,7 @@ if part == "part_f":
                     threshold = cv_mean + cv_sd
                     print(f"New gamma: {gamma}")
 
-        filename = f"../data/mse_crossvalidation_{met}_l1_only_five.txt"
+        filename = f"data/mse_crossvalidation_{met}_l1_only_five.txt"
 
         np.savetxt(filename, validation_mse_grid, fmt="%.10e", delimiter=" ")
 
@@ -603,7 +596,7 @@ if part == "part_d":
     plt.yticks(size=15)
     plt.legend(fontsize = 15)
     plt.tight_layout()
-    plt.savefig("../figures/d)/MSE_l1_l2_norm.pdf", bbox_inches="tight")
+    plt.savefig("figures/d)/MSE_l1_l2_norm.pdf", bbox_inches="tight")
     #plt.show()       
       
 if part == "plot_f":
@@ -625,9 +618,9 @@ if part == "plot_f":
     
     network_input_size = inputs_scaled.shape[1]
 
-    baseline_txtfile = np.loadtxt("../data/base_line_test_preds.txt")
+    baseline_txtfile = np.loadtxt("data/base_line_test_preds.txt")
     baseline_vals = baseline_txtfile[:]
-    ridge_comparison_txtfile = np.loadtxt("../data/ridge_data_from_project1_deg_12_1.4174741629268048e-05_5.txt")
+    ridge_comparison_txtfile = np.loadtxt("data/ridge_data_from_project1_deg_12_1.4174741629268048e-05_5.txt")
     ridge_vals_x = ridge_comparison_txtfile[:,0]
     ridge_vals_y = ridge_comparison_txtfile[:,1]
 
@@ -690,7 +683,7 @@ if part == "plot_f":
             plt.yticks(size=23)
             plt.legend(fontsize = 16)
             plt.ylim(-0.37, 1.3)
-            plt.savefig(f"../figures/f)/final_fit_plain_l2_compare.pdf")
+            plt.savefig(f"figures/f)/final_fit_plain_l2_compare.pdf")
             plt.show()
 
         if method == "adam": 
@@ -742,7 +735,7 @@ if part == "plot_f":
             plt.yticks(size=23)
             plt.legend(fontsize = 16)
             plt.ylim(-0.35, 1.25)
-            plt.savefig(f"../figures/f)/final_fit_adam_l2_compare.pdf")
+            plt.savefig(f"figures/f)/final_fit_adam_l2_compare.pdf")
             plt.show()
 
         if method == "rmsprop": 
@@ -797,7 +790,7 @@ if part == "plot_f":
             plt.yticks(size=23)
             plt.legend(fontsize = 16)
             plt.ylim(-0.35, 1.25)
-            plt.savefig(f"../figures/f)/final_fit_rmsprop_l2_compare.pdf")
+            plt.savefig(f"figures/f)/final_fit_rmsprop_l2_compare.pdf")
             plt.show()
 
 
@@ -808,7 +801,7 @@ if part == "baseline":
     """ 
     
 
-    ols_deg11_fold25 = np.loadtxt("../data/best_fit_from_project_1_x_and_y.txt")
+    ols_deg11_fold25 = np.loadtxt("data/best_fit_from_project_1_x_and_y.txt")
     mse_train, mse_test_ols, theta, y_tilde, y_tilde_test, y_tilde_train, y_train, y_test= calculate_mse(inputs[:,0], targets[:,0], degree=7)
     act_functions = [sigmoid, leaky_ReLU, ReLU]
     act_functions_names = ["sigmoid", "leaky_ReLU", "ReLU"]
@@ -871,6 +864,6 @@ if part == "baseline":
     plt.yticks(size=20)
     plt.legend(fontsize = 16)
     # plt.ylim(-0.33, 1.4)
-    plt.savefig(f"../figures/f)/final_fit_rmsprop_l2_baseline.pdf")
+    plt.savefig(f"figures/f)/final_fit_rmsprop_l2_baseline.pdf")
     plt.show()
 #-------------------------------------------------------- PART f) -----------------------------------------------------------------------------

@@ -8,13 +8,13 @@ import jax.numpy as jnp
 from sklearn.metrics import accuracy_score
 from source.utils_classification import *
 
-rng = np.random.default_rng(2026)
-np.random.default_rng(2026)
+SEED = 2026
+rng = np.random.default_rng(SEED) #LLM tag: ChatGPT suggested to make this more global, as we were having some issues with reproducibility
 
 plt.rcParams.update({'font.size': 13})
 
 
-DATA = np.load("../data/mnist.npz")
+DATA = np.load("data/mnist.npz")
 x_train = DATA["x_train"].reshape(len(DATA["x_train"]), -1) / 255.0
 x_test = DATA["x_test"].reshape(len(DATA["x_test"]), -1) / 255.0
 y_train = (DATA["y_train"]).astype(int)
@@ -33,7 +33,7 @@ small_y_train = DATA["y_train"][indices].astype(int)
 # First tune architecture:
 select_architecture = False
 
-while select_architecture:
+if select_architecture:
     architectures = [[50], [100], [100, 10], [100, 50]]
     gammas = np.linspace(0.01, 0.5, 10)
     best_parameters = None
@@ -66,14 +66,13 @@ while select_architecture:
         print(f"Eligible parameters: {save_parameters[i]} " f"with accuracy {save_accuracy[i]:.4f} ")
 
     print(f"Best Architecture: {best_parameters[0]}; Best Learning Rate: {best_parameters[1]}")
-    select_architecture = False
 
 best_architecture = [100, 50]
 
 select_learning_rate_norm = False
 # Selected using smaller training set (10000):
 # Change between plain, adam and rms here.
-while select_learning_rate_norm:
+if select_learning_rate_norm:
     gammas = np.linspace(0.01, 0.6, 5)
     lambda_values = np.linspace(0, 1e-3, 5)
     best_parameters = None
@@ -106,7 +105,6 @@ while select_learning_rate_norm:
         print(f"Eligible parameters: {save_parameters[i]} " f"with accuracy {save_accuracy[i]:.4f} ")
 
     print(f"Best Learning Rate: {best_parameters[0]}; Best L2 penalty parameter: {best_parameters[1]}")
-    select_learning_rate_norm = False
     
 eligible_parameters_l2 = [(np.float64(0.305), np.float64(0.00025)), 
                        (np.float64(0.305), np.float64(0.0005)), 
@@ -119,7 +117,7 @@ eligible_parameters_l2 = [(np.float64(0.305), np.float64(0.00025)),
 
 select_learning_rate_norm_with_test_data = False
 # Using test data to confirm learning rate and norm.
-while select_learning_rate_norm_with_test_data:
+if select_learning_rate_norm_with_test_data:
     save_parameters = []
     save_accuracy = []
     hidden_sizes = best_architecture
@@ -137,7 +135,7 @@ while select_learning_rate_norm_with_test_data:
         method="plain",
         batch_size=100,
         epochs=50,
-        rng=2026,
+        rng=None,
         X_test=x_test,
         y_test=y_test,
         lam=lam
@@ -152,14 +150,12 @@ while select_learning_rate_norm_with_test_data:
 
     print(f"Best parameters: {save_parameters[best_idx]};", f"Accuracy: {save_accuracy[best_idx]}")
 
-    select_learning_rate_norm_with_test_data = False
-
 # Analysis confirms lam=0.0
 optimal_lam = 0
 
 select_learning_rate = False
 
-while select_learning_rate:
+if select_learning_rate:
     gammas = np.linspace(0.01, 0.6, 30)
     best_parameters = None
     best_accuracy = 0
@@ -190,13 +186,12 @@ while select_learning_rate:
         print(f"Eligible parameters: {save_parameters[i]} " f"with accuracy {save_accuracy[i]:.4f} ")
 
     print(f"Best Learning Rate: {best_parameters}")
-    select_learning_rate = False
 
 eligible_gamma = np.array([0.396551724137931, 0.5186206896551724, 0.579655172413793])
 
 select_final_learning_rate = False
 
-while select_final_learning_rate:
+if select_final_learning_rate:
     save_parameters = []
     save_accuracy = []
     hidden_sizes = best_architecture
@@ -214,7 +209,7 @@ while select_final_learning_rate:
         method="plain",
         batch_size=100,
         epochs=50,
-        rng=2026,
+        rng=None,
         X_test=x_test,
         y_test=y_test,
         lam=optimal_lam
@@ -229,13 +224,12 @@ while select_final_learning_rate:
 
     print(f"Best parameters: {save_parameters[best_idx]};", f"Accuracy: {save_accuracy[best_idx]}")
 
-    select_final_learning_rate = False
 
 optimal_gamma = 0.5186206896551724
 
 select_accuracy_analysis = False
 # Selected using full training set
-while select_accuracy_analysis:
+if select_accuracy_analysis:
     save_accuracy = {"sigmoid": [], "tanh": [], "relu": [], "lrelu": []}
     save_time = {"sigmoid": [], "tanh": [], "relu": [], "lrelu": []}
     for idx in range(5):
@@ -262,15 +256,14 @@ while select_accuracy_analysis:
 
     print(f"time mean={time_mean:.2f} s, SD={time_sd:.2f} s")
 
-    with open("code/activation_accuracy.txt", "w", encoding="utf-8") as f:
+    with open("data/activation_accuracy.txt", "w", encoding="utf-8") as f:
         for mean, sd in zip(means, stds):
             f.write(f"{mean:.16g} {sd:.16g}\n")
     
-    select_accuracy_analysis = False
 
 display_names = ["sigmoid", "tanh", "ReLU", "LReLU"]
 
-data_accuracy = np.loadtxt("../data/activation_accuracy.txt", delimiter=" ")
+data_accuracy = np.loadtxt("data/activation_accuracy.txt", delimiter=" ")
 data_accuracy = data_accuracy.T
 means = data_accuracy[0]
 stds = data_accuracy[1]
@@ -298,13 +291,13 @@ for mean in means:
     ax.axhline(mean, ls="--", alpha=0.7, color="grey")
 
 fig.tight_layout()
-fig.savefig("../figures/e)/activation_accuracy_seeds.pdf",
+fig.savefig("figures/e)/activation_accuracy_seeds.pdf",
             dpi=300, bbox_inches="tight")
 plt.show()
 
 select_baseline_model = False
 # Baseline model gives 92.37%.
-while select_baseline_model:
+if select_baseline_model:
     t0 = time.time()
     lam_adam = 1e-4
     layers = create_layers_batch(784, [10])
@@ -313,17 +306,14 @@ while select_baseline_model:
 
     print(f"test accuracy after 50 epochs for ReLU, lam={optimal_lam}, gamma={optimal_gamma:.4f}: {hist['test_accuracy'][-1]:.2%}  ({time.time() - t0:.0f} s)")
 
-    select_baseline_model = False
-
 
 select_best_model = True
 # Use the best model, plain, relu, gamma=gamma_plain, no norm
-while select_best_model:
+if select_best_model:
     t0 = time.time()
-    lam_adam = 1e-4
     layers = create_layers_batch(784, best_architecture + [10])
     layers, hist = train(x_train, one_hot(y_train, 10), layers, hidden_activation="relu", head="cross", method="plain", gamma=optimal_gamma, epochs=50,
-                    batch_size = 100, rng=None, X_test = x_test, y_test = y_test, norm="l2", lam=0.0)
+                    batch_size = 100, rng=None, X_test = x_test, y_test = y_test, norm="l2", lam=optimal_lam)
 
     print(f"test accuracy after 50 epochs for ReLU and lam={0.0}: {hist['test_accuracy'][-1]:.2%}  ({time.time() - t0:.0f} s)")
 
@@ -373,7 +363,7 @@ while select_best_model:
         axb.grid(axis="y", alpha=0.25)
 
     fig.savefig(
-        "../figures/e)/mnist_question.pdf",
+        "figures/e)/mnist_question.pdf",
         dpi=300,
         bbox_inches="tight",
         pad_inches=0.08
@@ -384,7 +374,7 @@ while select_best_model:
     # LLM-tag - easy way to save the data from the model:
     # Save all weights and biases.
     np.savez(
-        "code/best_model_layers.npz",
+        "data/best_model_layers.npz",
         P=P,
         **{
             f"layer_{i}_{name}": value
@@ -395,7 +385,7 @@ while select_best_model:
 
     # Save history as: epoch, cost, test accuracy.
     np.savetxt(
-        "code/best_model_history.txt",
+        "data/best_model_history.txt",
         np.column_stack((
             np.arange(1, len(hist["cost"]) + 1),
             hist["cost"],
@@ -405,16 +395,15 @@ while select_best_model:
         comments=""
     )
     
-    select_best_model = False
 
 
 # LLM-tag: reading saved data
 # Read history
-history_data = np.loadtxt("../data/best_model_history.txt",skiprows=1).T
+history_data = np.loadtxt("data/best_model_history.txt",skiprows=1).T
 history = {"epoch": history_data[0],"cost": history_data[1],"test_accuracy": history_data[2]}
 
 # Read layers.
-saved_model = np.load("../data/best_model_layers.npz")
+saved_model = np.load("data/best_model_layers.npz")
 P = saved_model["P"]
 
 layer_indices = sorted({int(name.split("_")[1]) for name in saved_model.files if name.startswith("layer_")})
@@ -427,7 +416,7 @@ from sklearn.metrics import (confusion_matrix as sk_confusion_matrix, ConfusionM
 
 select_confusion_matrix = True
 
-while select_confusion_matrix:
+if select_confusion_matrix:
 
     p_test = np.argmax(P, axis=1)
     y_true = np.asarray(y_test).ravel()
@@ -460,16 +449,15 @@ while select_confusion_matrix:
     disp.im_.set_norm(norm)
     disp.im_.set_cmap(cmap)
     fig.tight_layout()
-    fig.savefig("../figures/e)/confusion_matrix_best_model.pdf", dpi=300)
+    fig.savefig("figures/e)/confusion_matrix_best_model.pdf", dpi=300)
     plt.show()
     plt.close(fig)
 
-    select_confusion_matrix = False
 
 
 select_sklearn_model = False
 # Running code gives 92.57% accuracy
-while select_sklearn_model: 
+if select_sklearn_model: 
     from sklearn.linear_model import LogisticRegression
     # Initialize the model (multinomial logistic regression with the saga solver)
     model = LogisticRegression(solver='saga', max_iter=1000, random_state=42)
@@ -480,5 +468,3 @@ while select_sklearn_model:
     # Calculate accuracy
     accuracy_value = accuracy_score(y_test, y_pred)
     print(f"Model Accuracy: {accuracy_value:.4f}") 
-    
-    select_sklearn_model = False

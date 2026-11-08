@@ -8,8 +8,8 @@ import jax.numpy as jnp
 from sklearn.metrics import accuracy_score
 
 
-rng = np.random.default_rng(2026)
-np.random.default_rng(2026)
+SEED = 2026
+rng = np.random.default_rng(SEED) #LLM tag: ChatGPT suggested to make this more global, as we were having some issues with reproducibility
 
 
 # Activation functions
