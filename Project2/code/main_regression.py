@@ -476,8 +476,9 @@ def cross_validate_network(X, y, layer_output_sizes, activation_funcs, method, g
 # This uses the exact same script for the sake of reproducibility.
 if part == "part_d":
     """
-    This part runs the script for exercise d, where we investigate the l1 and l2 norms.
-    """
+    This part investigates Ridge and Lasso regularisation norms (l1 and l2). 
+    The goal here is to analyse whether the implementation of a penalty parameter would result in better
+    results for our model.    """
 
     with open("exercise_d.py", "r") as file:
         code = file.read()
