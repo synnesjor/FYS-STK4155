@@ -82,7 +82,7 @@ In this part we perform a k-fold cross-validation for our regression problem, in
 
 #### Plotting Scripts
 
-For the scripts in `plotting_scripts/`, run either `heat_map_plot_layers_and_nodes.py` or `heat_map_plots_cross_validation.py` with the command `python insert_name.py` in the directory `code/`. These are connected to the regression case and require data files saved by running the other scripts in `main_regression.py`.
+For the scripts in `plotting_scripts/`, run either `heat_map_plot_layers_and_nodes.py` or `heat_map_plots_cross_validation.py` with the command `python plotting_scripts/insert_name.py` in the directory `code/`. These are connected to the regression case and require data files saved by running the other scripts in `main_regression.py`.
 
 ### Classification
 
