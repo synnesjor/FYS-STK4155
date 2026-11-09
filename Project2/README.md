@@ -4,7 +4,7 @@
 
 Welcome to our repository for Project 2 for FYS-STK3155 / FYS-STK4155!
 
-Here, we present an examination of neural networks, with a focus on predicting the One Dimensional Runge function and classifying the MNSIT digits dataset. We delve into optimisation of neural network architectures, optimiser methods, learning rates, regularisation (l1 and l2 norms) and activation functions.
+Here, we present an examination of neural networks, with a focus on predicting the one-dimensional Runge function and classifying the MNSIT digits dataset. We delve into optimisation of neural network architectures, optimiser methods, learning rates, regularisation (l1 and l2 norms) and activation functions.
 
 ## File Tree and Structure:
 
@@ -44,7 +44,7 @@ Use the command `pip install numpy matplotlib sklearn jax seaborn` or replace `p
 The following libraries were used in this project:
 
 - [NumPy](https://numpy.org/doc/stable/) – numerical computations and array operations.
-- [Matplotlib](https://matplotlib.org/stable/) – visualization and plotting.
+- [Matplotlib](https://matplotlib.org/stable/) – visualisation and plotting.
 - [Scikit-learn](https://scikit-learn.org/stable/) – regression methods, cross-validation, and model evaluation.
 - [JAX](https://docs.jax.dev/) – automatic differentiation and numerical optimization.
 - [Seaborn](https://seaborn.pydata.org/) - statistical data visualization based on matplotlib.
