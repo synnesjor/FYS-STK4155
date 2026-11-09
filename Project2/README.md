@@ -64,11 +64,11 @@ To use `main_regression.py`:
 
 #### part_b
 
-This part of the code does the initial analysis, where we calculate the MSE values for a range of learning rates. Standard architecture is 1 hidden layer of 50 nodes, or 2 hidden layers of 100 nodes, but these numbers are flexible. Standard sctivation function for hidden layers are sigmoid and the output layer has no activation function, but this may be changed also. When the optimal learning rate has been indentified, we train our neural network, and compare it to the OLS results from Project1.
+This part of the code does the initial analysis, where we calculate the MSE values for a range of learning rates. Standard architecture is 1 hidden layer of 50 nodes, or 2 hidden layers of 100 nodes, but these numbers are flexible. Standard activation function for hidden layers are sigmoid and the output layer has no activation function, but this may be changed also. When the optimal learning rate has been identified, we train our neural network, and compare it to the OLS results from Project1.
 
 #### part_c
 
-This part investigates the number of hidden layers and nodes; our goal is to indentify the optimal combination of these hyperparameters. We also test various activation functions and optimisers for the gradient descent. Running this full part TAKES TIME! That is why we run this and save the data and then plot, we do not olot in the run. The plotting script can be found in the plotting_scripts folder. 
+This part investigates the number of hidden layers and nodes; our goal is to identify the optimal combination of these hyperparameters. We also test various activation functions and optimisers for the gradient descent. Running this full part TAKES TIME! That is why we run this and save the data and then plot, we do not plot in the run. The plotting script can be found in the plotting_scripts folder. 
 
 #### part_d
 
@@ -78,7 +78,7 @@ This part investigates Ridge and Lasso regularisation norms (l1 and l2). The goa
 
 #### part_f
 
-In this part we perform a k-fold cross-validation for our regression problem, investigating the learning rate and the penalty parameter. Running this full part TAKES TIME! That is why we run this and save the data and then plot, we do not olot in the run. The plotting script can be found in the plotting_scripts folder. 
+In this part we perform a k-fold cross-validation for our regression problem, investigating the learning rate and the penalty parameter. Running this full part TAKES TIME! That is why we run this and save the data and then plot, we do not plot in the run. The plotting script can be found in the plotting_scripts folder. 
 
 #### Plotting Scripts
 
