@@ -11,17 +11,10 @@ For more details on the individual projects, please see the README inside the di
 ```text
 ├───Project1
 ├───Project2
-│   └───code
+│   ├───code
+|   └───important_results
 ```
 
 - `Project1/` contains the files for the first project.
 - `Project2/code` contains the files for the second project.
-
-## Sources and documentation
-
-The following libraries were used in this project:
-
-- [NumPy](https://numpy.org/doc/stable/) – numerical computations and array operations.
-- [Matplotlib](https://matplotlib.org/stable/) – visualization and plotting.
-- [Scikit-learn](https://scikit-learn.org/stable/) – regression methods, cross-validation, and model evaluation.
-- [JAX](https://docs.jax.dev/) – automatic differentiation and numerical optimization.
+- `Project2/important_results` contains figures from the different parts of the project that we deemed important and that are used in a connected report.
