@@ -26,7 +26,7 @@ method = ["leaky_ReLU", "sigmoid", "ReLU"]
 
 for each in method:
 
-    mse = np.loadtxt(f"textfiles/mse_{each}_adam_train.txt")
+    mse = np.loadtxt(f"data/mse_{each}_adam_train.txt")
 
     n_hidden_layers = [1, 2, 3, 5, 10]
     number_of_nodes = [2, 5, 10, 20, 50, 100, 200]
