@@ -9,8 +9,14 @@ from source.utils_regression import *
 SEED = 2026
 rng = np.random.default_rng(SEED) #LLM tag: ChatGPT suggested to make this more global, as we were having some issues with reproducibility
 
+"""
+This script includes the code for the regression analysis. Considering the time, the code has been divided into parts, 
+so you can run the part you want, one at a time. The parts are named "part_b", "part_c", "heatmap_c", "part_d", "part_f", 
+"plot_f", "heatmap_f", and "baseline". Each part includes an explanatory string.  
+"""
+
 #-------------------------------------------------------- GENERAL PART -----------------------------------------------------------------------------
-part = "heatmap_f"
+part = "heatmap_c"
 sigma = 0.1
 n = 2000
 
@@ -401,6 +407,17 @@ if part == "part_c":
         m+=1
     # plt.savefig("figures/c)/exercise_c_mse_vs_hidden_layers_stochastic_{met}_new.pdf")
     plt.show()
+
+if part == "heatmap_c":
+    """
+    This part runs the heatmap ploting script for part_c, where we generate heat maps for the investigation of various combinations
+    of hidden nodes and layers.
+    """
+    
+    with open("plotting_scripts/heat_map_plot_layers_and_nodes.py", "r") as file:
+        code = file.read()
+
+    exec(code)
 #-------------------------------------------------------- PART c) -----------------------------------------------------------------------------
     
 # Cross validation of learning rate
@@ -458,6 +475,9 @@ def cross_validate_network(X, y, layer_output_sizes, activation_funcs, method, g
 #-------------------------------------------------------- PART d) -----------------------------------------------------------------------------
 # This uses the exact same script for the sake of reproducibility.
 if part == "part_d":
+    """
+    This part runs the script for exercise d, where we investigate the l1 and l2 norms.
+    """
 
     with open("exercise_d.py", "r") as file:
         code = file.read()
@@ -737,6 +757,10 @@ if part == "plot_f":
             plt.show()
 
 if part == "heatmap_f":
+    """
+    This part runs the heatmap ploting script for part_f, where we generate heat maps for the final k-fold cross 
+    validation analysis.
+    """
     
     with open("plotting_scripts/heat_map_plots_cross_validation.py", "r") as file:
         code = file.read()
