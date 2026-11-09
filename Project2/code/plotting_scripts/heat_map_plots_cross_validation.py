@@ -12,7 +12,7 @@ The code snippet for modifying the colour map was written by ChatGPT and checked
 lambda_values = np.concatenate(([0.0], np.logspace(-5, -3, 10)))
 print(lambda_values)
 
-method = "rmsprop"
+method = "adam"
 
 # Original colormap
 cmap = plt.cm.RdPu_r
@@ -26,7 +26,7 @@ new_cmap = mcolors.LinearSegmentedColormap.from_list(
 )
 
 
-mse = np.loadtxt(f"data/mse_crossvalidation_{method}_l1.txt")
+mse = np.loadtxt(f"data/mse_crossvalidation_{method}_l2.txt")
 
 
 gamma_values = [10**-3, 10**-2, 5*10**-2, 10**-1, 5*10**-1]
@@ -44,7 +44,7 @@ plt.ylabel(rf"$\gamma$", fontsize = 16)
 yticks = [10**-3, 10**-2, 5*10**-2, 10**-1, 5*10**-1]
 plt.yticks(np.arange(len(yticks)) + 0.5,[f"{y:.3f}" for y in yticks], size=14)
 xticks = [0, 10**-5, 10**-4, 5*10**-4, 10**-3]
-plt.xticks(np.arange(len(xticks)) + 0.5,[f"{x:.4f}" for x in xticks], size=14)
+plt.xticks(np.arange(len(xticks)) + 0.5,[f"{x:.5f}" for x in xticks], size=13)
 # plt.title(f"Neural Network Architecture vs MSE {each}")
 plt.savefig(f"figures/f)/crossvalidation_heatmap_{method}.pdf")
 plt.show()

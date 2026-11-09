@@ -308,7 +308,7 @@ def calculate_mse(x, y, degree):
 
 part = "part_d"
 sigma = 0.1
-n = 100
+n = 2000
 
 inputs = rng.uniform(-1,1,n).reshape(-1, 1)
 inputs_scaled = inputs_scale(inputs)

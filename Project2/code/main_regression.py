@@ -10,7 +10,7 @@ SEED = 2026
 rng = np.random.default_rng(SEED) #LLM tag: ChatGPT suggested to make this more global, as we were having some issues with reproducibility
 
 #-------------------------------------------------------- GENERAL PART -----------------------------------------------------------------------------
-part = "part_d"
+part = "heatmap_f"
 sigma = 0.1
 n = 2000
 
@@ -52,143 +52,143 @@ if part == "part_b":
     network_input_size = inputs_scaled.shape[1]
 
 
-    # #for plotting the actual fit, PLAIN:
-    # nodes = [50, 100]
-    # n_hidden_layers = [1, 2]
+    #for plotting the actual fit, PLAIN:
+    nodes = [50, 100]
+    n_hidden_layers = [1, 2]
             
-    # m = 0 #just for colours in plot
-    # plt.figure(figsize=(10, 9.5))
+    m = 0 #just for colours in plot
+    plt.figure(figsize=(10, 9.5))
     
   
-    # inputs_true = rng.uniform(-1,1,n).reshape(-1, 1)
-    # inputs_true_scaled = inputs_scale(inputs)
-    # targets_no_noise = runge_1d_no_noise(inputs_true_scaled)
-    # targets_centered_no_noise = targets_no_noise-np.mean(targets_no_noise)
+    inputs_true = rng.uniform(-1,1,n).reshape(-1, 1)
+    inputs_true_scaled = inputs_scale(inputs)
+    targets_no_noise = runge_1d_no_noise(inputs_true_scaled)
+    targets_centered_no_noise = targets_no_noise-np.mean(targets_no_noise)
 
-    # points = sorted(zip(inputs_true_scaled, targets_centered_no_noise)) # ChatGPT used for debugging this sorting
-    # x_sorted = [p[0] for p in points]
-    # y_sorted = [p[1] for p in points]
+    points = sorted(zip(inputs_true_scaled, targets_centered_no_noise)) # ChatGPT used for debugging this sorting
+    x_sorted = [p[0] for p in points]
+    y_sorted = [p[1] for p in points]
 
-    # plt.plot(x_sorted, y_sorted, "--", color = "#1B1A1A", label = "Centered runge function")
-    # plt.plot(inputs_scaled, targets_centered,  "o", color = "#4E5B4C", label = "Observed data", markersize = 3, alpha = 0.2)
-    # plt.plot(x_test, y_tilde_test, "o", color = "#ef9d2c", label = "Polyomial fit using OLS, deg 6", markersize = 2)
-    # plt.plot(ols_deg11_fold25[:,0], ols_deg11_fold25[:,1]+np.mean(targets), "o", color = "#729A72", label = "Polyomial fit using OLS, k-fold 25, deg 11", markersize = 2)
+    plt.plot(x_sorted, y_sorted, "--", color = "#1B1A1A", label = "Centered runge function")
+    plt.plot(inputs_scaled, targets_centered,  "o", color = "#4E5B4C", label = "Observed data", markersize = 3, alpha = 0.2)
+    plt.plot(x_test, y_tilde_test, "o", color = "#ef9d2c", label = "Polyomial fit using OLS, deg 6", markersize = 2)
+    plt.plot(ols_deg11_fold25[:,0], ols_deg11_fold25[:,1]+np.mean(targets), "o", color = "#729A72", label = "Polyomial fit using OLS, k-fold 25, deg 11", markersize = 2)
 
-    # smallest_mse_values = []
-    # smallest_mse_values_args = []
+    smallest_mse_values = []
+    smallest_mse_values_args = []
 
-    # for idx, nod in enumerate(nodes):
-    #     for n in n_hidden_layers:
-    #         if (nod == 50 and n == 1) or (nod == 100 and n == 2):
-    #             if (nod == 50 and n == 1):
-    #                 gamma_value = 0.08446
-    #             if (nod == 100 and n == 2):
-    #                 gamma_value = 0.04481
-    #             mse_values_train = []
-    #             mse_values_test = []
-    #             layer_output_sizes = [nod] * n + [1]
-    #             activation_funcs = [sigmoid] * n + [no_activation_func] #make changes her if you wish
-    #             layers_batch = create_layers_batch(network_input_size,layer_output_sizes)
-    #             print("finding trained")
-    #             trained_layers, history, preds, mse_v = train_network_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, gamma = gamma_value, epochs=100)
-    #             test_preds = predict_network(x_test,trained_layers,activation_funcs)
-    #             mse_values_train.append(mse_v)
-    #             test_mse = mse(test_preds, targets_test)
-    #             mse_values_test.append(test_mse)
-    #             # Plot the MSE values for this architecture
-    #             # plt.plot(x_test, test_preds, "-o", markersize = 4, color = colours2[idx+m], label= f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, train")
-    #             plt.plot(x_test, test_preds, "o", markersize = 2, color = colours[idx+m], label=f"{nod} nodes and {n} hidden layer{'s' if n > 1 else ''} NN, plain") #LLM tag: Claude helped with the placement of these plot commands
+    for idx, nod in enumerate(nodes):
+        for n in n_hidden_layers:
+            if (nod == 50 and n == 1) or (nod == 100 and n == 2):
+                if (nod == 50 and n == 1):
+                    gamma_value = 0.08446
+                if (nod == 100 and n == 2):
+                    gamma_value = 0.04481
+                mse_values_train = []
+                mse_values_test = []
+                layer_output_sizes = [nod] * n + [1]
+                activation_funcs = [sigmoid] * n + [no_activation_func] #make changes her if you wish
+                layers_batch = create_layers_batch(network_input_size,layer_output_sizes)
+                print("finding trained")
+                trained_layers, history, preds, mse_v = train_network_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, gamma = gamma_value, epochs=100)
+                test_preds = predict_network(x_test,trained_layers,activation_funcs)
+                mse_values_train.append(mse_v)
+                test_mse = mse(test_preds, targets_test)
+                mse_values_test.append(test_mse)
+                # Plot the MSE values for this architecture
+                # plt.plot(x_test, test_preds, "-o", markersize = 4, color = colours2[idx+m], label= f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, train")
+                plt.plot(x_test, test_preds, "o", markersize = 2, color = colours[idx+m], label=f"{nod} nodes and {n} hidden layer{'s' if n > 1 else ''} NN, plain") #LLM tag: Claude helped with the placement of these plot commands
 
-    #             print(f"MSE for {n} hidden layers of {nod} nodes:", mse_values_test)
-    #         m += 1
-    # print(mse_values_test)
-    # plt.plot()
-    # plt.xlabel("x", fontsize=24)
-    # plt.ylabel("y", fontsize=24)
-    # plt.xticks(size=23)
-    # plt.yticks(size=23)
-    # plt.legend(fontsize = 16)
-    # plt.ylim(-0.38, 1.4)
-    # plt.savefig(f"figures/b)/fit_to_runge_plain_ols_7_and_11.pdf")
-    # plt.show()
+                print(f"MSE for {n} hidden layers of {nod} nodes:", mse_values_test)
+            m += 1
+    print(mse_values_test)
+    plt.plot()
+    plt.xlabel("x", fontsize=24)
+    plt.ylabel("y", fontsize=24)
+    plt.xticks(size=23)
+    plt.yticks(size=23)
+    plt.legend(fontsize = 16)
+    plt.ylim(-0.38, 1.4)
+    plt.savefig(f"figures/b)/fit_to_runge_plain_ols_7_and_11.pdf")
+    plt.show()
 
 
 
-    # #for plotting the actual fit, adam and rmsprop STOCHASTIC:
-    # nodes = [50, 100]
-    # n_hidden_layers = [1, 2]
-    # degree_for_ols_fit = 7
+    #for plotting the actual fit, adam and rmsprop STOCHASTIC:
+    nodes = [50, 100]
+    n_hidden_layers = [1, 2]
+    degree_for_ols_fit = 7
 
-    # methods = ["rmsprop"]
+    methods = ["rmsprop"]
 
-    # for met in methods:
-    #     if met == "adam":
-    #         gamma_value = 0.001 
-    #         print("Doing adam!")
-    #     if met == "rmsprop":
-    #         gamma_value = 0.0045
-    #         print("Doing rmsprop!")
+    for met in methods:
+        if met == "adam":
+            gamma_value = 0.001 
+            print("Doing adam!")
+        if met == "rmsprop":
+            gamma_value = 0.0045
+            print("Doing rmsprop!")
             
-    #     m = 0 #just for colours in plot
-    #     plt.figure(figsize=(10, 9.5))
+        m = 0 #just for colours in plot
+        plt.figure(figsize=(10, 9.5))
         
-    #  
-    #     inputs_true = rng.uniform(-1,1,n).reshape(-1, 1)
-    #     inputs_true_scaled = inputs_scale(inputs)
-    #     targets_no_noise = runge_1d_no_noise(inputs_true_scaled)
-    #     targets_centered_no_noise = targets_no_noise-np.mean(targets_no_noise)
+     
+        inputs_true = rng.uniform(-1,1,n).reshape(-1, 1)
+        inputs_true_scaled = inputs_scale(inputs)
+        targets_no_noise = runge_1d_no_noise(inputs_true_scaled)
+        targets_centered_no_noise = targets_no_noise-np.mean(targets_no_noise)
     
-    #     points = sorted(zip(inputs_true_scaled, targets_centered_no_noise)) # ChatGPT used for debugging this sorting
-    #     x_sorted = [p[0] for p in points]
-    #     y_sorted = [p[1] for p in points]
+        points = sorted(zip(inputs_true_scaled, targets_centered_no_noise)) # ChatGPT used for debugging this sorting
+        x_sorted = [p[0] for p in points]
+        y_sorted = [p[1] for p in points]
     
-    #     plt.plot(x_sorted, y_sorted, "--", color = "#1B1A1A", label = "Centered runge function")
-    #     plt.plot(inputs_scaled, targets_centered,  "o", color = "#4E5B4C", label = "Observed data", markersize = 3, alpha = 0.2)
-    #     plt.plot(x_test, y_tilde_test, "o", color = "#ef9d2c", label = f"Polyomial fit using OLS, deg {degree_for_ols_fit}", markersize = 2)
-    #     plt.plot(ols_deg11_fold25[:,0], ols_deg11_fold25[:,1]+np.mean(targets), "o", color = "#729A72", label = "Polyomial fit using OLS, k-fold 25, deg 11", markersize = 2)
+        plt.plot(x_sorted, y_sorted, "--", color = "#1B1A1A", label = "Centered runge function")
+        plt.plot(inputs_scaled, targets_centered,  "o", color = "#4E5B4C", label = "Observed data", markersize = 3, alpha = 0.2)
+        plt.plot(x_test, y_tilde_test, "o", color = "#ef9d2c", label = f"Polyomial fit using OLS, deg {degree_for_ols_fit}", markersize = 2)
+        plt.plot(ols_deg11_fold25[:,0], ols_deg11_fold25[:,1]+np.mean(targets), "o", color = "#729A72", label = "Polyomial fit using OLS, k-fold 25, deg 11", markersize = 2)
 
-    #     smallest_mse_values = []
-    #     smallest_mse_values_args = []
+        smallest_mse_values = []
+        smallest_mse_values_args = []
 
-    #     for idx, nod in enumerate(nodes):
-    #         for n in n_hidden_layers:
-    #             if (nod == 50 and n == 1) or (nod == 100 and n == 2):
-    #                 if (nod == 50 and n == 1) and met == "adam":
-    #                     gamma_value = 0.007743
-    #                 if (nod == 100 and n == 2) and met == "adam":
-    #                     gamma_value = 0.001
-    #                 if (nod == 50 and n == 1) and met == "rms_prop":
-    #                     gamma_value = 0.004534
-    #                 if (nod == 100 and n == 2) and met == "rms_prop":
-    #                     gamma_value = 0.004534
-    #                 mse_values_train = []
-    #                 mse_values_test = []
-    #                 layer_output_sizes = [nod] * n + [1]
-    #                 activation_funcs = [sigmoid] * n + [no_activation_func]
-    #                 layers_batch = create_layers_batch(network_input_size,layer_output_sizes)
-    #                 print("finding trained")
-    #                 trained_layers, history, preds, mse_v = train_network_stochastic_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, gamma = gamma_value, method=met, schedule=None, epochs=100)
-    #                 test_preds = predict_network(x_test,trained_layers,activation_funcs)
-    #                 mse_values_train.append(mse_v)
-    #                 test_mse = mse(test_preds, targets_test)
-    #                 mse_values_test.append(test_mse)
-    #                 # Plot the MSE values for this architecture
-    #                 # plt.plot(x_test, test_preds, "-o", markersize = 4, color = colours2[idx+m], label= f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, train")
-    #                 plt.plot(x_test, test_preds, "o", markersize = 2, color = colours[idx+m], label=f"{nod} nodes and {n} hidden layer{'s' if n > 1 else ''} NN, {met}") #LLM tag: Claude helped with the placement of these plot commands
+        for idx, nod in enumerate(nodes):
+            for n in n_hidden_layers:
+                if (nod == 50 and n == 1) or (nod == 100 and n == 2):
+                    if (nod == 50 and n == 1) and met == "adam":
+                        gamma_value = 0.007743
+                    if (nod == 100 and n == 2) and met == "adam":
+                        gamma_value = 0.001
+                    if (nod == 50 and n == 1) and met == "rms_prop":
+                        gamma_value = 0.004534
+                    if (nod == 100 and n == 2) and met == "rms_prop":
+                        gamma_value = 0.004534
+                    mse_values_train = []
+                    mse_values_test = []
+                    layer_output_sizes = [nod] * n + [1]
+                    activation_funcs = [sigmoid] * n + [no_activation_func]
+                    layers_batch = create_layers_batch(network_input_size,layer_output_sizes)
+                    print("finding trained")
+                    trained_layers, history, preds, mse_v = train_network_stochastic_gradient(inputs_scaled, layers_batch, activation_funcs, targets_centered, gamma = gamma_value, method=met, schedule=None, epochs=100)
+                    test_preds = predict_network(x_test,trained_layers,activation_funcs)
+                    mse_values_train.append(mse_v)
+                    test_mse = mse(test_preds, targets_test)
+                    mse_values_test.append(test_mse)
+                    # Plot the MSE values for this architecture
+                    # plt.plot(x_test, test_preds, "-o", markersize = 4, color = colours2[idx+m], label= f"{nod} nodes, {n} hidden layer{'s' if n > 1 else ''}, train")
+                    plt.plot(x_test, test_preds, "o", markersize = 2, color = colours[idx+m], label=f"{nod} nodes and {n} hidden layer{'s' if n > 1 else ''} NN, {met}") #LLM tag: Claude helped with the placement of these plot commands
 
-    #                 print(f"MSE for {n} hidden layers of {nod} nodes:", mse_values_test)
-    #             m += 1
+                    print(f"MSE for {n} hidden layers of {nod} nodes:", mse_values_test)
+                m += 1
 
 
-    #     plt.plot()
-    #     plt.xlabel("x", fontsize=24)
-    #     plt.ylabel("y", fontsize=24)
-    #     plt.xticks(size=23)
-    #     plt.yticks(size=23)
-    #     plt.legend(fontsize = 16)
-    #     plt.ylim(-0.38, 1.4)
-    #     plt.savefig(f"figures/b)/fit_to_runge_{met}_ols_7_and_11.pdf")
-    #     plt.show()
+        plt.plot()
+        plt.xlabel("x", fontsize=24)
+        plt.ylabel("y", fontsize=24)
+        plt.xticks(size=23)
+        plt.yticks(size=23)
+        plt.legend(fontsize = 16)
+        plt.ylim(-0.38, 1.4)
+        plt.savefig(f"figures/b)/fit_to_runge_{met}_ols_7_and_11.pdf")
+        plt.show()
 
     
     # For plotting the mse vs gamma value plots, and finding minumum mse and gamma value for PLAIN
@@ -736,6 +736,14 @@ if part == "plot_f":
             plt.savefig(f"figures/f)/final_fit_rmsprop_l2_compare.pdf")
             plt.show()
 
+if part == "heatmap_f":
+    
+    with open("plotting_scripts/heat_map_plots_cross_validation.py", "r") as file:
+        code = file.read()
+
+    exec(code)
+    
+
 
 if part == "baseline":
     """
@@ -810,3 +818,4 @@ if part == "baseline":
     plt.savefig(f"figures/f)/final_fit_rmsprop_l2_baseline.pdf")
     plt.show()
 #-------------------------------------------------------- PART f) -----------------------------------------------------------------------------
+
