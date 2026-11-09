@@ -2,7 +2,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from pathlib import Path
 
 from source.utils_regression import *
 
@@ -371,7 +370,6 @@ if part == "part_c":
     m = 0
     #for c)
     plt.figure()
-    Path("data").mkdir(exist_ok=True)
     for idx, a in enumerate(act_functions):
         mse_values_train = []
         mse_values_test = []
@@ -458,85 +456,13 @@ def cross_validate_network(X, y, layer_output_sizes, activation_funcs, method, g
 
     return np.mean(validation_mse), np.std(validation_mse, ddof = 1) / np.sqrt(n_splits)
 #-------------------------------------------------------- PART d) -----------------------------------------------------------------------------
-
+# This uses the exact same script for the sake of reproducibility.
 if part == "part_d":
 
-    SEED = 2026
-    rng = np.random.default_rng(SEED) #LLM tag: ChatGPT suggested to make this more global, as we were having some issues with reproducibility
+    with open("exercise_d.py", "r") as file:
+        code = file.read()
 
-    sigma = 0.1
-    n = 2000
-
-    inputs = rng.uniform(-1,1,n).reshape(-1, 1)
-    inputs_scaled = inputs_scale(inputs)
-
-    targets = runge_1d(inputs_scaled, sigma, n)
-    targets_no_noise = runge_1d_no_noise(inputs_scaled)
-    targets_centered = targets - np.mean(targets)
-    targets_centered_no_noise = targets_no_noise - np.mean(targets_no_noise)
-
-    inputs_scaled, x_test, targets_centered, y_test = train_test_split(inputs_scaled, targets_centered, test_size = 0.2, random_state = 2026)
-    targets_test = runge_1d(x_test, sigma, len(x_test))
-    layer_sizes = [5, 1]
-    activation_functions = [leaky_ReLU,leaky_ReLU, leaky_ReLU, leaky_ReLU, no_activation_func]
-    layers = create_layers_batch(inputs_scaled.shape[1], layer_sizes)
-
-    lambda_values = np.concatenate(([0.0], np.logspace(-5, -3, 10)))
-
-    mse_train_l1, mse_train_l2 = [],[]
-
-    #colours = ["#aa333c", "#99d2fb", "#4e827b", "#ef9d2c", "#B0a6df", "#2da9cf", "#ff46a2", "#9aab64", "#e5194f", "#8f1cab", "#2da9cf", "#3ba336"]
-    colours2 = ["#ef9d2c", "#020202", "#195626", "#ef2c2c", "#732775", "#a495cd", "#aaaf0f", "#f4b537", "#5513b9", "#5a585b", "#103a46", "#b83453"]
-
-    plt.figure()
-    for lambda_val in lambda_values:
-        # runs for l2 - norm
-        layers_l2, history_l2, predictions_l2, mse_value_l2 = train_network_stochastic_gradient(
-            inputs_scaled,
-            layers,
-            activation_functions,
-            targets_centered,
-            gamma=0.001,
-            epochs=100,
-            norm="l2", # change here to change norm, l1 or l2
-            lam=lambda_val,
-            schedule=None,
-            method="adam"
-        )
-        #test_predictions_l2 = predict_network(x_test, layers_l2, activation_functions)
-        #mse_train_l2 = mse(predictions_l2, targets_centered)
-        mse_train_l2.append(mse(predictions_l2, targets_centered))
-        #print(f"train MSE={float(mse_train):.6f}, test MSE={float(mse_test):.6f}")
-
-        # runs for l1 - norm
-        layers_l1, history_l1, predictions_l1, mse_value_l1 = train_network_stochastic_gradient(
-            inputs_scaled,
-            layers,
-            activation_functions,
-            targets_centered,
-            gamma=0.001,
-            epochs=100,
-            norm="l1", # change here to change norm, l1 or l2
-            lam=lambda_val,
-            schedule=None,
-            method="adam"
-        )
-        #test_predictions_l1 = predict_network(x_test, layers_l1, activation_functions)
-        #mse_train = mse(predictions, targets_centered)
-        mse_train_l1.append(mse(predictions_l1, targets_centered))
-        #print(f"train MSE={float(mse_train):.6f}, test MSE={float(mse_test):.6f}")
-
-    plt.plot(lambda_values, mse_train_l1, "-o", color = "#ef9d2c", label = r"$\ell_1$-norm", markersize = 1, alpha = 0.5)
-    plt.plot(lambda_values, mse_train_l2, "-o", color = "#732775", label = r"$\ell_2$-norm", markersize = 1, alpha = 0.5)
-    plt.xscale("symlog", linthresh=1e-5)
-    plt.xlabel(r"$\lambda$", fontsize=15) 
-    plt.ylabel(r"MSE($\lambda$)", fontsize=15)
-    plt.xticks(size=15)
-    plt.yticks(size=15)
-    plt.legend(fontsize = 15)
-    plt.tight_layout()
-    plt.savefig("figures/d)/MSE_l1_l2_norm.pdf", bbox_inches="tight")
-    #plt.show()     
+    exec(code)
 
 #-------------------------------------------------------- PART f) -----------------------------------------------------------------------------
 if part == "part_f":
@@ -576,7 +502,6 @@ if part == "part_f":
         validation_save_parameters = []
 
         validation_mse_grid = np.zeros((len(gamma_values), len(lambda_values)))
-        # Path("data").mkdir(exist_ok=True)
         # filename = f"data/mse_crossvalidation_test.txt"
         for gamma_idx, gamma in enumerate(gamma_values):
             for lam_idx, lam in enumerate(lambda_values):

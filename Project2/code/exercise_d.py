@@ -382,7 +382,7 @@ plt.xticks(size=15)
 plt.yticks(size=15)
 plt.legend(fontsize = 15)
 plt.tight_layout()
-plt.savefig("figures/d)/MSE_l1_l2_norm.pdf", bbox_inches="tight")
+plt.savefig("MSE_l1_l2_norm.pdf", bbox_inches="tight")
 #plt.show()
 """
 # runs for l1 - norm
