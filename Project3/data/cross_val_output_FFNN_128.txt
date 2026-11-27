@@ -1,0 +1,324 @@
+For architecture: [50], gamma: 0.001, lambda: 0
+Fold 1: 0.3881
+Fold 2: 0.3851
+Fold 3: 0.4137
+Values: mean=0.3956 SD=0.0091 time: (167 s)
+For architecture: [50], gamma: 0.001, lambda: 0.1
+Fold 1: 0.2898
+Fold 2: 0.2977
+Fold 3: 0.2929
+Values: mean=0.2935 SD=0.0023 time: (170 s)
+For architecture: [50], gamma: 0.001, lambda: 0.01
+Fold 1: 0.3888
+Fold 2: 0.3765
+Fold 3: 0.4029
+Values: mean=0.3894 SD=0.0076 time: (176 s)
+For architecture: [50], gamma: 0.001, lambda: 0.001
+Fold 1: 0.3678
+Fold 2: 0.4124
+Fold 3: 0.3747
+Values: mean=0.3850 SD=0.0139 time: (177 s)
+For architecture: [50], gamma: 0.01, lambda: 0
+Fold 1: 0.5174
+Fold 2: 0.4803
+Fold 3: 0.4077
+Values: mean=0.4685 SD=0.0322 time: (177 s)
+For architecture: [50], gamma: 0.01, lambda: 0.1
+Fold 1: 0.2988
+Fold 2: 0.2778
+Fold 3: 0.2963
+Values: mean=0.2910 SD=0.0066 time: (177 s)
+For architecture: [50], gamma: 0.01, lambda: 0.01
+Fold 1: 0.4908
+Fold 2: 0.4803
+Fold 3: 0.4865
+Values: mean=0.4859 SD=0.0030 time: (172 s)
+For architecture: [50], gamma: 0.01, lambda: 0.001
+Fold 1: 0.5073
+Fold 2: 0.4436
+Fold 3: 0.4209
+Values: mean=0.4572 SD=0.0259 time: (167 s)
+For architecture: [50], gamma: 0.025, lambda: 0
+Fold 1: 0.3937
+Fold 2: 0.3622
+Fold 3: 0.4351
+Values: mean=0.3970 SD=0.0211 time: (172 s)
+For architecture: [50], gamma: 0.025, lambda: 0.1
+Fold 1: 0.2685
+Fold 2: 0.2433
+Fold 3: 0.2562
+Values: mean=0.2560 SD=0.0073 time: (174 s)
+For architecture: [50], gamma: 0.025, lambda: 0.01
+Fold 1: 0.4533
+Fold 2: 0.4199
+Fold 3: 0.3578
+Values: mean=0.4104 SD=0.0280 time: (173 s)
+For architecture: [50], gamma: 0.025, lambda: 0.001
+Fold 1: 0.3738
+Fold 2: 0.3086
+Fold 3: 0.2974
+Values: mean=0.3266 SD=0.0238 time: (177 s)
+For architecture: [50], gamma: 0.05, lambda: 0
+Fold 1: 0.3003
+Fold 2: 0.2426
+Fold 3: 0.2393
+Values: mean=0.2607 SD=0.0198 time: (177 s)
+For architecture: [50], gamma: 0.05, lambda: 0.1
+Fold 1: 0.2385
+Fold 2: 0.1744
+Fold 3: 0.1557
+Values: mean=0.1895 SD=0.0251 time: (173 s)
+For architecture: [50], gamma: 0.05, lambda: 0.01
+Fold 1: 0.2433
+Fold 2: 0.3150
+Fold 3: 0.2142
+Values: mean=0.2575 SD=0.0299 time: (183 s)
+For architecture: [50], gamma: 0.05, lambda: 0.001
+Fold 1: 0.2287
+Fold 2: 0.2711
+Fold 3: 0.1879
+Values: mean=0.2292 SD=0.0240 time: (185 s)
+For architecture: [100], gamma: 0.001, lambda: 0
+Fold 1: 0.4218
+Fold 2: 0.3971
+Fold 3: 0.3785
+Values: mean=0.3991 SD=0.0126 time: (281 s)
+For architecture: [100], gamma: 0.001, lambda: 0.1
+Fold 1: 0.3112
+Fold 2: 0.3033
+Fold 3: 0.2941
+Values: mean=0.3029 SD=0.0050 time: (270 s)
+For architecture: [100], gamma: 0.001, lambda: 0.01
+Fold 1: 0.3858
+Fold 2: 0.3765
+Fold 3: 0.3822
+Values: mean=0.3815 SD=0.0027 time: (270 s)
+For architecture: [100], gamma: 0.001, lambda: 0.001
+Fold 1: 0.4226
+Fold 2: 0.4136
+Fold 3: 0.3923
+Values: mean=0.4095 SD=0.0090 time: (274 s)
+For architecture: [100], gamma: 0.01, lambda: 0
+Fold 1: 0.5317
+Fold 2: 0.4863
+Fold 3: 0.4524
+Values: mean=0.4901 SD=0.0230 time: (272 s)
+For architecture: [100], gamma: 0.01, lambda: 0.1
+Fold 1: 0.3120
+Fold 2: 0.3277
+Fold 3: 0.3031
+Values: mean=0.3142 SD=0.0072 time: (271 s)
+For architecture: [100], gamma: 0.01, lambda: 0.01
+Fold 1: 0.4931
+Fold 2: 0.4994
+Fold 3: 0.5000
+Values: mean=0.4975 SD=0.0022 time: (274 s)
+For architecture: [100], gamma: 0.01, lambda: 0.001
+Fold 1: 0.5557
+Fold 2: 0.4788
+Fold 3: 0.4497
+Values: mean=0.4947 SD=0.0316 time: (2298 s)
+For architecture: [100], gamma: 0.025, lambda: 0
+Fold 1: 0.5448
+Fold 2: 0.3180
+Fold 3: 0.3976
+Values: mean=0.4201 SD=0.0664 time: (275 s)
+For architecture: [100], gamma: 0.025, lambda: 0.1
+Fold 1: 0.2643
+Fold 2: 0.2790
+Fold 3: 0.2629
+Values: mean=0.2687 SD=0.0051 time: (270 s)
+For architecture: [100], gamma: 0.025, lambda: 0.01
+Fold 1: 0.3525
+Fold 2: 0.4417
+Fold 3: 0.4584
+Values: mean=0.4175 SD=0.0329 time: (268 s)
+For architecture: [100], gamma: 0.025, lambda: 0.001
+Fold 1: 0.5381
+Fold 2: 0.4732
+Fold 3: 0.4835
+Values: mean=0.4982 SD=0.0201 time: (268 s)
+For architecture: [100], gamma: 0.05, lambda: 0
+Fold 1: 0.3033
+Fold 2: 0.2261
+Fold 3: 0.3818
+Values: mean=0.3038 SD=0.0450 time: (266 s)
+For architecture: [100], gamma: 0.05, lambda: 0.1
+Fold 1: 0.2426
+Fold 2: 0.1740
+Fold 3: 0.1635
+Values: mean=0.1934 SD=0.0248 time: (266 s)
+For architecture: [100], gamma: 0.05, lambda: 0.01
+Fold 1: 0.3213
+Fold 2: 0.4241
+Fold 3: 0.3102
+Values: mean=0.3519 SD=0.0362 time: (266 s)
+For architecture: [100], gamma: 0.05, lambda: 0.001
+Fold 1: 0.3007
+Fold 2: 0.3360
+Fold 3: 0.3095
+Values: mean=0.3154 SD=0.0106 time: (268 s)
+For architecture: [100, 50], gamma: 0.001, lambda: 0
+Fold 1: 0.3607
+Fold 2: 0.3738
+Fold 3: 0.3987
+Values: mean=0.3778 SD=0.0111 time: (295 s)
+For architecture: [100, 50], gamma: 0.001, lambda: 0.1
+Fold 1: 0.2550
+Fold 2: 0.2531
+Fold 3: 0.2487
+Values: mean=0.2522 SD=0.0019 time: (302 s)
+For architecture: [100, 50], gamma: 0.001, lambda: 0.01
+Fold 1: 0.3416
+Fold 2: 0.3588
+Fold 3: 0.4002
+Values: mean=0.3669 SD=0.0174 time: (303 s)
+For architecture: [100, 50], gamma: 0.001, lambda: 0.001
+Fold 1: 0.4199
+Fold 2: 0.3682
+Fold 3: 0.3698
+Values: mean=0.3860 SD=0.0170 time: (308 s)
+For architecture: [100, 50], gamma: 0.01, lambda: 0
+Fold 1: 0.5414
+Fold 2: 0.4751
+Fold 3: 0.4715
+Values: mean=0.4960 SD=0.0227 time: (301 s)
+For architecture: [100, 50], gamma: 0.01, lambda: 0.1
+Fold 1: 0.2388
+Fold 2: 0.2347
+Fold 3: 0.2363
+Values: mean=0.2366 SD=0.0012 time: (305 s)
+For architecture: [100, 50], gamma: 0.01, lambda: 0.01
+Fold 1: 0.5197
+Fold 2: 0.5257
+Fold 3: 0.5041
+Values: mean=0.5165 SD=0.0064 time: (300 s)
+For architecture: [100, 50], gamma: 0.01, lambda: 0.001
+Fold 1: 0.5208
+Fold 2: 0.4668
+Fold 3: 0.4520
+Values: mean=0.4799 SD=0.0209 time: (307 s)
+For architecture: [100, 50], gamma: 0.025, lambda: 0
+Fold 1: 0.4559
+Fold 2: 0.4998
+Fold 3: 0.4377
+Values: mean=0.4645 SD=0.0184 time: (306 s)
+For architecture: [100, 50], gamma: 0.025, lambda: 0.1
+Fold 1: 0.2370
+Fold 2: 0.2283
+Fold 3: 0.2348
+Values: mean=0.2334 SD=0.0026 time: (303 s)
+For architecture: [100, 50], gamma: 0.025, lambda: 0.01
+Fold 1: 0.4653
+Fold 2: 0.4874
+Fold 3: 0.5019
+Values: mean=0.4849 SD=0.0106 time: (297 s)
+For architecture: [100, 50], gamma: 0.025, lambda: 0.001
+Fold 1: 0.5051
+Fold 2: 0.4886
+Fold 3: 0.4704
+Values: mean=0.4880 SD=0.0100 time: (294 s)
+For architecture: [100, 50], gamma: 0.05, lambda: 0
+Fold 1: 0.3491
+Fold 2: 0.4582
+Fold 3: 0.4584
+Values: mean=0.4219 SD=0.0364 time: (293 s)
+For architecture: [100, 50], gamma: 0.05, lambda: 0.1
+Fold 1: 0.2328
+Fold 2: 0.2231
+Fold 3: 0.2179
+Values: mean=0.2246 SD=0.0044 time: (306 s)
+For architecture: [100, 50], gamma: 0.05, lambda: 0.01
+Fold 1: 0.3667
+Fold 2: 0.4237
+Fold 3: 0.3848
+Values: mean=0.3917 SD=0.0168 time: (308 s)
+For architecture: [100, 50], gamma: 0.05, lambda: 0.001
+Fold 1: 0.5152
+Fold 2: 0.3660
+Fold 3: 0.5049
+Values: mean=0.4620 SD=0.0481 time: (299 s)
+For architecture: [100, 100, 100, 100, 100], gamma: 0.001, lambda: 0
+Fold 1: 0.3225
+Fold 2: 0.3378
+Fold 3: 0.3312
+Values: mean=0.3305 SD=0.0045 time: (306 s)
+For architecture: [100, 100, 100, 100, 100], gamma: 0.001, lambda: 0.1
+Fold 1: 0.1519
+Fold 2: 0.1522
+Fold 3: 0.1519
+Values: mean=0.1520 SD=0.0001 time: (306 s)
+For architecture: [100, 100, 100, 100, 100], gamma: 0.001, lambda: 0.01
+Fold 1: 0.2981
+Fold 2: 0.3045
+Fold 3: 0.2828
+Values: mean=0.2951 SD=0.0064 time: (309 s)
+For architecture: [100, 100, 100, 100, 100], gamma: 0.001, lambda: 0.001
+Fold 1: 0.3416
+Fold 2: 0.3378
+Fold 3: 0.3166
+Values: mean=0.3320 SD=0.0078 time: (302 s)
+For architecture: [100, 100, 100, 100, 100], gamma: 0.01, lambda: 0
+Fold 1: 0.5253
+Fold 2: 0.5174
+Fold 3: 0.5525
+Values: mean=0.5318 SD=0.0106 time: (305 s)
+For architecture: [100, 100, 100, 100, 100], gamma: 0.01, lambda: 0.1
+Fold 1: 0.1519
+Fold 2: 0.1522
+Fold 3: 0.1519
+Values: mean=0.1520 SD=0.0001 time: (302 s)
+For architecture: [100, 100, 100, 100, 100], gamma: 0.01, lambda: 0.01
+Fold 1: 0.4972
+Fold 2: 0.4792
+Fold 3: 0.3935
+Values: mean=0.4566 SD=0.0320 time: (306 s)
+For architecture: [100, 100, 100, 100, 100], gamma: 0.01, lambda: 0.001
+Fold 1: 0.4784
+Fold 2: 0.4473
+Fold 3: 0.4299
+Values: mean=0.4519 SD=0.0142 time: (307 s)
+For architecture: [100, 100, 100, 100, 100], gamma: 0.025, lambda: 0
+Fold 1: 0.5362
+Fold 2: 0.5688
+Fold 3: 0.4767
+Values: mean=0.5272 SD=0.0269 time: (306 s)
+For architecture: [100, 100, 100, 100, 100], gamma: 0.025, lambda: 0.1
+Fold 1: 0.1519
+Fold 2: 0.1522
+Fold 3: 0.1519
+Values: mean=0.1520 SD=0.0001 time: (306 s)
+For architecture: [100, 100, 100, 100, 100], gamma: 0.025, lambda: 0.01
+Fold 1: 0.4061
+Fold 2: 0.4443
+Fold 3: 0.4745
+Values: mean=0.4416 SD=0.0198 time: (306 s)
+For architecture: [100, 100, 100, 100, 100], gamma: 0.025, lambda: 0.001
+Fold 1: 0.5497
+Fold 2: 0.4852
+Fold 3: 0.4917
+Values: mean=0.5089 SD=0.0205 time: (304 s)
+For architecture: [100, 100, 100, 100, 100], gamma: 0.05, lambda: 0
+Fold 1: 0.5377
+Fold 2: 0.4762
+Fold 3: 0.5420
+Values: mean=0.5186 SD=0.0213 time: (303 s)
+For architecture: [100, 100, 100, 100, 100], gamma: 0.05, lambda: 0.1
+Fold 1: 0.1519
+Fold 2: 0.1522
+Fold 3: 0.1519
+Values: mean=0.1520 SD=0.0001 time: (302 s)
+For architecture: [100, 100, 100, 100, 100], gamma: 0.05, lambda: 0.01
+Fold 1: 0.2805
+Fold 2: 0.3082
+Fold 3: 0.3327
+Values: mean=0.3071 SD=0.0151 time: (308 s)
+For architecture: [100, 100, 100, 100, 100], gamma: 0.05, lambda: 0.001
+Fold 1: 0.4593
+Fold 2: 0.4934
+Fold 3: 0.4362
+Values: mean=0.4630 SD=0.0166 time: (317 s)
+Overall eligible parameters:
+Eligible parameter: ([100, 100, 100, 100, 100], 0.01, 0) with accuracy 0.5318 
+Eligible parameter: ([100, 100, 100, 100, 100], 0.025, 0) with accuracy 0.5272 
+Best Architecture: [100, 100, 100, 100, 100]; Best Learning Rate: 0.01
